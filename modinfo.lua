@@ -1,0 +1,26 @@
+name = "New Russian Language Pack"
+version = "1.0"
+
+local desc = {
+	en = "\nThe best russian localisation at the moment. Soure code was taken from the Russian Language Pack. Special thanks to Some1 and Alevastor!\n\nVersion: "..version,
+	ru = "\nЛучший, на данный момент, русификатор. Код для базы был взят из мода Russian Language Pack. Огромное спасибо Some1'у и Alevastor'у за проделанную работу!\n\nВерсия: "..version
+}
+
+description = language and desc[language] or desc["en"]
+
+author = "Cunning fox"--Макс. 67 символов
+
+forumthread = ""
+
+api_version = 10
+
+icon_atlas = "images/modicon.xml"
+icon = "modicon.tex"
+
+priority = .9999999999991 --Сразу после старого русификатора
+
+dont_starve_compatible = false
+dst_compatible = true
+
+client_only_mod = true
+

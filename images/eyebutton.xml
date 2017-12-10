@@ -1,0 +1,8 @@
+<Atlas>
+<Texture filename="eyebutton.tex" />
+<Elements>
+<Element name="eyebutton1.tex" u1="0" u2="0.1875" v1="0" v2="0.671875" />
+<Element name="eyebutton2.tex" u1="0.1875" u2="0.375" v1="0" v2="0.671875" />
+<Element name="eyebutton3.tex" u1="0.375" u2="0.5625" v1="0" v2="0.671875" />
+</Elements>
+</Atlas>

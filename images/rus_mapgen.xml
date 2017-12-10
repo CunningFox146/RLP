@@ -1,0 +1,14 @@
+<Atlas><Texture filename="rus_mapgen.tex" /><Elements>
+<Element name="rus_day.tex" u1="0" u2="0.125" v1="0.5" v2="1" />
+<Element name="rus_season.tex" u1="0.125" u2="0.25" v1="0.5" v2="1" />
+<Element name="rus_season_start.tex" u1="0.25" u2="0.375" v1="0.5" v2="1" />
+<Element name="rus_world_branching.tex" u1="0.375" u2="0.5" v1="0.5" v2="1" />
+<Element name="rus_world_loop.tex" u1="0.5" u2="0.625" v1="0.5" v2="1" />
+<Element name="rus_world_size.tex" u1="0.625" u2="0.75" v1="0.5" v2="1" />
+<Element name="rus_world_map.tex" u1="0.75" u2="0.875" v1="0.5" v2="1" />
+<Element name="rus_world_start.tex" u1="0.875" u2="1" v1="0.5" v2="1" />
+<Element name="rus_winter.tex" u1="0" u2="0.125" v1="0" v2="0.5" />
+<Element name="rus_summer.tex" u1="0.125" u2="0.25" v1="0" v2="0.5" />
+<Element name="rus_autumn.tex" u1="0.25" u2="0.375" v1="0" v2="0.5" />
+<Element name="rus_spring.tex" u1="0.375" u2="0.5" v1="0" v2="0.5" />
+</Elements></Atlas>
