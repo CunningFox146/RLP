@@ -354,7 +354,20 @@ end
 --Исправление бага с шрифтом в спиннерах
 AddClassPostConstruct("widgets/spinner", function(self, options, width, height, textinfo, ...) --Выполняем подмену шрифта в спиннере из-за глупой ошибки разрабов в этом виджете
 	if textinfo then return end
+	
 	self.text:SetFont(_G.BUTTONFONT)
+	--Насильно заменяем
+	--[[
+	if self.text.string == nil then return end
+	print(self.text.string)
+	if self.text.string == "Disabled" then
+		self.text:SetString("Отключено")
+	end
+	
+	if self.text.string == "Enabled" then
+		self.text:SetString("Включено")
+	end
+	]]
 end)
 
 local function GetPoFileVersion(file) --Возвращает версию po файла
@@ -3114,6 +3127,51 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	AddClassPostConstruct("screens/lobbyscreen", LobbyScreenPost)
 	AddClassPostConstruct("screens/redux/lobbyscreen", LobbyScreenPost)
 	]]
+	
+	--Тут не переводилось, так что фиксим
+	AddClassPostConstruct("screens/redux/optionsscreen", function(self)
+		local SPINNERS = {
+			"fullscreenSpinner",
+			"displaySpinner",
+			"refreshRateSpinner",
+			"resolutionSpinner",
+			"netbookModeSpinner",
+			"smallTexturesSpinner",
+			"bloomSpinner",
+			"distortionSpinner",
+			"screenshakeSpinner",
+			"vibrationSpinner",
+			"passwordSpinner",
+			"wathgrithrfontSpinner",
+			"automodsSpinner",
+		}
+		
+		for _,v in pairs(SPINNERS) do
+			--Небольшая проверка. Мы же не хотим крашей
+			if not self[v] then
+				return
+			end
+			
+			local text = self[v]:GetSelectedText()
+			if text == nil or type(text) ~= "string" then
+				return
+				print("ERROR! text == nil or type(text) ~= \"string\"")
+			end
+			
+			if text == "Disabled" then
+				self[v].text:SetString("Выключено")
+			elseif text == "Enabled" then
+				self[v].text:SetString("Включено")
+			end
+			
+			local enableDisableOptions = { { text = "Выключено", data = false }, { text = "Включено", data = true } }
+			self[v].options = enableDisableOptions
+		end
+		--Та же картина
+		if self.title ~= nil then
+			self.title.big:SetString("Настройки игры")
+		end
+	end)
 	
 	--Русификация модов. Подгружаем в самом конце (!!!)
 	if t.IsModTranslEnabled ~= t.ModTranslationTypes.disabled then

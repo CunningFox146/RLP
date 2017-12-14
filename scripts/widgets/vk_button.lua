@@ -20,6 +20,7 @@ local VKButton = Class(Widget, function(self)
 	self.btn:SetFont(CHATFONT)
 	self.btn:SetTextColour({.7,.7,.7,1})
 	self.btn:SetTextFocusColour({1,1,1,1})
+	self.btn.scale_on_focus = false
 	
 	self.btn:SetOnClick(function()
 		VisitURL("https://vk.com/kleientertainment")
@@ -28,7 +29,6 @@ local VKButton = Class(Widget, function(self)
 	self.btn:SetOnGainFocus(function()
 		if self.btn:IsEnabled() and not self.btn:IsSelected() and TheFrontEnd:GetFadeLevel() <= 0 then
 			self.btn.highlight:Show()
-			self.btn.image:SetScale(1,1,1)
 		end
 	end)
 	

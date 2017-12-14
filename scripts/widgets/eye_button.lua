@@ -25,6 +25,7 @@ local EyeButton = Class(Widget, function(self)
 	self.btn:SetFont(CHATFONT)
 	self.btn:SetTextColour({.7,.7,.7,1})
 	self.btn:SetTextFocusColour({1,1,1,1})
+	self.btn.scale_on_focus = false
 	
 	self.btn:SetOnClick(function()
 		VisitURL("http://steamcommunity.com/sharedfiles/filedetails/changelog/"..t.SteamID)

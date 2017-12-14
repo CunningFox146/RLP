@@ -17,17 +17,7 @@ local VKButton = require "widgets/vk_button"
 local RLPModButton = require "widgets/mod_settings_button"
 local Puppet = require "widgets/puppet"
 
-local MMScreen
---Для фейда
-if kleifileexists("scripts/screens/redux/multiplayermainscreen.lua") then
-	MMScreen = require "screens/redux/multiplayermainscreen"
-else
-	MMScreen = require "screens/multiplayermainscreen"
-end
-
-
 local TranslationTypeSave = nil
-
 
 local LanguageOptions = Class(Screen, function(self)
     Widget._ctor(self, "LanguageOptions")
@@ -1051,10 +1041,11 @@ function LanguageOptions:Cancel()
 	--Музло
 	TheFrontEnd:GetSound():KillSound("rlp_ragtime") 
 	TheFrontEnd:GetSound():PlaySound(FE_MUSIC, "FEMusic")
-	TheFrontEnd:GetSound():PlaySound("dontstarve/together_FE/portal_idle_vines", "FEPortalSFX")
+	--TheFrontEnd:GetSound():PlaySound("dontstarve/together_FE/portal_idle_vines", "FEPortalSFX")
 	
 	--Делаем красивую штуку
-	TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return MMScreen() end)
+	--TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return MMScreen() end)
+	TheFrontEnd:FadeBack()
 end
 
 
