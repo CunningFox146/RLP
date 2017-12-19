@@ -337,20 +337,12 @@ end)
 
 --Кнопка настойки в главном меню
 do
-	--local RLPButton = require "widgets/rlp_button"
-	local TEMPLATES = require "widgets/redux/templates"
-	local LanguageOptions = require "screens/LanguageOptions"
+	local RLPButton = require "widgets/rlp_button"
 
 	local function AddButton(self, ...)
 		if self.rlp_settings == nil then
-			local TheFrontEnd = _G.TheFrontEnd
-			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/button_icons.xml", "mods.tex", "Настроить\nрусификатор", false, true, function() 
-				TheFrontEnd:GetSound():KillSound("FEMusic")
-				TheFrontEnd:GetSound():KillSound("FEPortalSFX")
-				TheFrontEnd:GetSound():PlaySound("dontstarve/music/gramaphone_ragtime", "rlp_ragtime") 
-				
-				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return LanguageOptions() end)
-			end, {font=NEWFONT_OUTLINE}))
+			self.rlp_settings = self:AddChild(RLPButton())
+			--self.rlp_settings:SetPosition(1040, 124 , 0)
 			self.submenu:AddCustomItem(self.rlp_settings, _G.Vector3(-605,0,0))
 		end
 	end
@@ -3070,7 +3062,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			self.create_button.text:SetSize(self.create_button.text.size-7)
 		end
 	end)
-	--[[
+
 	--Подвигаем текст в списках серверов
 	local function ServerListingScreenPost(self)
 		local _OnUpdate_Old = self.OnUpdate or (function() return end)
@@ -3089,7 +3081,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	
 	AddClassPostConstruct("screens/serverlistingscreen", ServerListingScreenPost)
 	AddClassPostConstruct("screens/redux/serverlistingscreen", ServerListingScreenPost)
-	]]
+	
 	--Меняем меню создания сервера, чтоб текст не вылазил за кнопку
 	local function ServerCreationScreenPost(self)
 		local _OnUpdate_Old = self.OnUpdate or (function() return end)
