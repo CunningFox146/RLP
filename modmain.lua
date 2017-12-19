@@ -2963,8 +2963,24 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		end
 	end)
 
-
 	--сочетаем слово "День" с количеством дней
+	AddClassPostConstruct("widgets/truescrolllist", function(self) 
+		local oldupdate_fn=self.update_fn
+		self.update_fn=function(context, widget, data, index)
+			oldupdate_fn(context, widget, data, index)
+			if data and data.days_survived then
+				local Text = require "widgets/text"
+				widget.DAYS_LIVED:SetTruncatedString((data.days_survived or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(data.days_survived), widget.DAYS_LIVED._align.maxwidth, widget.DAYS_LIVED._align.maxchars, true)
+			end
+			if data and data.playerage then
+				local Text = require "widgets/text"
+			    local age_str = (data.playerage or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(tonumber(data.playerage))
+	    		widget.PLAYER_AGE:SetTruncatedString(age_str, widget.PLAYER_AGE._align.maxwidth, widget.PLAYER_AGE._align.maxchars, true)
+			end
+		end
+	end)
+	
+	--Устарело
 	AddClassPostConstruct("screens/morguescreen", function(self) 
 		if self.encounter_widgets then for _,v in ipairs(self.encounter_widgets) do
 			if v.PLAYER_AGE and not v.PLAYER_AGE.RLPFixed then
