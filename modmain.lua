@@ -264,8 +264,8 @@ end)]]
 --Для тех, кто пользуется ps4 или NACL должна быть возможность сохранять не в ини файле, а в облаке.
 --Для этого дорабатываем функционал стандартного класса PlayerProfile
 local function SetLocalizaitonValue(self,name,value) --Метод, сохраняющий опцию с именем name и значением value
-    local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
- 	if USE_SETTINGS_FILE then
+	local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
+	if USE_SETTINGS_FILE then
 		TheSim:SetSetting("translation", tostring(name), tostring(value))
 	else
 		self:SetValue(tostring(name), tostring(value))
@@ -274,8 +274,8 @@ local function SetLocalizaitonValue(self,name,value) --Метод, сохран�
 	end
 end
 local function GetLocalizaitonValue(self,name) --Метод, возвращающий значение опции name
-        local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
- 	if USE_SETTINGS_FILE then
+	local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
+	if USE_SETTINGS_FILE then
 		return TheSim:GetSetting("translation", tostring(name))
 	else
 		return self:GetValue(tostring(name))
@@ -285,9 +285,9 @@ end
 --Расширяем функционал PlayerProfile дополнительной инициализацией двух методов и заданием дефолтных значений опций нашего перевода.
 AddGlobalClassPostConstruct("playerprofile", "PlayerProfile", function(self)
 	local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
- 	if not USE_SETTINGS_FILE then
-	        self.persistdata.update_is_allowed = true --Разрешено запускать обновление по умолчанию
-	        self.persistdata.update_frequency = t.UpdatePeriod[3] --Раз в неделю по умолчанию
+	if not USE_SETTINGS_FILE then
+			self.persistdata.update_is_allowed = true --Разрешено запускать обновление по умолчанию
+			self.persistdata.update_frequency = t.UpdatePeriod[3] --Раз в неделю по умолчанию
 		local date=_G.os.date("*t")
 		self.persistdata.last_update_date = tostring(date.day.."."..date.month.."."..date.year) --Текущая дата по умолчанию
 	end
@@ -403,7 +403,7 @@ if poversion~=modinfo.version then
 		end
 		local text="Версия игры: "..modinfo.version..", версия PO файла: "..poversion.."\nПуть: "..string.gsub(_G.CWD..t.StorePath,a,b)..t.MainPOfilename.."\nПеревод работает в режиме «Только чат»."
 		local PopupDialogScreen = require "screens/popupdialog"
-	        _G.TheFrontEnd:PushScreen(PopupDialogScreen("Неверная версия PO файла", text,
+			_G.TheFrontEnd:PushScreen(PopupDialogScreen("Неверная версия PO файла", text,
 			{{text="Понятно", cb = function() _G.TheFrontEnd:PopScreen() end}},nil,nil,"dark"))
 	end
 	return
@@ -549,7 +549,7 @@ if language_lua_has_rusification(languageluapath) then --Если в language.lu
 		end
 		local text="В файле "..string.gsub("data/"..languageluapath,a,b).."\nнайдено подключение другой локализации.\nЭто подключение было деактивировано."
 		local PopupDialogScreen = require "screens/popupdialog"
-	        _G.TheFrontEnd:PushScreen(PopupDialogScreen("Обнаружена посторонняя локализация", text,
+			_G.TheFrontEnd:PushScreen(PopupDialogScreen("Обнаружена посторонняя локализация", text,
 			
 			{{text="Понятно", cb = function() _G.TheFrontEnd:PopScreen() _G.SimReset() end}},nil,nil,"dark"))
 	end
@@ -636,7 +636,7 @@ Assets = {
 --Возвращает корректную форму слова день (или другого, переданного вторым параметром)
 local function StringTime(n,s)
 	local pl_type=n%10==1 and n%100~=11 and 1 or(n%10>=2 and n%10<=4
-       		and(n%100<10 or n%100>=20)and 2 or 3)
+			and(n%100<10 or n%100>=20)and 2 or 3)
 	s=s or {"день","дня","дней"}
 	return s[pl_type]
 end 
@@ -994,7 +994,7 @@ end
 --split("|","|") вернёт таблицу из "" и ""
 --По идее разделителем может служить сразу несколько символов (не тестировалось)
 local function split(str,sep)
-       	local fields, first = {}, 1
+		local fields, first = {}, 1
 	str=str..sep
 	for i=1,#str do
 		if string.sub(str,i,i+#sep-1)==sep then
@@ -1002,7 +1002,7 @@ local function split(str,sep)
 			first=i+#sep
 		end
 	end
-        return fields
+		return fields
 end
 
 
@@ -1099,7 +1099,7 @@ function t.ParseTranslationTags(message, char, talker, optionaltags)
 			local vars2=split(v,"=")
 			if #vars2==1 then counter=counter+1 end
 			local path=(#vars2==2) and vars2[1] or 
-			        (((counter==1) and "he")
+					(((counter==1) and "he")
 				or ((counter==2) and "she")
 				or ((counter==3) and "it")
 				or ((counter==4) and "plural")
@@ -1539,7 +1539,7 @@ local function convertfromutf8(str)
 --[[		if not str or type(str)~="string" then return str end
 	local str2=""
 	for uchar in string.gfind(str, "([%z\1-\127\194-\244][\128-\191]*)") do
-       		if #uchar==1 then
+		if #uchar==1 then
 			str2=str2..uchar
 		elseif #uchar==2 then
 			local res=(uchar:byte(1)-0xC0)*0x40+uchar:byte(2)-0x80
@@ -1652,13 +1652,13 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 		if not name2 then
 			--Реплики о смерти
 			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
-			     " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE, announcerus.DEATH_ANNOUNCEMENT_2_MALE)
+				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE, announcerus.DEATH_ANNOUNCEMENT_2_MALE)
 			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
-			     " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE, announcerus.DEATH_ANNOUNCEMENT_2_FEMALE)
+				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE, announcerus.DEATH_ANNOUNCEMENT_2_FEMALE)
 			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
-			     " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT, announcerus.DEATH_ANNOUNCEMENT_2_ROBOT)
+				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT, announcerus.DEATH_ANNOUNCEMENT_2_ROBOT)
 			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
-			     " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT, announcerus.DEATH_ANNOUNCEMENT_2_DEFAULT)
+				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT, announcerus.DEATH_ANNOUNCEMENT_2_DEFAULT)
 			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1, " (.*)%.$", nil, nil, ".")
 			test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_MALE, announcerus.GHOST_DEATH_ANNOUNCEMENT_MALE)
 			test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_FEMALE, announcerus.GHOST_DEATH_ANNOUNCEMENT_FEMALE)
@@ -1684,7 +1684,7 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 			if _G.TheNet.GetClientTable then _G.TheNet:GetClientTable()	end --обновляем список игроков
 			announcement = string.format((t.ParseTranslationTags(RussianMessage, AllPlayersList[name], "announce", killerkey)), name or "", name2 or "", "" ,"") or announcement
 		end
-        OldShowNewAnnouncement(self, announcement, ...)
+		OldShowNewAnnouncement(self, announcement, ...)
 	end end
 end) -- для AddClassPostConstruct "widgets/eventannouncer"
 
@@ -1862,26 +1862,26 @@ end
 
 --Перевод на русский произносимого на сервере
 if _G.TheNet.Talker then
-    _G.getmetatable(_G.TheNet).__index.Talker = (function()
-        local oldTalker = _G.getmetatable(_G.TheNet).__index.Talker
-        return function(self, message, entity, ... )
-            oldTalker(self, message, entity, ...)
+	_G.getmetatable(_G.TheNet).__index.Talker = (function()
+		local oldTalker = _G.getmetatable(_G.TheNet).__index.Talker
+		return function(self, message, entity, ... )
+			oldTalker(self, message, entity, ...)
  
-            local inst=entity and entity:GetGUID() or nil
-            inst=inst and _G.Ents[inst] or nil --определяем инстанс персонажа по entity
-            if inst and inst.components.talker.widget then --если он может говорить
-                if message and type(message)=="string" then
-                    --Делаем одноразовую подмену для последующего задания текста, в котором осуществляем перевод.
-                    local OldSetString = inst.components.talker.widget.text.SetString
-                    function inst.components.talker.widget.text:SetString(str, ...)
-                        str = t.TranslateToRussian(str, inst) or str --переводим
-                        OldSetString(self, str, ...)
-                        self.SetString = OldSetString
-                    end
-                end
-            end
-        end
-    end)()
+			local inst=entity and entity:GetGUID() or nil
+			inst=inst and _G.Ents[inst] or nil --определяем инстанс персонажа по entity
+			if inst and inst.components.talker.widget then --если он может говорить
+				if message and type(message)=="string" then
+					--Делаем одноразовую подмену для последующего задания текста, в котором осуществляем перевод.
+					local OldSetString = inst.components.talker.widget.text.SetString
+					function inst.components.talker.widget.text:SetString(str, ...)
+						str = t.TranslateToRussian(str, inst) or str --переводим
+						OldSetString(self, str, ...)
+						self.SetString = OldSetString
+					end
+				end
+			end
+		end
+	end)()
 end
 --Перевод на русский произносимого на сервере
 --[[if _G.TheNet.Talker then
@@ -2974,12 +2974,12 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			end
 			if data and data.playerage then
 				local Text = require "widgets/text"
-			    local age_str = (data.playerage or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(tonumber(data.playerage))
-	    		widget.PLAYER_AGE:SetTruncatedString(age_str, widget.PLAYER_AGE._align.maxwidth, widget.PLAYER_AGE._align.maxchars, true)
+				local age_str = (data.playerage or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(tonumber(data.playerage))
+				widget.PLAYER_AGE:SetTruncatedString(age_str, widget.PLAYER_AGE._align.maxwidth, widget.PLAYER_AGE._align.maxchars, true)
 			end
 		end
 	end)
-	
+
 	--Устарело
 	AddClassPostConstruct("screens/morguescreen", function(self) 
 		if self.encounter_widgets then for _,v in ipairs(self.encounter_widgets) do
