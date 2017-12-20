@@ -3130,6 +3130,10 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		if self.text then
 			self.text:SetFont(_G.CHATFONT)
 		end
+
+		if self.title and self.title.string==STRINGS.UI.MODSSCREEN.UPDATEALL_TITLE then
+			self:SetTitleTextSize(30)
+		end
 	end
 	
 	AddClassPostConstruct("screens/popupdialog", PopUpdialogPost)
