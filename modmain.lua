@@ -344,7 +344,7 @@ do
 	local function AddButton(self, ...)
 		if self.rlp_settings == nil then
 			local TheFrontEnd = _G.TheFrontEnd
-			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/button_icons.xml", "mods.tex", "Настроить\nрусификатор", false, true, function() 
+			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/button_icons.xml", "mods.tex", "Русификатор", false, true, function() 
 				TheFrontEnd:GetSound():KillSound("FEMusic")
 				TheFrontEnd:GetSound():KillSound("FEPortalSFX")
 				TheFrontEnd:GetSound():PlaySound("dontstarve/music/gramaphone_ragtime", "rlp_ragtime") 
