@@ -5,7 +5,10 @@ if not mods then
 	mods = {}
 	_G.rawset(_G, "mods", mods)
 end
-
+Assets = {
+    _G.Asset( "IMAGE", "images/ru_button_icon.tex" ),
+    _G.Asset( "ATLAS", "images/ru_button_icon.xml" ),
+}
 --Вставляем проверку на наличие старого русификатора.
 local IS_ENABLED_OLD_RLP
 if mods.RussianLanguagePack ~= nil and mods.RussianLanguagePack ~= {} or _G.KnownModIndex:IsModEnabled("workshop-354836336") or _G.KnownModIndex:IsModEnabled("workshop-1224043697") then
@@ -344,7 +347,7 @@ do
 	local function AddButton(self, ...)
 		if self.rlp_settings == nil then
 			local TheFrontEnd = _G.TheFrontEnd
-			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/button_icons.xml", "mods.tex", "Настроить\nрусификатор", false, true, function() 
+			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/ru_button_icon.xml", "ru_button_icon.tex", "Русификатор", false, true, function() 
 				TheFrontEnd:GetSound():KillSound("FEMusic")
 				TheFrontEnd:GetSound():KillSound("FEPortalSFX")
 				TheFrontEnd:GetSound():PlaySound("dontstarve/music/gramaphone_ragtime", "rlp_ragtime") 
