@@ -350,7 +350,7 @@ do
 				TheFrontEnd:GetSound():PlaySound("dontstarve/music/gramaphone_ragtime", "rlp_ragtime") 
 				
 				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return LanguageOptions() end)
-			end, {font=NEWFONT_OUTLINE}))
+			end, {font=_G.NEWFONT_OUTLINE}))
 			self.submenu:AddCustomItem(self.rlp_settings, _G.Vector3(-605,0,0))
 		end
 	end
