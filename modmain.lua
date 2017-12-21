@@ -6,8 +6,8 @@ if not mods then
 	_G.rawset(_G, "mods", mods)
 end
 Assets = {
-    _G.Asset( "IMAGE", "images/ru_button_icon.tex" ),
-    _G.Asset( "ATLAS", "images/ru_button_icon.xml" ),
+    _G.Asset( "IMAGE", "images/rus_button_icon.tex" ),
+    _G.Asset( "ATLAS", "images/rus_button_icon.xml" ),
 }
 --Вставляем проверку на наличие старого русификатора.
 local IS_ENABLED_OLD_RLP
@@ -348,7 +348,7 @@ do
 		if self.rlp_settings == nil then
 			local TheFrontEnd = _G.TheFrontEnd
 
-			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/ru_button_icon.xml", "ru_button_icon.tex", "Русификатор", false, true, function() 
+			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/rus_button_icon.xml", "rus_button.tex", "Русификатор", false, true, function() 
 
 				TheFrontEnd:GetSound():KillSound("FEMusic")
 				TheFrontEnd:GetSound():KillSound("FEPortalSFX")
