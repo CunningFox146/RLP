@@ -3054,10 +3054,11 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 
 	--Подвигаем всё красивенько в окне подписки
 	AddClassPostConstruct("screens/emailsignupscreen", function(self)
-		self.bg:Nudge({x=-5,y=0,z=0})
-		self.bg.fill:Nudge({x=-5,y=0,z=0})
 		if self.bday_message then
 			self.bday_message:SetSize(21)
+			local dialog_width = 640
+			local label_height = 40
+			self.bday_message:SetRegionSize( dialog_width, label_height * 2+30 )
 		end
 		if self.bday_label then
 			self.bday_label:SetSize(26)
