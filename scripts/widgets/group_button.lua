@@ -6,17 +6,17 @@ local ImageButton = require "widgets/imagebutton"
 local GroupButton = Class(Widget, function(self)
     Widget._ctor(self, "RLPGroupButton")
 	
-	self.btn = self:AddChild(ImageButton("images/rus_group.xml", "rus_group.tex", "rus_group.tex", "rus_group.tex", "rus_group.tex", "rus_group.tex", {1,1}, {0,0}))
-	self.btn.image:SetScale(1,1,1)
+	self.btn = self:AddChild(ImageButton("images/rus_group.xml", "rus_group.tex", nil, nil, nil, nil, {1,1}, {0,0}))
+	self.btn.image:SetPosition(-12, 0)
 
 	self.btn.highlight = self.btn:AddChild(Image("images/frontend.xml", "button_square_highlight.tex"))
 	self.btn.highlight:SetScale(1.5)
 	self.btn.highlight:SetClickable(false)
 	self.btn.highlight:Hide()
 
-	self.btn:SetText("Русская группа\nв стиме.")
-	self.btn:SetTextSize(32)
-	self.btn.text:SetPosition(0, -75)
+	self.btn:SetText("Группа\nв Steam")
+	self.btn:SetTextSize(25)
+	self.btn.text:SetPosition(-12, -80)
 	self.btn:SetFont(CHATFONT)
 	self.btn:SetTextColour({.7,.7,.7,1})
 	self.btn:SetTextFocusColour({1,1,1,1})
