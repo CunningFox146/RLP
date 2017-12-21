@@ -2898,7 +2898,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 
 
 	--Увеличиваем область заголовка, чтобы не съедало буквы
-	AddClassPostConstruct("widgets/intentionpicker", function(self)
+	local function postintentionpicker(self)
 		if self.headertext then
 			local w,h = self.headertext:GetRegionSize()
 			self.headertext:SetRegionSize(w,h+10)
@@ -2908,7 +2908,9 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		for i, v in ipairs(intention_options) do
 			self.buttons[i]:SetText(intention_options[i].text)
 		end
-	end)
+	end
+	AddClassPostConstruct("widgets/intentionpicker", postintentionpicker)
+	AddClassPostConstruct("widgets/redux/intentionpicker", postintentionpicker)
 
 
 	--Исправляем жёстко зашитые надписи на кнопках в казане и телепорте.
