@@ -3167,7 +3167,6 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			"fullscreenSpinner",
 			"displaySpinner",
 			"refreshRateSpinner",
-			"resolutionSpinner",
 			"netbookModeSpinner",
 			"smallTexturesSpinner",
 			"bloomSpinner",
