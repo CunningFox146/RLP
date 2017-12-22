@@ -2086,8 +2086,27 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	--Двигаем портрет в гардеробе
 	AddClassPostConstruct("screens/redux/wardrobescreen", function(self)
 		if self.heroportrait then
-			self.heroportrait:Nudge(({x=-80,y=50,z=0}))
+			self.heroportrait:Nudge({x=-80,y=50,z=0})
 		end
+	end)
+	
+	AddClassPostConstruct("screens/redux/setpopupdialog", function(self)
+		if self.dialog then
+			self.dialog:SetSize(550,450)
+		end
+		for i = 1,self.max_num_items do
+			self.input_item_imagetext[i]:Nudge({x=-50,y=0,z=0})
+			self.input_item_imagetext[i].text:SetFont(_G.NEWFONT)
+			local w,h = self.input_item_imagetext[i].text:GetRegionSize()
+			self.input_item_imagetext[i].text:SetRegionSize(w+70, h)
+			self.input_item_imagetext[i].text:Nudge({x=20,y=0,z=0})
+			i = i + 1
+	    end
+	    self.reward.text:Nudge({x=20,y=0,z=0})
+	    local w,h = self.reward.text:GetRegionSize()
+	    self.reward.text:SetRegionSize(w+70, h)
+
+	    self.reward.text:SetFont(_G.NEWFONT)
 	end)
 	
 	--Фиксим менюшку обзора игрока
