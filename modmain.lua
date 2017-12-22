@@ -2079,7 +2079,13 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	ChangeNamesTex("widgets/redux/loadoutselect")
 	ChangeNamesTex("screens/redux/wardrobescreen")
 
-
+	--Фиксим менюшку обзора игрока
+	AddClassPostConstruct("screens/redux/playersummaryscreen", function(self)
+		if self.most_died and self.most_died.name then
+			local w,h = self.most_died.name:GetRegionSize()
+			self.most_died.name:SetRegionSize(w+100,h+50)
+		end
+	end)
 
 	--Подменяем русские имена в виджете внешнего вида персонажа
 	AddClassPostConstruct("widgets/playeravatarpopup", function(self)
