@@ -14,7 +14,7 @@ local GroupButton = Class(Widget, function(self)
 	self.btn.highlight:SetClickable(false)
 	self.btn.highlight:Hide()
 
-	self.btn:SetText("Группа\nв Steam")
+	self.btn:SetText("Группа\nSteam")
 	self.btn:SetTextSize(25)
 	self.btn.text:SetPosition(-12, -80)
 	self.btn:SetFont(CHATFONT)
