@@ -2188,9 +2188,15 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	end
 
 
-
-
 	--Окно просмотра серверов, двигаем контролсы, исправляем надписи
+	local function ServerListingScreenPost1(self)
+		if self.sorting_spinner and self.sorting_spinner.label then
+			self.sorting_spinner.label:Nudge({x=-40,y=0,z=0})
+			self.sorting_spinner.label:SetRegionSize(150,50)
+		end
+	end
+	AddClassPostConstruct("screens/redux/serverlistingscreen", ServerListingScreenPost1)
+
 	AddClassPostConstruct("screens/serverlistingscreen", function(self)
 		if self.nav_bar and self.nav_bar.title then
 			local w, h = self.nav_bar.title:GetRegionSize()
