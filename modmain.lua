@@ -2083,6 +2083,13 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	ChangeNamesTex("widgets/redux/loadoutselect")
 	ChangeNamesTex("screens/redux/wardrobescreen")
 
+	--Двигаем портрет в гардеробе
+	AddClassPostConstruct("screens/redux/wardrobescreen", function(self)
+		if self.heroportrait then
+			self.heroportrait:Nudge(({x=-80,y=50,z=0}))
+		end
+	end)
+	
 	--Фиксим менюшку обзора игрока
 	AddClassPostConstruct("screens/redux/playersummaryscreen", function(self)
 		if self.most_died and self.most_died.name then
