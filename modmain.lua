@@ -3013,6 +3013,14 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		if self.desc then
 			self.desc:SetSize(28)
 			self.desc:SetRegionSize(64*3+30,130)
+			local OldSetMultilineTruncatedString = self.desc.SetMultilineTruncatedString
+			if OldSetMultilineTruncatedString then
+				function self.desc:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
+					maxcharsperline = 24
+					maxlines = 3
+					OldSetMultilineTruncatedString(self,str, maxlines, maxwidth, maxcharsperline, ellipses)
+				end
+			end
 		end
 	end)
 
