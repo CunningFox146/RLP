@@ -1,5 +1,5 @@
 name = "Russification Pack for DST"
-version = "1.0.1"
+version = "1.0.3"
 
 local desc = {
 	en = "\nThe best russian localisation at the moment. Soure code was taken from the Russian Language Pack. Special thanks to Some1 and Alevastor!\n\nVersion: "..version,
