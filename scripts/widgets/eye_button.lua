@@ -14,7 +14,7 @@ local EyeButton = Class(Widget, function(self)
 	self.btn.highlight:SetClickable(false)
 	self.btn.highlight:Hide()
 
-	self.btn:SetText("Список\nИзменений")
+	self.btn:SetText("Список\nизменений")
 	self.btn:SetTextSize(25)
 	self.btn.text:SetPosition(-12, -80)
 	self.btn:SetFont(CHATFONT)
