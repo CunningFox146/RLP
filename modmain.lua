@@ -3033,6 +3033,10 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		local oldupdate_fn=self.update_fn
 		self.update_fn=function(context, widget, data, index)
 			oldupdate_fn(context, widget, data, index)
+			if data and data.item_type and widget.text then
+				local x, y = widget.text:GetRegionSize()
+				widget.text:SetRegionSize(x+30, y+20)
+			end
 			if data and data.days_survived and widget.DAYS_LIVED then
 				local Text = require "widgets/text"
 				widget.DAYS_LIVED:SetTruncatedString((data.days_survived or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(data.days_survived), widget.DAYS_LIVED._align.maxwidth, widget.DAYS_LIVED._align.maxchars, true)
