@@ -13,8 +13,8 @@ local assets =
     Asset("ANIM", "anim/text_sparkle.zip"),
     Asset("ANIM", "anim/mods_button.zip"),
 	
-    Asset("ATLAS", "images/modicon.xml"),
-    Asset("IMAGE", "images/modicon.tex"),
+    Asset("ATLAS", "images/rusif_icon.xml"),
+    Asset("IMAGE", "images/rusif_icon.tex"),
 	
 	Asset("ATLAS","images/eyebutton.xml"),
 	Asset("IMAGE","images/eyebutton.tex"),

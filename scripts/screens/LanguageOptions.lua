@@ -123,7 +123,7 @@ local LanguageOptions = Class(Screen, function(self)
 	self.updateoptionstitle_fx:SetScale(.4)
 	self.updateoptionstitle_fx:Hide()
 	
-	self.updateoptionstitle.modicon = self.updateoptionstitle:AddChild(Image("images/modicon.xml", "modicon.tex"))
+	self.updateoptionstitle.modicon = self.updateoptionstitle:AddChild(Image("images/rusif_icon.xml", "rusif_icon.tex"))
 	self.updateoptionstitle.modicon:SetScale(.380, .380, 1)
 	self.updateoptionstitle.modicon:Hide()
 	

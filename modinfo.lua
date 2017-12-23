@@ -1,4 +1,4 @@
-name = "New Russian Language Pack"
+name = "Russification Pack for DST"
 version = "1.0"
 
 local desc = {
@@ -14,8 +14,8 @@ forumthread = ""
 
 api_version = 10
 
-icon_atlas = "images/modicon.xml"
-icon = "modicon.tex"
+icon_atlas = "images/rusif_icon.xml"
+icon = "rusif_icon.tex"
 
 priority = .9999999999991 --Сразу после старого русификатора
 
