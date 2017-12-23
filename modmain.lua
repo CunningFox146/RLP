@@ -3025,6 +3025,22 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 				local Text = require "widgets/text"
 				local age_str = (data.playerage or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(tonumber(data.playerage))
 				widget.PLAYER_AGE:SetTruncatedString(age_str, widget.PLAYER_AGE._align.maxwidth, widget.PLAYER_AGE._align.maxchars, true)
+				if widget.SEEN_DATE and not widget.SEEN_DATE.RLPFixed then
+					local OldSetString = widget.SEEN_DATE.SetString
+					if OldSetString then
+						local months = {Jan="Янв.",Feb="Февр.",Mar="Март",Apr="Апр.",May="Мая",Jun="Июня",Jul="Июля",Aug="Авг.",Sept="Сент.",Oct="Окт.",Nov="Нояб.",Dec="Дек."}
+						function widget.SEEN_DATE:SetString(s, ...)
+							s = s:gsub("(.-) (%d-), (%d-)",function(m, d, y)
+								if not months[m] then return end
+								return d.." "..months[m].." "..y
+							end) or s
+							local res = OldSetString(self, s, ...)
+							return res
+						end
+						widget.SEEN_DATE.RLPFixed = true
+						widget.SEEN_DATE:SetString(widget.SEEN_DATE:GetString())
+					end
+				end
 			end
 		end
 	end)
