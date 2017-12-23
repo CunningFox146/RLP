@@ -70,7 +70,6 @@ local FontNames = {
 	BUTTONFONT = _G.BUTTONFONT,
 	HEADERFONT = _G.HEADERFONT,
 	CHATFONT = _G.CHATFONT,
-	CHATFONT_OUTLINE = _G.CHATFONT_OUTLINE,
 	NUMBERFONT = _G.NUMBERFONT,
 	TALKINGFONT = _G.TALKINGFONT,
 	SMALLNUMBERFONT = _G.SMALLNUMBERFONT,
@@ -92,7 +91,6 @@ function ApplyLocalizedFonts()
 							   ["buttonfont"] = true,
 							   ["hammerhead50"] = true,
 							   ["bellefair50"] = true,
-							   ["bellefair_outline50"] = true,
 							   ["spirequal"] = rawget(_G,"NEWFONT") and true or nil,
 							   ["spirequal_small"] = rawget(_G,"NEWFONT_SMALL") and true or nil,
 							   ["spirequal_outline"] = rawget(_G,"NEWFONT_OUTLINE") and true or nil,
@@ -107,7 +105,6 @@ function ApplyLocalizedFonts()
 	_G.BUTTONFONT = FontNames.BUTTONFONT
 	_G.HEADERFONT = FontNames.HEADERFONT
 	_G.CHATFONT = FontNames.CHATFONT
-	_G.CHATFONT_OUTLINE = FontNames.CHATFONT_OUTLINE
 	_G.NUMBERFONT = FontNames.NUMBERFONT
 	_G.TALKINGFONT = FontNames.TALKINGFONT
 	_G.SMALLNUMBERFONT = FontNames.SMALLNUMBERFONT
@@ -171,7 +168,6 @@ function ApplyLocalizedFonts()
 	_G.BUTTONFONT = t.SelectedLanguage.."_buttonfont"
 	_G.HEADERFONT = t.SelectedLanguage.."_hammerhead50"
 	_G.CHATFONT = t.SelectedLanguage.."_bellefair50"
-	_G.CHATFONT_OUTLINE = t.SelectedLanguage.."_bellefair_outline50"
 	_G.NUMBERFONT = t.SelectedLanguage.."_stint-ucr50"
 	_G.TALKINGFONT = t.SelectedLanguage.."_talkingfont"
 	_G.SMALLNUMBERFONT = t.SelectedLanguage.."_stint-ucr20"
