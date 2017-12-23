@@ -806,7 +806,7 @@ function LanguageOptions:LoadHistory()
 	self.UpdateLog={}
 	self.logtextlines=0
 	local lines=0
-	local f=io.open(t.StorePath.."scripts/history.json","r")
+	local f=io.open(t.StorePath.."scripts/history.txt","r")
 	if f then for line in f:lines() do 
 		line=t.escapeR(line) --избавляемся от \r для юникс систем
 		if line:utf8sub(1,6)=="Версия" then --Найдено описание новой версии
