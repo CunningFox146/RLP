@@ -2108,7 +2108,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	    self.reward.text:SetFont(_G.NEWFONT)
 	end)
-	
+
 	--Фиксим менюшку обзора игрока
 	AddClassPostConstruct("screens/redux/playersummaryscreen", function(self)
 		if self.most_died and self.most_died.name then
@@ -2229,6 +2229,22 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		if self.sorting_spinner and self.sorting_spinner.label then
 			self.sorting_spinner.label:Nudge({x=-40,y=0,z=0})
 			self.sorting_spinner.label:SetRegionSize(150,50)
+		end
+		if self.season_description and self.season_description.text then
+			local OldSetString = self.season_description.text.SetString
+			if OldSetString then
+				function self.season_description.text:SetString(str, ...)
+					if str:find("Лето")~=nil then
+						if str:find("Ранняя")~=nil then
+							str=str:gsub("Ранняя","Раннее")
+						elseif str:find("Поздняя")~=nil then
+							str=str:gsub("Поздняя","Позднее")
+						end
+					end
+					local res = OldSetString(self, str, ...)
+					return res
+				end
+			end
 		end
 	end
 	AddClassPostConstruct("screens/redux/serverlistingscreen", ServerListingScreenPost1)
