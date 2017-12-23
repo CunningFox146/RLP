@@ -30,8 +30,8 @@ t.TranslationTypes = {Full = "Full", InterfaceChat = "InterfaceChat", ChatOnly =
 t.ModTranslationTypes = {enabled = "enabled", disabled = "disabled"}
 t.CurrentTranslationType = nil
 t.IsModTranslEnabled = nil
-t.SteamURL = "http://steamcommunity.com/sharedfiles/filedetails/?id=354836336"
-t.SteamID = "354836336"
+t.SteamURL = "http://steamcommunity.com/sharedfiles/filedetails/?id=1240565842"
+t.SteamID = "1240565842"
 t.SelectedLanguage = "ru"
 
 t.DataFile = "scripts/rlp_data.json"--Сюда будем записывать разную инфу
@@ -398,7 +398,7 @@ local function GetPoFileVersion(file) --Возвращает версию po ф�
 	if not ver then ver = "не задана" end
 	return ver
 end
-
+--[[
 --Проверяем версию по файла, и если она не соответствует текущей версии, то отключаем перевод
 local poversion = GetPoFileVersion(t.StorePath..t.MainPOfilename)
 if poversion~=modinfo.version then
@@ -417,7 +417,7 @@ if poversion~=modinfo.version then
 	end
 	return
 end
-
+]]
 --Проверяем наличие мода-переводчика модов. Если включен, то отключаем.
 
 
