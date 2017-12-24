@@ -879,7 +879,7 @@ function rebuildname(str1,action,objectname)
 				end
 			--Изучить (Кого? Что?) Винительный
 			--применительно к имени свиньи или кролика
-			elseif action and objectname and (objectname=="pigman" or objectname=="pigguard" or objectname=="bunnyman") then 
+			elseif action and objectname and (objectname=="pigman" or objectname=="pigguard" or objectname=="bunnyman" or objectname:find("critter")~=nil) then 
 				if str:utf8sub(str:utf8len()-2)=="нок" then
 					str=str:utf8sub(1,str:utf8len()-2).."ка"
 				elseif str:utf8sub(str:utf8len()-2)=="лец" then
