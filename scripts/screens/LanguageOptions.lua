@@ -15,7 +15,7 @@ local GroupButton = require "widgets/group_button"
 local WikiButton = require "widgets/wiki_button"
 local VKButton = require "widgets/vk_button"
 local RLPModButton = require "widgets/mod_settings_button"
-local Puppet = require "widgets/puppet"
+--local Puppet = require "widgets/skinspuppet"
 
 local TranslationTypeSave = nil
 
