@@ -70,6 +70,7 @@ local FontNames = {
 	BUTTONFONT = _G.BUTTONFONT,
 	HEADERFONT = _G.HEADERFONT,
 	CHATFONT = _G.CHATFONT,
+	CHATFONT_OUTLINE = _G.CHATFONT_OUTLINE,
 	NUMBERFONT = _G.NUMBERFONT,
 	TALKINGFONT = _G.TALKINGFONT,
 	SMALLNUMBERFONT = _G.SMALLNUMBERFONT,
@@ -91,6 +92,7 @@ function ApplyLocalizedFonts()
 							   ["buttonfont"] = true,
 							   ["hammerhead50"] = true,
 							   ["bellefair50"] = true,
+							   ["bellefair_outline50"] = true,
 							   ["spirequal"] = rawget(_G,"NEWFONT") and true or nil,
 							   ["spirequal_small"] = rawget(_G,"NEWFONT_SMALL") and true or nil,
 							   ["spirequal_outline"] = rawget(_G,"NEWFONT_OUTLINE") and true or nil,
@@ -105,6 +107,7 @@ function ApplyLocalizedFonts()
 	_G.BUTTONFONT = FontNames.BUTTONFONT
 	_G.HEADERFONT = FontNames.HEADERFONT
 	_G.CHATFONT = FontNames.CHATFONT
+	_G.CHATFONT_OUTLINE = FontNames.CHATFONT_OUTLINE
 	_G.NUMBERFONT = FontNames.NUMBERFONT
 	_G.TALKINGFONT = FontNames.TALKINGFONT
 	_G.SMALLNUMBERFONT = FontNames.SMALLNUMBERFONT
@@ -168,6 +171,7 @@ function ApplyLocalizedFonts()
 	_G.BUTTONFONT = t.SelectedLanguage.."_buttonfont"
 	_G.HEADERFONT = t.SelectedLanguage.."_hammerhead50"
 	_G.CHATFONT = t.SelectedLanguage.."_bellefair50"
+	_G.CHATFONT_OUTLINE = t.SelectedLanguage.."_bellefair_outline50"
 	_G.NUMBERFONT = t.SelectedLanguage.."_stint-ucr50"
 	_G.TALKINGFONT = t.SelectedLanguage.."_talkingfont"
 	_G.SMALLNUMBERFONT = t.SelectedLanguage.."_stint-ucr20"
@@ -2982,28 +2986,51 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 
 
 	AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем шрифт описания рецепта в попапе рецептов
-		if self.name and self.Refresh then --Перехватываем вывод названия, проверяем, вмещается ли оно, и если нужно, меняем его размер
-			if not self.OldRefresh then
-				self.OldRefresh=self.Refresh
-				function self.Refresh(self,...)
-					self:OldRefresh(...)
-					if not self.name then return end
-					local Text = require "widgets/text"
-					local tmp = self.contents:AddChild(Text(_G.UIFONT, 42))
+		-- if self.name and self.Refresh then --Перехватываем вывод названия, проверяем, вмещается ли оно, и если нужно, меняем его размер
+		-- 	if not self.OldRefresh then
+		-- 		self.OldRefresh=self.Refresh
+		-- 		function self.Refresh(self,...)
+		-- 			self:OldRefresh(...)
+		-- 			if not self.name then return end
+		-- 			local Text = require "widgets/text"
+		-- 			local tmp = self.contents:AddChild(Text(_G.UIFONT, 42))
 					
-					tmp:SetPosition(320, 182, 0)
-					tmp:SetHAlign(_G.ANCHOR_MIDDLE)
-					tmp:Hide()
-					tmp:SetString(self.name:GetString())
-					local desiredw = self.name:GetRegionSize()
-					local w = tmp:GetRegionSize()
-					tmp:Kill()
-					if w>desiredw then
-						self.name:SetSize(42*desiredw/w)
-					else
-						self.name:SetSize(42)
-					end
+		-- 			tmp:SetPosition(320, 182, 0)
+		-- 			tmp:SetHAlign(_G.ANCHOR_MIDDLE)
+		-- 			tmp:Hide()
+		-- 			tmp:SetString(self.name:GetString())
+		-- 			local desiredw = self.name:GetRegionSize()
+		-- 			local w = tmp:GetRegionSize()
+		-- 			tmp:Kill()
+
+		-- 			if w>desiredw then
+		-- 				self.name:SetSize(42*desiredw/w)
+		-- 			else
+		-- 				self.name:SetSize(42)
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
+
+		if self.name then
+			if not self.name.RLPfixed then
+				if self.bg and self.bg.light_box then
+					self.bg.light_box:Nudge({x=0,y=-20,z=0})
 				end
+				self.contents:Nudge({x=0,y=-20,z=0})
+				self.name:Nudge({x=0,y=10,z=0})
+				local OldSetTruncatedString = self.name.SetTruncatedString
+				if OldSetTruncatedString then
+					local function NewSetTruncatedString (self1,str, maxwidth, maxcharsperline, ellipses)
+						maxcharsperline = 16
+						local maxlines = 2
+						self.name.SetTruncatedString=OldSetTruncatedString
+						self.name:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
+						self.name.SetTruncatedString=NewSetTruncatedString
+					end
+					self.name.SetTruncatedString=NewSetTruncatedString
+				end
+				self.name.RLPfixed=true
 			end
 		end
 		if self.desc then
