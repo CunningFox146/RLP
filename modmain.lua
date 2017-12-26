@@ -2111,14 +2111,13 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Фиксим менюшку обзора игрока
 	AddClassPostConstruct("screens/redux/playersummaryscreen", function(self)
-<<<<<<< HEAD
-		if self.most_died and self.most_died.name then
-			self.most_died.name:SetRegionSize(400,100)
-=======
-		if self.most_died and self.most_died.name and self.most_died.name.GetRegionSize and  self.most_died.name.SetRegionSize then
-			local w,h = self.most_died.name:GetRegionSize()
-			self.most_died.name:SetRegionSize(w+100,h+50)
->>>>>>> 51c05121790ef1a6a62aca6b2b67d260e3743dcd
+		if self.most_died and self.most_died.name and self.most_died.name.SetRegionSize then 
+			if self.most_died.name.GetRegionSize then
+				local w,h = self.most_died.name:GetRegionSize()
+				self.most_died.name:SetRegionSize(w+100,h+50)
+			else
+				self.most_died.name:SetRegionSize(400,100)
+			end
 		end
 	end)
 
