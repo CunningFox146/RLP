@@ -879,7 +879,7 @@ function rebuildname(str1,action,objectname)
 				end
 			--Изучить (Кого? Что?) Винительный
 			--применительно к имени свиньи или кролика
-			elseif action and objectname and (objectname=="pigman" or objectname=="pigguard" or objectname=="bunnyman") then 
+			elseif action and objectname and (objectname=="pigman" or objectname=="pigguard" or objectname=="bunnyman" or objectname:find("critter")~=nil) then 
 				if str:utf8sub(str:utf8len()-2)=="нок" then
 					str=str:utf8sub(1,str:utf8len()-2).."ка"
 				elseif str:utf8sub(str:utf8len()-2)=="лец" then
@@ -2111,8 +2111,14 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Фиксим менюшку обзора игрока
 	AddClassPostConstruct("screens/redux/playersummaryscreen", function(self)
+<<<<<<< HEAD
 		if self.most_died and self.most_died.name then
 			self.most_died.name:SetRegionSize(400,100)
+=======
+		if self.most_died and self.most_died.name and self.most_died.name.GetRegionSize and  self.most_died.name.SetRegionSize then
+			local w,h = self.most_died.name:GetRegionSize()
+			self.most_died.name:SetRegionSize(w+100,h+50)
+>>>>>>> 51c05121790ef1a6a62aca6b2b67d260e3743dcd
 		end
 	end)
 
@@ -2985,62 +2991,54 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 
 
 	AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем шрифт описания рецепта в попапе рецептов
-		-- if self.name and self.Refresh then --Перехватываем вывод названия, проверяем, вмещается ли оно, и если нужно, меняем его размер
-		-- 	if not self.OldRefresh then
-		-- 		self.OldRefresh=self.Refresh
-		-- 		function self.Refresh(self,...)
-		-- 			self:OldRefresh(...)
-		-- 			if not self.name then return end
-		-- 			local Text = require "widgets/text"
-		-- 			local tmp = self.contents:AddChild(Text(_G.UIFONT, 42))
-					
-		-- 			tmp:SetPosition(320, 182, 0)
-		-- 			tmp:SetHAlign(_G.ANCHOR_MIDDLE)
-		-- 			tmp:Hide()
-		-- 			tmp:SetString(self.name:GetString())
-		-- 			local desiredw = self.name:GetRegionSize()
-		-- 			local w = tmp:GetRegionSize()
-		-- 			tmp:Kill()
+		if self.name and self.Refresh and not self.horizontal then --Перехватываем вывод названия, проверяем, вмещается ли оно, и если нужно, меняем его размер
 
-		-- 			if w>desiredw then
-		-- 				self.name:SetSize(42*desiredw/w)
-		-- 			else
-		-- 				self.name:SetSize(42)
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
+			if not self.OldRefresh then
+				self.OldRefresh=self.Refresh
+				function self.Refresh(self,...)
+					self:OldRefresh(...)
+					if not self.name then return end
 
-		if self.name then
-			if not self.name.RLPfixed then
-				if self.bg and self.bg.light_box then
-					self.bg.light_box:Nudge({x=0,y=-20,z=0})
-				end
-				self.contents:Nudge({x=0,y=-20,z=0})
-				self.name:Nudge({x=0,y=10,z=0})
-				local OldSetTruncatedString = self.name.SetTruncatedString
-				if OldSetTruncatedString then
-					local function NewSetTruncatedString (self1,str, maxwidth, maxcharsperline, ellipses)
-						maxcharsperline = 16
-						local maxlines = 2
-						self.name.SetTruncatedString=OldSetTruncatedString
-						self.name:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
-						self.name.SetTruncatedString=NewSetTruncatedString
+					if self.bg and self.bg.light_box then
+						self.bg.light_box:SetPosition(30, -42)
 					end
-					self.name.SetTruncatedString=NewSetTruncatedString
-				end
-				self.name.RLPfixed=true
-			end
-		end
-		if self.desc then
-			self.desc:SetSize(28)
-			self.desc:SetRegionSize(64*3+30,130)
-			local OldSetMultilineTruncatedString = self.desc.SetMultilineTruncatedString
-			if OldSetMultilineTruncatedString then
-				function self.desc:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
-					maxcharsperline = 24
-					maxlines = 3
-					OldSetMultilineTruncatedString(self,str, maxlines, maxwidth, maxcharsperline, ellipses)
+					
+					if #self.skins_options == 1 then
+						self.contents:SetPosition(-75,-20,0)
+						self.name:SetPosition(320, 157, 0)
+						self.button:SetPosition(320, -95, 0)
+						self.teaser:SetPosition(320, -90, 0)
+				    else
+				    	self.name:SetPosition(320, 182, 0)
+				    end
+				    if not self.name.OldSetTruncatedString then
+						self.name.OldSetTruncatedString = self.name.SetTruncatedString
+						if self.name.OldSetTruncatedString then
+							local function NewSetTruncatedString (self1,str, maxwidth, maxcharsperline, ellipses)
+								maxcharsperline = 15
+								local maxlines = 2
+								self.name.SetTruncatedString=self.name.OldSetTruncatedString
+								self.name:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
+								self.name.SetTruncatedString=NewSetTruncatedString
+							end
+							self.name.SetTruncatedString=NewSetTruncatedString
+						end
+					end
+					if self.desc then
+						self.desc:SetSize(28)
+						self.desc:SetRegionSize(64*3+30,130)
+						if not self.desc.OldSetMultilineTruncatedString then
+							self.desc.OldSetMultilineTruncatedString = self.desc.SetMultilineTruncatedString
+							if self.desc.OldSetMultilineTruncatedString then
+								self.desc.SetMultilineTruncatedString=function(self1,str, maxlines, maxwidth, maxcharsperline, ellipses)
+									maxcharsperline = 24
+									maxlines = 3
+									self.desc.OldSetMultilineTruncatedString(self1,str, maxlines, maxwidth, maxcharsperline, ellipses)
+								end
+							end
+						end
+					end
+
 				end
 			end
 		end
