@@ -3003,7 +3003,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 						self.bg.light_box:SetPosition(30, -42)
 					end
 					
-					if skins_options ~= nil and #self.skins_options == 1 then
+					if (self.skins_options ~= nil and #self.skins_options == 1) or not self.skins_options then
 						self.contents:SetPosition(-75,-20,0)
 						self.name:SetPosition(320, 157, 0)
 						self.button:SetPosition(320, -95, 0)
