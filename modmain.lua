@@ -3005,29 +3005,31 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 						self.teaser:SetPosition(320, -90, 0)
 				    else
 				    	self.name:SetPosition(320, 182, 0)
-
 				    end
-
-					local OldSetTruncatedString = self.name.SetTruncatedString
-					if OldSetTruncatedString then
-						local function NewSetTruncatedString (self1,str, maxwidth, maxcharsperline, ellipses)
-							maxcharsperline = 15
-							local maxlines = 2
-							self.name.SetTruncatedString=OldSetTruncatedString
-							self.name:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
+				    if not self.name.OldSetTruncatedString then
+						self.name.OldSetTruncatedString = self.name.SetTruncatedString
+						if self.name.OldSetTruncatedString then
+							local function NewSetTruncatedString (self1,str, maxwidth, maxcharsperline, ellipses)
+								maxcharsperline = 15
+								local maxlines = 2
+								self.name.SetTruncatedString=self.name.OldSetTruncatedString
+								self.name:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
+								self.name.SetTruncatedString=NewSetTruncatedString
+							end
 							self.name.SetTruncatedString=NewSetTruncatedString
 						end
-						self.name.SetTruncatedString=NewSetTruncatedString
 					end
 					if self.desc then
 						self.desc:SetSize(28)
 						self.desc:SetRegionSize(64*3+30,130)
-						local OldSetMultilineTruncatedString = self.desc.SetMultilineTruncatedString
-						if OldSetMultilineTruncatedString then
-							function self.desc:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
-								maxcharsperline = 24
-								maxlines = 3
-								OldSetMultilineTruncatedString(self,str, maxlines, maxwidth, maxcharsperline, ellipses)
+						if not self.desc.OldSetMultilineTruncatedString then
+							self.desc.OldSetMultilineTruncatedString = self.desc.SetMultilineTruncatedString
+							if self.desc.OldSetMultilineTruncatedString then
+								self.desc.SetMultilineTruncatedString=function(self1,str, maxlines, maxwidth, maxcharsperline, ellipses)
+									maxcharsperline = 24
+									maxlines = 3
+									self.desc.OldSetMultilineTruncatedString(self1,str, maxlines, maxwidth, maxcharsperline, ellipses)
+								end
 							end
 						end
 					end
