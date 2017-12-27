@@ -878,6 +878,86 @@ function rebuildname(str1,action,objectname)
 					str=str.."у"
 					wasnoun=true
 				end
+			-- (Кого? Чего?) Родительный
+			elseif action=="reskin" and str:utf8len()>3 then
+				if str=="Стол" then
+					str=str.."а"
+				elseif counter==wordcount then
+					if str:utf8sub(str:utf8len()-1)=="ьё" then
+						str=repsubstr(str,str:utf8len()-1,"ья")
+					elseif str:utf8sub(str:utf8len())=="я" then
+						str=repsubstr(str,str:utf8len(),"и")
+					elseif str:utf8sub(str:utf8len()-1)=="на" then
+						str=repsubstr(str,str:utf8len(),"ы")
+					elseif str:utf8sub(str:utf8len()-1)=="ль" then
+						str=repsubstr(str,str:utf8len(),"я")
+					elseif str:utf8sub(str:utf8len())=="ь" then
+						str=repsubstr(str,str:utf8len(),"и")
+					elseif str:utf8sub(str:utf8len()-1)=="ок" then
+						str=repsubstr(str,str:utf8len()-1,"ка")
+					elseif str:utf8sub(str:utf8len()-1)=="ка" then
+						str=repsubstr(str,str:utf8len()-1,"ки")
+					elseif str:utf8sub(str:utf8len()-1)=="та" then
+						str=repsubstr(str,str:utf8len()-1,"ты")
+					elseif str:utf8sub(str:utf8len()-1)=="ая" then
+						str=repsubstr(str,str:utf8len()-1,"ой")
+					elseif str:utf8sub(str:utf8len()-1)=="ло" then
+						str=repsubstr(str,str:utf8len()-1,"ла")
+					elseif str:utf8sub(str:utf8len()-1)=="ол" then
+						str=repsubstr(str,str:utf8len()-1,"ола")
+					elseif str:utf8sub(str:utf8len()-1)=="ом" then
+						str=repsubstr(str,str:utf8len()-1,"ома")
+					elseif str:utf8sub(str:utf8len()-2)=="нец" then
+						str=repsubstr(str,str:utf8len()-2,"нец")
+					elseif str:utf8sub(str:utf8len()-2)=="ий" then
+						str=repsubstr(str,str:utf8len()-2,"ого")
+					elseif str:utf8sub(str:utf8len()-1)=="ья" then
+						str=repsubstr(str,str:utf8len()-1,"ьей")
+					elseif str:utf8sub(str:utf8len()-1)=="па" then
+						str=repsubstr(str,str:utf8len()-1,"пы")
+					elseif str:utf8sub(str:utf8len()-1)=="ще" then
+						str=repsubstr(str,str:utf8len()-1,"ща")
+					elseif sogl[str:utf8sub(str:utf8len())] then
+						str=str.."а"
+					end
+				else
+					if t.NamesGender["she"][string.lower(objectname)] then --женский род
+						if str:utf8sub(str:utf8len()-1)=="ая" then
+							str=repsubstr(str,str:utf8len()-1,"ой")
+						elseif str:utf8sub(str:utf8len()-1)=="яя" then
+							str=repsubstr(str,str:utf8len()-1,"ей")
+						elseif str:utf8sub(str:utf8len()-1)=="ья" then
+							str=repsubstr(str,str:utf8len(),"ей")
+						elseif str:utf8sub(-4)=="аяся" then
+							str=repsubstr(str,str:utf8len()-3,"ейся")
+						end
+					elseif t.NamesGender["it"][string.lower(objectname)] then --средний род
+						if str:utf8sub(str:utf8len()-2)=="кое" then
+							str=repsubstr(str,str:utf8len()-1,"ого")
+						elseif str:utf8sub(str:utf8len()-1)=="ое" then
+							str=repsubstr(str,str:utf8len()-1,"ого")
+						elseif str:utf8sub(str:utf8len()-1)=="ее" then
+							str=repsubstr(str,str:utf8len()-1,"его")
+						end
+					elseif t.NamesGender["plural"][string.lower(objectname)] or 
+						   t.NamesGender["plural2"][string.lower(objectname)] then --множественное число
+						if str:utf8sub(str:utf8len()-1)=="ые" then
+							str=repsubstr(str,str:utf8len()-1,"ых")
+						elseif str:utf8sub(str:utf8len()-1)=="ие" then
+							str=repsubstr(str,str:utf8len()-1,"их")
+						elseif str:utf8sub(str:utf8len()-1)=="ьи" then
+							str=repsubstr(str,str:utf8len()-1,"их")
+						end
+					elseif t.NamesGender["he"][string.lower(objectname)] or t.NamesGender["he2"][string.lower(objectname)] then--мужской род
+						if str:utf8sub(str:utf8len()-1)=="ый" then
+							str=repsubstr(str,str:utf8len()-1,"ого")
+						elseif str:utf8sub(str:utf8len()-1)=="ий" then
+							str=repsubstr(str,str:utf8len()-1,"его")
+						elseif str:utf8sub(str:utf8len()-1)=="ой" then
+							str=repsubstr(str,str:utf8len()-1,"ого")
+						end
+					end
+				end
 			--Изучить (Кого? Что?) Винительный
 			--применительно к имени свиньи или кролика
 			elseif action and objectname and (objectname=="pigman" or objectname=="pigguard" or objectname=="bunnyman" or objectname:find("critter")~=nil) then 
@@ -928,8 +1008,8 @@ _G.testname=function(name,key)
 	if key then
 		print("Был убит "..rebuildname(name,"KILL",key))
 	end
+	print("Сменить скин у "..rebuildname(name,"reskin", key))
 end
-
 
 --Сохраняет в файле fn все имена с действием, указанным в параметре action)
 local function printnames(fn,action,openfn)
@@ -1580,8 +1660,41 @@ if _G.TheNet.GetClientTable then
 		end
 	end)()
 end
-
-
+--Склоняем названия вещей в пожитках
+_G.GetSkinUsableOnString = function (item_type, popup_txt)
+	local skin_data = _G.GetSkinData(item_type)
+	
+	local skin_str = _G.GetSkinName(item_type)
+	
+	local usable_on_str = ""
+	if skin_data ~= nil and skin_data.base_prefab ~= nil then
+		if skin_data.granted_items == nil then
+			local item_str = rebuildname(STRINGS.NAMES[string.upper(skin_data.base_prefab)],"reskin",string.upper(skin_data.base_prefab))
+			usable_on_str = _G.subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON, { skin = skin_str, item = item_str })
+		else
+			local item1_str = rebuildname(STRINGS.NAMES[string.upper(skin_data.base_prefab)],"reskin",string.upper(skin_data.base_prefab))
+			local item2_str = nil
+			local item3_str = nil
+			
+			local granted_skin_data = _G.GetSkinData(skin_data.granted_items[1])
+			if granted_skin_data ~= nil and granted_skin_data.base_prefab ~= nil then
+				item2_str = rebuildname(STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)],"reskin",string.upper(granted_skin_data.base_prefab))	
+			end
+			local granted_skin_data = _G.GetSkinData(skin_data.granted_items[2])
+			if granted_skin_data ~= nil and granted_skin_data.base_prefab ~= nil then
+				item3_str = rebuildname(STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)],"reskin",string.upper(granted_skin_data.base_prefab))
+			end
+			
+			if item3_str == nil then
+				usable_on_str = _G.subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE, { skin = skin_str, item1 = item1_str, item2 = item2_str })
+			else
+				usable_on_str = _G.subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE_3_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE_3, { skin = skin_str, item1 = item1_str, item2 = item2_str, item3 = item3_str })
+			end
+		end
+	end
+	
+	return usable_on_str
+end
 --Сообщения о событиях в игре
 AddClassPostConstruct("widgets/eventannouncer", function(self)
 	--Переопределяем глобальную функцию, формирующую анонс-сообщение о смерти
@@ -3002,6 +3115,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 					if self.bg and self.bg.light_box then
 						self.bg.light_box:SetPosition(30, -42)
 					end
+					
 					
 					if (self.skins_options ~= nil and #self.skins_options == 1) or not self.skins_options then
 						self.contents:SetPosition(-75,-20,0)
