@@ -2158,7 +2158,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Подменяем портреты
 	AddClassPostConstruct("widgets/characterselect", function(self)
-		local charlist = {wickerbottom=1,waxwell=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1}
+		local charlist = {winona=1,wickerbottom=1,waxwell=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1}
 		local texnames = {locked="locked",random="random"}
 		for name in pairs(charlist) do texnames[name] = name.."_none" end
 		if self.heroportrait then HookUpImage(self.heroportrait, "bigportraits/", "images/rus_", texnames) end
@@ -2170,7 +2170,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Подменяем русские имена в лобби и правим другие мелочи
 	AddClassPostConstruct("screens/lobbyscreen", function(self)
-		local charlist = {wickerbottom=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1,random=1}
+		local charlist = {winona=1,wickerbottom=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1,random=1}
 		local texnames = {}
 		for name in pairs(charlist) do texnames["names_"..name] = name end
 		if self.heroname then HookUpImage(self.heroname, "images/", "images/rus_", texnames) end
@@ -2237,7 +2237,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Подменяем русские имена в виджете внешнего вида персонажа
 	AddClassPostConstruct("widgets/playeravatarpopup", function(self)
-		local charlist = {wickerbottom=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1,random=1}
+		local charlist = {winona=1,wickerbottom=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1,random=1}
 		local texnames = {}
 		for name in pairs(charlist) do texnames["names_"..name] = name end
 		if self.character_name then HookUpImage(self.character_name, "images/", "images/rus_", texnames) end
