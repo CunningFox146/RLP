@@ -2839,7 +2839,7 @@ function FixPrefix(prefix, act, item)
 	local words=string.split(prefix," ") --разбиваем на слова
 	prefix=""
 	for _,word in ipairs(words) do
-		if --[[isupper(word:utf8sub(1,1)) and ]]word:utf8len()>3 then
+		if --[[isupper(word:utf8sub(1,1)) and ]]word:utf8len()>3 and word~="влагой" then
 			--Заменяем по всем возможным сценариям
 			if word:utf8sub(-2)=="ый" then
 				word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case1"]
