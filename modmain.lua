@@ -980,7 +980,7 @@ function rebuildname(str1,action,objectname)
 				elseif sogl[str:utf8sub(str:utf8len())] then
 					str=str.."а"
 				end
-			elseif action then --Изучить (Кого? Что?) Винительный
+			elseif action and not(objectname and objectname=="sketch") then --Изучить (Кого? Что?) Винительный
 				if str:utf8sub(str:utf8len()-1)=="ая" then
 					str=repsubstr(str,str:utf8len()-1,"ую")
 				elseif str:utf8sub(str:utf8len()-1)=="яя" then
@@ -2026,7 +2026,32 @@ end
 		end
 	end)()
 end--]]
-
+--Склоняем имена эскизов
+local SKETCHES = 
+{
+    {item="chesspiece_pawn",        recipe="chesspiece_pawn_builder"},
+    {item="chesspiece_rook",        recipe="chesspiece_rook_builder"},
+    {item="chesspiece_knight",      recipe="chesspiece_knight_builder"},
+    {item="chesspiece_bishop",      recipe="chesspiece_bishop_builder"},
+    {item="chesspiece_muse",        recipe="chesspiece_muse_builder"},
+    {item="chesspiece_formal",      recipe="chesspiece_formal_builder"},
+    {item="chesspiece_deerclops",   recipe="chesspiece_deerclops_builder"},
+    {item="chesspiece_bearger",     recipe="chesspiece_bearger_builder"},
+    {item="chesspiece_moosegoose",  recipe="chesspiece_moosegoose_builder"},
+    {item="chesspiece_dragonfly",   recipe="chesspiece_dragonfly_builder"},
+}
+AddPrefabPostInitAny(function(inst)
+	if inst.prefab=="sketch" then 
+		local newname ="Эскиз "..STRINGS.NAMES[string.upper(SKETCHES[inst.sketchid].recipe)]
+		newname=newname:gsub("Фигура","фигуры")
+		inst.components.named:SetName(newname)
+		local oldOnLoad=inst.OnLoad
+		inst.OnLoad=function(inst, data)
+			oldOnLoad(inst, data)
+			inst.components.named:SetName(inst.name:gsub("Фигура","фигуры"))
+		end
+	end
+end)
 --Тут мы должны переделать описание скелета, чтобы в него не попал русский
 AddPrefabPostInit("skeleton_player", function(inst)
 	local function reassignfn(inst) --функция переопределяет функцию. Туповато, но менять лень
