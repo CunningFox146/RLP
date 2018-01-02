@@ -50,7 +50,7 @@ function UpdateChecker:SyncVersion()
 	"GET")
 	
 	self.inst:DoTaskInTime(1 + math.random(), function()
-		if not self.is_error and t.modinfo.version ~= self.last_ver then
+		if not self.is_error and self.last_ver ~= nil and t.modinfo.version ~= self.last_ver then
 			self.last_ver_text:SetString(self.last_ver)
 			self.last_ver_text:SetColour(COLOUR_RED)
 			
