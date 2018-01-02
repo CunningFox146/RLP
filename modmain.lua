@@ -2026,7 +2026,6 @@ end
 		end
 	end)()
 end--]]
---Склоняем имена эскизов
 local SKETCHES = 
 {
     {item="chesspiece_pawn",        recipe="chesspiece_pawn_builder"},
@@ -2633,10 +2632,19 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		end, false, true, self.countdown_message and self.countdown_message:GetString())
 
 		if self.survived_message then self.survived_message:SetSize(27) end
-		SetHookFunction(self.survived_message, "SetString", function(self, str)
-			local val=tonumber((str or ""):match(" ([^ ]*)$"))
-			return str..(val and " "..StringTime(val) or "")
-		end, false, true, self.survived_message and self.survived_message:GetString())
+		self.oldStartTimer=self.StartTimer
+		function self:StartTimer()
+			self:oldStartTimer()
+			if self.survived_message then
+				local age = self.owner.Network:GetPlayerAge()
+				local newmsg=self.survived_message:GetString()
+				self.survived_message:SetString(newmsg:gsub("дней",StringTime(age),1))
+			end
+		end
+		-- SetHookFunction(self.survived_message, "SetString", function(self, str)
+		-- 	local val=tonumber((str or ""):match(" ([^ ]*)$"))
+		-- 	return str..(val and " "..StringTime(val) or "")
+		-- end, false, true, self.survived_message and self.survived_message:GetString())
 	end)
 
 end-- для if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly
