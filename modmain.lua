@@ -2040,7 +2040,7 @@ local SKETCHES =
     {item="chesspiece_dragonfly",   recipe="chesspiece_dragonfly_builder"},
 }
 AddPrefabPostInit("sketch",function(inst)
-	if inst.sketchid and SKETCHES[inst.sketchid] and SKETCHES[inst.sketchid].recipe then 
+	if inst.sketchid and SKETCHES[inst.sketchid] and SKETCHES[inst.sketchid].recipe  and STRINGS.NAMES[string.upper(SKETCHES[inst.sketchid].recipe)] then 
 		local newname ="Эскиз "..STRINGS.NAMES[string.upper(SKETCHES[inst.sketchid].recipe)]
 		newname=newname:gsub("Фигура","фигуры")
 		inst.components.named:SetName(newname)
