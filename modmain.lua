@@ -2318,20 +2318,30 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	end)
 	
 	AddClassPostConstruct("widgets/playeravatarpopup", function(self)
-		if self.age then
-			local OldSetString = self.age.SetString
-			function self.age:SetString(str, ...)
-				if str then
-					str = str:gsub(STRINGS.UI.PLAYER_AVATAR.AGE_SURVIVED.."(.+)(%d+)(%s+)(.+)", function (sep1, days, sep2, word)
-						if word~=STRINGS.UI.PLAYER_AVATAR.AGE_DAY and word~=STRINGS.UI.PLAYER_AVATAR.AGE_DAYS then return end
-						return StringTime(days, {"Прожит", "Прожито", "Прожиты"})..sep1..days..sep2..StringTime(days)
-					end)
-				end
-				local res = OldSetString(self, str, ...)
-				return res
+		self.oldUpdateData=self.UpdateData
+		function self:UpdateData(data)
+			--data.playerage=21
+			self:oldUpdateData(data)
+			if self.age and data.playerage then
+				local newstr=self.age:GetString()
+				newstr=newstr:gsub("Прожито",StringTime(data.playerage, {"Прожит", "Прожито", "Прожиты"}),1)
+				self.age:SetString(newstr:gsub("Дней",StringTime(data.playerage),1))
 			end
-			self.age:SetString(self.age:GetString())
 		end
+		-- if self.age then
+		-- 	local OldSetString = self.age.SetString
+		-- 	function self.age:SetString(str, ...)
+		-- 		if str then
+		-- 			str = str:gsub(STRINGS.UI.PLAYER_AVATAR.AGE_SURVIVED.."(.+)(%d+)(%s+)(.+)", function (sep1, days, sep2, word)
+		-- 				if word~=STRINGS.UI.PLAYER_AVATAR.AGE_DAY and word~=STRINGS.UI.PLAYER_AVATAR.AGE_DAYS then return end
+		-- 				return StringTime(days, {"Прожит", "Прожито", "Прожиты"})..sep1..days..sep2..StringTime(days)
+		-- 			end)
+		-- 		end
+		-- 		local res = OldSetString(self, str, ...)
+		-- 		return res
+		-- 	end
+		-- 	self.age:SetString(self.age:GetString())
+		-- end
 	end)
 
 	--Переводим названия дней недели
