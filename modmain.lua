@@ -8,6 +8,9 @@ end
 Assets = {
     _G.Asset( "IMAGE", "images/rus_button_icon.tex" ),
     _G.Asset( "ATLAS", "images/rus_button_icon.xml" ),
+
+    _G.Asset( "IMAGE", "images/frontscreen.tex" ),
+    _G.Asset( "ATLAS", "images/frontscreen.xml" ),
 }
 --Вставляем проверку на наличие старого русификатора.
 local IS_ENABLED_OLD_RLP
