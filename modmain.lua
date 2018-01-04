@@ -3157,7 +3157,9 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 				function self.Refresh(self,...)
 					self:OldRefresh(...)
 					if not self.name then return end
-
+					if self.button and self.button.image then
+						self.button.image:SetScale(.60, .7)
+					end
 					if self.bg and self.bg.light_box then
 						self.bg.light_box:SetPosition(30, -42)
 					end
