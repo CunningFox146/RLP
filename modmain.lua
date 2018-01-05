@@ -2334,16 +2334,16 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 			end
 			self.oldUpdateEquipWidgetForSlot(b,image_group, slot, name)
 		end
-		
+
 		self.oldUpdateData=self.UpdateData
 		function self:UpdateData(data)
 			--data.playerage=21
-			self:oldUpdateData(data)
 			if self.age and data.playerage then
 				local newstr=self.age:GetString()
 				newstr=newstr:gsub("Прожито",StringTime(data.playerage, {"Прожит", "Прожито", "Прожиты"}),1)
 				self.age:SetString(newstr:gsub("Дней",StringTime(data.playerage),1))
 			end
+			self:oldUpdateData(data)
 		end
 		-- if self.age then
 		-- 	local OldSetString = self.age.SetString
@@ -3411,7 +3411,13 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	
 	AddClassPostConstruct("screens/servercreationscreen", ServerCreationScreenPost)
 	AddClassPostConstruct("screens/redux/servercreationscreen", ServerCreationScreenPost)
-	
+	--Слетали шрифты у кнопок выбора в первом слоте
+	local function serversettingstabpost(self)
+		for i,wgt in ipairs(self.privacy_type.buttons.buttonwidgets) do 
+			wgt.button:SetFont(_G.NEWFONT)
+		end
+	end
+	AddClassPostConstruct("widgets/serversettingstab", serversettingstabpost)
 	--Клей отрубили подгрузку шрифтов, поэтому подменяем шрифты в попапах
 	local function PopUpdialogPost(self)
 		if self.title then
