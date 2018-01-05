@@ -2321,6 +2321,20 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	end)
 	
 	AddClassPostConstruct("widgets/playeravatarpopup", function(self)
+		self.oldUpdateEquipWidgetForSlot=self.UpdateEquipWidgetForSlot
+		self.UpdateEquipWidgetForSlot=function(b,image_group, slot, name)
+			if not image_group._text.OldSetMultilineTruncatedString then
+				image_group._text.OldSetMultilineTruncatedString = image_group._text.SetMultilineTruncatedString
+				if image_group._text.OldSetMultilineTruncatedString then
+					image_group._text.SetMultilineTruncatedString = function(s,str, maxlines, maxwidth, maxcharsperline, ellipses)
+						maxwidth = maxwidth+20
+						image_group._text.OldSetMultilineTruncatedString(s,str, maxlines, maxwidth, maxcharsperline, ellipses)
+					end
+				end
+			end
+			self.oldUpdateEquipWidgetForSlot(b,image_group, slot, name)
+		end
+
 		self.oldUpdateData=self.UpdateData
 		function self:UpdateData(data)
 			--data.playerage=21
@@ -3177,7 +3191,8 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 						self.name.OldSetTruncatedString = self.name.SetTruncatedString
 						if self.name.OldSetTruncatedString then
 							local function NewSetTruncatedString (self1,str, maxwidth, maxcharsperline, ellipses)
-								maxcharsperline = 15
+								maxcharsperline = 17
+								maxwidth = maxwidth + 30
 								local maxlines = 2
 								self.name.SetTruncatedString=self.name.OldSetTruncatedString
 								self.name:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
@@ -3396,7 +3411,13 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	
 	AddClassPostConstruct("screens/servercreationscreen", ServerCreationScreenPost)
 	AddClassPostConstruct("screens/redux/servercreationscreen", ServerCreationScreenPost)
-	
+	--Слетали шрифты у кнопок выбора в первом слоте
+	local function serversettingstabpost(self)
+		for i,wgt in ipairs(self.privacy_type.buttons.buttonwidgets) do 
+			wgt.button:SetFont(_G.NEWFONT)
+		end
+	end
+	AddClassPostConstruct("widgets/serversettingstab", serversettingstabpost)
 	--Клей отрубили подгрузку шрифтов, поэтому подменяем шрифты в попапах
 	local function PopUpdialogPost(self)
 		if self.title then
