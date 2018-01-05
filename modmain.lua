@@ -2338,12 +2338,12 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		self.oldUpdateData=self.UpdateData
 		function self:UpdateData(data)
 			--data.playerage=21
+			self:oldUpdateData(data)
 			if self.age and data.playerage then
 				local newstr=self.age:GetString()
 				newstr=newstr:gsub("Прожито",StringTime(data.playerage, {"Прожит", "Прожито", "Прожиты"}),1)
 				self.age:SetString(newstr:gsub("Дней",StringTime(data.playerage),1))
 			end
-			self:oldUpdateData(data)
 		end
 		-- if self.age then
 		-- 	local OldSetString = self.age.SetString
