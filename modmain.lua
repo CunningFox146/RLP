@@ -1534,31 +1534,31 @@ end
 
 --Удаляем из таблицы с переводом PO некоторые реплики.
 --Далее игра будет пользоваться хеш-таблицами для вывода русских реплик		
-for i,v in pairs(t.PO) do
-	local path=string.split(i,".")
-	local data=nil
-	if path and type(path)=="table" and path[2] then
-		if path[2]=="CHARACTERS" then --Удаляем все реплики персонажей
-			t.PO[i]=nil
---[[		elseif string.sub(path[2],1,9)=="PIG_TALK_" --Удаляем реплики свинов и свинов стражей
-		   or string.sub(path[2],1,14)=="PIG_GUARD_TALK" then
-			data=GetDataByPath(path)
-			if data then t.SpeechHashTbl.PIGTALKS[data]=t.PO[i] end
-			t.PO[i]=nil
-		elseif string.sub(path[2],1,7)=="RABBIT_" then --Удаляем реплики зайцев
-			data=GetDataByPath(path)
-			if data then t.SpeechHashTbl.BUNNYMANTALKS[data]=t.PO[i] end
-			t.PO[i]=nil]]
-		elseif path[2]=="EPITAPHS" then--Удаляем эпитафии
-			data=GetDataByPath(path)
-			if data then
-				t.SpeechHashTbl.EPITAPHS[data] = t.PO[i]
-				t.SpeechHashTbl.EPITAPHS[data:upper()] = russianupper(t.PO[i])
-			end
-			t.PO[i]=nil
-		end
-	end
-end
+-- for i,v in pairs(t.PO) do
+-- 	local path=string.split(i,".")
+-- 	local data=nil
+-- 	if path and type(path)=="table" and path[2] then
+-- 		if path[2]=="CHARACTERS" then --Удаляем все реплики персонажей
+-- 			t.PO[i]=nil
+-- --[[		elseif string.sub(path[2],1,9)=="PIG_TALK_" --Удаляем реплики свинов и свинов стражей
+-- 		   or string.sub(path[2],1,14)=="PIG_GUARD_TALK" then
+-- 			data=GetDataByPath(path)
+-- 			if data then t.SpeechHashTbl.PIGTALKS[data]=t.PO[i] end
+-- 			t.PO[i]=nil
+-- 		elseif string.sub(path[2],1,7)=="RABBIT_" then --Удаляем реплики зайцев
+-- 			data=GetDataByPath(path)
+-- 			if data then t.SpeechHashTbl.BUNNYMANTALKS[data]=t.PO[i] end
+-- 			t.PO[i]=nil]]
+-- 		elseif path[2]=="EPITAPHS" then--Удаляем эпитафии
+-- 			data=GetDataByPath(path)
+-- 			if data then
+-- 				t.SpeechHashTbl.EPITAPHS[data] = t.PO[i]
+-- 				t.SpeechHashTbl.EPITAPHS[data:upper()] = russianupper(t.PO[i])
+-- 			end
+-- 			t.PO[i]=nil
+-- 		end
+-- 	end
+-- end
 
 
 
