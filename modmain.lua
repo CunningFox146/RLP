@@ -3399,6 +3399,20 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	]]
 	--Меняем меню создания сервера, чтоб текст не вылазил за кнопку
 	local function ServerCreationScreenPost(self)
+		local oldSetString=self.day_title.SetString
+		if oldSetString then
+			function self.day_title:SetString(str)
+				if str:find("Лето")~=nil then
+					if str:find("Ранняя")~=nil then
+						str=str:gsub("Ранняя","Раннее")
+					elseif str:find("Поздняя")~=nil then
+						str=str:gsub("Поздняя","Позднее")
+					end
+				end
+				oldSetString(self,str)
+			end
+		end
+		self.day_title:SetString(self.day_title:GetString())
 		local _OnUpdate_Old = self.OnUpdate or (function() return end)
 		function self:OnUpdate(...)
 			_OnUpdate_Old(self, ...)
