@@ -2638,14 +2638,61 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Баг разработчиков: Не переведённые пресеты
 	AddClassPostConstruct("widgets/customizationtab", function(self)
-		if self.presets then
-			for _,v in ipairs(self.presets) do
-				v.text = PresetLevels[v.text] and STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[ PresetLevels[v.text] ] or v.text
-				v.desc = PresetLevels[v.desc] and STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[ PresetLevels[v.desc] ] or v.desc
+		self.oldUpdateMultilevelUI=self.UpdateMultilevelUI
+		function self:UpdateMultilevelUI()
+			self:oldUpdateMultilevelUI()
+			for i, tabbtn in ipairs(self.multileveltabs.tabs) do
+				tabbtn:SetTextSize(22)
 			end
 		end
-		if self.addmultileveltext then
-			self.addmultileveltext:SetString("Многоуровневый")
+		local Levels = require "map/levels"
+		local oldGetDataForLevelID=Levels.GetDataForLevelID
+		Levels.GetDataForLevelID=function(id, nolocation)
+			local ret = oldGetDataForLevelID(id, nolocation)
+			if ret and STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[id] then
+				ret.desc=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[id]
+				ret.name=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[id]
+			end
+			return ret
+		end
+		function self:UpdatePresetInfo(level)
+		    if level ~= self.currentmultilevel then
+		        -- this might be called for the "unselected" level, so we don't want to do anything.
+		        return
+		    end
+
+		    local clean = self:GetNumberOfTweaks(self.currentmultilevel) == 0
+
+		    if not self.allowEdit then
+		    	local levelid=self.slotoptions[self.slot][self.currentmultilevel].id
+		    	self.slotoptions[self.slot][self.currentmultilevel].desc=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[levelid]
+		    	self.slotoptions[self.slot][self.currentmultilevel].name=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[levelid]
+		        self.presetdesc:SetString(self.slotoptions[self.slot][self.currentmultilevel].desc)
+		        self.presetspinner.spinner:UpdateText(self.slotoptions[self.slot][self.currentmultilevel].name)
+		    elseif clean then
+		        self.presetdesc:SetString(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).desc)
+		        self.presetspinner.spinner:UpdateText(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name)
+		    elseif self.current_option_settings[self.currentmultilevel].preset == "MOD_MISSING" then
+		        self.presetdesc:SetString(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC.MOD_MISSING)
+		        self.presetspinner.spinner:UpdateText(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS.MOD_MISSING)
+		    else
+		        self.presetdesc:SetString(STRINGS.UI.CUSTOMIZATIONSCREEN.CUSTOMDESC)
+		        self.presetspinner.spinner:UpdateText(string.format(STRINGS.UI.CUSTOMIZATIONSCREEN.CUSTOM, Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name))
+		    end
+
+		    if self.allowEdit then
+		        self.revertbutton:Show()
+		        self.savepresetbutton:Show()
+		    else
+		        self.revertbutton:Hide()
+		        self.savepresetbutton:Hide()
+		    end
+
+		    if not clean and self.allowEdit then
+		        self.revertbutton:Unselect()
+		    else
+		        self.revertbutton:Select()
+		    end
 		end
 	end)
 
@@ -3399,6 +3446,20 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	]]
 	--Меняем меню создания сервера, чтоб текст не вылазил за кнопку
 	local function ServerCreationScreenPost(self)
+		local oldSetString=self.day_title.SetString
+		if oldSetString then
+			function self.day_title:SetString(str)
+				if str:find("Лето")~=nil then
+					if str:find("Ранняя")~=nil then
+						str=str:gsub("Ранняя","Раннее")
+					elseif str:find("Поздняя")~=nil then
+						str=str:gsub("Поздняя","Позднее")
+					end
+				end
+				oldSetString(self,str)
+			end
+		end
+		self.day_title:SetString(self.day_title:GetString())
 		local _OnUpdate_Old = self.OnUpdate or (function() return end)
 		function self:OnUpdate(...)
 			_OnUpdate_Old(self, ...)
