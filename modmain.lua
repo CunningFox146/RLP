@@ -2252,6 +2252,15 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Фиксим менюшку обзора игрока
 	AddClassPostConstruct("screens/redux/playersummaryscreen", function(self)
+		if self.new_items and self.new_items.items and self.new_items.items.text and self.new_items.items.text.SetRegionSize then
+			self.new_items.items.text:SetRegionSize(200, 80)
+			self.new_items.items.text:Nudge({x=-50,y=0,z=0})
+			-- local old = self.new_items.UpdateItems
+			-- self.new_items.UpdateItems = function()
+			-- 	old()
+			-- 	self.new_items.items.text:SetString("Декоративный столик \"Драконья муха\"")
+			-- end
+		end
 		if self.most_died and self.most_died.name and self.most_died.name.SetRegionSize then 
 			if self.most_died.name.GetRegionSize then
 				local w,h = self.most_died.name:GetRegionSize()
