@@ -1834,11 +1834,11 @@ function t.GetFromSpeechesHash(message, char)
 	if not char then char = "GENERIC" end
 	if message and t.SpeechHashTbl[char] then
 		local umlautified = false
-		if char=="WATHGRITHR" then
-			local tmp = message:gsub("[\246ö]","o"):gsub("[\214Ö]","O") or message --подменяем и 1251 и UTF-8 версии
-			umlautified = tmp~=message
-			message = tmp
-		end
+		-- if char=="WATHGRITHR" then
+		-- 	local tmp = message:gsub("[\246ö]","o"):gsub("[\214Ö]","O") or message --подменяем и 1251 и UTF-8 версии
+		-- 	umlautified = tmp~=message
+		-- 	message = tmp
+		-- end
 		--переводим из хеш-таблицы родного персонажа или Уилсона (если не найден родной)
 		local msg = t.SpeechHashTbl[char][message] or t.SpeechHashTbl["GENERIC"][message]
 		if not msg and char=="WX78" then --Тут хеш-таблица не работает, приходится делать перебор
@@ -1852,15 +1852,15 @@ function t.GetFromSpeechesHash(message, char)
 		message = msg or message
 		--если есть разные варианты переводов, то выбираем один из них случайным образом
 		message = (type(message)=="table") and _G.GetRandomItem(message) or message
-		if umlautified then
-			if rawget(_G, "GetSpecialCharacterPostProcess") then
-				--подменяем русские на английские, чтобы работала Umlautify
-				local tmp = message:gsub("о","o"):gsub("О","O") or message
-				message = _G.GetSpecialCharacterPostProcess("wathgrithr", tmp) or message
-			else
-				message = message:gsub("о","ö"):gsub("О","Ö") or message
-			end
-		end
+		-- if umlautified then
+		-- 	if rawget(_G, "GetSpecialCharacterPostProcess") then
+		-- 		--подменяем русские на английские, чтобы работала Umlautify
+		-- 		local tmp = message:gsub("о","o"):gsub("О","O") or message
+		-- 		message = _G.GetSpecialCharacterPostProcess("wathgrithr", tmp) or message
+		-- 	else
+		-- 		message = message:gsub("о","ö"):gsub("О","Ö") or message
+		-- 	end
+		-- end
 	end
 	return message, mentions
 end
