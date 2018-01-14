@@ -1900,7 +1900,7 @@ function t.TranslateToRussian(message, entity)
 		local msg, mentions=t.GetFromSpeechesHash(message,entity)
 		message=msg or message
 		
-		if NotTranslated==message then return message end
+		if NotTranslated==message then return (t.ParseTranslationTags(message, ent.prefab, nil, nil)) or message end
 
 		local killerkey
 		if mentions then
