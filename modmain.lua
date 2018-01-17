@@ -2426,6 +2426,33 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Окно просмотра серверов, двигаем контролсы, исправляем надписи
 	local function ServerListingScreenPost1(self)
+		if self.title then
+			local checkstr = STRINGS.UI.SERVERLISTINGSCREEN.SERVER_LIST_TITLE_INTENT:gsub("%%s", "(.+)")
+			local intentions = {}
+			for key, str in pairs(STRINGS.UI.INTENTION) do intentions[str] = key end
+			local OldSetString = self.title.SetString
+			function self.title:SetString(str, ...)
+				if str then
+					local int = str:match(checkstr)
+					if int and intentions[int] then
+						if intentions[int]=="SOCIAL" then
+							str = "Дружеские сервера"
+						elseif intentions[int]=="COOPERATIVE" then
+							str = "Командные сервера"
+						elseif intentions[int]=="COMPETITIVE" then
+							str = "Соревновательные сервера"
+						elseif intentions[int]=="MADNESS" then
+							str = "Сервера типа «Безумие»"
+						elseif intentions[int]=="ANY" then
+							str = "Сервера всех стилей"
+						end
+					end
+				end
+				local res = OldSetString(self, str, ...)
+				return res
+			end
+			self.title:SetString(self.title:GetString())
+		end
 		if self.sorting_spinner and self.sorting_spinner.label then
 			self.sorting_spinner.label:Nudge({x=-40,y=0,z=0})
 			self.sorting_spinner.label:SetRegionSize(150,50)
