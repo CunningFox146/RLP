@@ -3477,7 +3477,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	]]
 	--Меняем меню создания сервера, чтоб текст не вылазил за кнопку
 	local function ServerCreationScreenPost(self)
-		local oldSetString=self.day_title.SetString
+		local oldSetString=self.day_title and self.day_title.SetString
 		if oldSetString then
 			function self.day_title:SetString(str)
 				if str:find("Лето")~=nil then
@@ -3490,7 +3490,11 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 				oldSetString(self,str)
 			end
 		end
-		self.day_title:SetString(self.day_title:GetString())
+		
+		if self.day_title then
+			self.day_title:SetString(self.day_title:GetString())
+		end
+		
 		local _OnUpdate_Old = self.OnUpdate or (function() return end)
 		function self:OnUpdate(...)
 			_OnUpdate_Old(self, ...)
@@ -3503,6 +3507,8 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	
 	AddClassPostConstruct("screens/servercreationscreen", ServerCreationScreenPost)
 	AddClassPostConstruct("screens/redux/servercreationscreen", ServerCreationScreenPost)
+
+	
 	--Слетали шрифты у кнопок выбора в первом слоте
 	local function serversettingstabpost(self)
 		for i,wgt in ipairs(self.privacy_type.buttons.buttonwidgets) do 
