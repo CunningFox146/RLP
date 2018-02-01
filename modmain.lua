@@ -2060,8 +2060,14 @@ AddPrefabPostInit("skeleton_player", function(inst)
 	local function reassignfn(inst) --функция переопределяет функцию. Туповато, но менять лень
 		inst.components.inspectable.Oldgetspecialdescription=inst.components.inspectable.getspecialdescription
 		function inst.components.inspectable.getspecialdescription(inst, viewer, ...)
+			local oldGetDescription=_G.GetDescription
+			_G.GetDescription=function(viewer1, inst1, tag)
+				local ret=oldGetDescription(viewer1, inst1, tag)
+				ret=t.ParseTranslationTags(ret, inst1.cause, nil, nil)
+				return ret
+			end
 			local message=inst.components.inspectable.Oldgetspecialdescription(inst, viewer, ...)
-			
+			_G.GetDescription=oldGetDescription
 			if not message then return message end
 
 			local player=rawget(_G,"ThePlayer") or _G.GetPlayer()
@@ -2069,6 +2075,7 @@ AddPrefabPostInit("skeleton_player", function(inst)
 --				local key=inst.char:upper()
 			local deadgender=_G.GetGenderStrings(inst.char)
 			local m=STRINGS.CHARACTERS[key] and STRINGS.CHARACTERS[key].DESCRIBE and STRINGS.CHARACTERS[key].DESCRIBE.SKELETON_PLAYER and STRINGS.CHARACTERS[key].DESCRIBE.SKELETON_PLAYER[deadgender] or STRINGS.CHARACTERS.GENERIC.DESCRIBE.SKELETON_PLAYER[deadgender]
+			m=t.ParseTranslationTags(m, inst.cause, nil, nil)
 			if not m then return message end
 			local dead,killer=string.match(message,(string.gsub(m,"%%s","(.*)"))) --вытаскиваем имена из сообщения
 			if not (m and dead and killer) then return message end
