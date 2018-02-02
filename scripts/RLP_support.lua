@@ -109,5 +109,14 @@ if t.CurrentTranslationType==t.TranslationTypes.Full then
 			end
 		end
 	end
+	
+	--Переводим анонсы
+	--Для их перевода анонс должен быть в отдельной таблице "STRINGS.UI.NOTIFICATION"
+	function t.TranslateAnnounce(id, translate)
+		print("TranslateAnnounce1")
+		if STRINGS.UI.NOTIFICATION and STRINGS.UI.NOTIFICATION[id] then
+			t.announcerus.mods[id] = translate or ""
+		end
+	end
 
 end

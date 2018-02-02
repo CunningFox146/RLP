@@ -49,6 +49,11 @@ t.AdjectiveCaseTags = {	nominative = "nom", --Именительный	Кто/ч
 						instrumental = "ins"}--unused
 t.DefaultActionCase = "accusative"
 
+--Для модов
+t.announcerus = {
+	mods = {}
+}
+
 io = _G.io
 STRINGS = _G.STRINGS
 tonumber = _G.tonumber
@@ -1382,7 +1387,7 @@ end
 
 
 --Сохраняем строки анонсов на русском
-local announcerus={}
+local announcerus = t.announcerus or {}
 local ru=t.PO
 announcerus.LEFTGAME=ru["STRINGS.UI.NOTIFICATION.LEFTGAME"] or ""
 announcerus.JOINEDGAME=ru["STRINGS.UI.NOTIFICATION.JOINEDGAME"] or ""
@@ -1773,6 +1778,14 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 		--Кик/Бан
 		test(nil,STRINGS.UI.NOTIFICATION.KICKEDFROMGAME, announcerus.KICKEDFROMGAME)
 		test(nil,STRINGS.UI.NOTIFICATION.BANNEDFROMGAME, announcerus.BANNEDFROMGAME)
+		--Моды
+		if announcerus.mods and #announcerus.mods > 0 then
+			for id, translate in pairs(announcerus.mods) do
+				if STRINGS.UI.NOTIFICATION[id] and translate then
+					test(nil, STRINGS.UI.NOTIFICATION[id], translate)
+				end
+			end
+		end
 		--Новый скин
 --		test(nil,STRINGS.UI.NOTIFICATION.NEW_SKIN_ANNOUNCEMENT, announcerus.NEW_SKIN_ANNOUNCEMENT)
 		if not name2 then
