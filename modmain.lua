@@ -810,6 +810,8 @@ function rebuildname(str1,action,objectname)
 					str=repsubstr(str,str:utf8len()-1,"ой")
 				elseif str:utf8sub(str:utf8len()-1)=="ая" then
 					str=repsubstr(str,str:utf8len()-1,"ей")
+				elseif str:utf8sub(str:utf8len()-1)=="ей" then
+					str=repsubstr(str,str:utf8len()-1,"ью")
 				elseif str:utf8sub(str:utf8len()-1)=="яя" then
 					str=repsubstr(str,str:utf8len()-1,"ей")
 				elseif str:utf8sub(str:utf8len()-1)=="ец" then
