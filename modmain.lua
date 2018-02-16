@@ -2592,7 +2592,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	end
 
 	--Баг разработчиков, не переводятся радиобаттоны в настройках при создании сервера
-	AddClassPostConstruct("widgets/serversettingstab", function(self)
+	AddClassPostConstruct("widgets/redux/serversettingstab", function(self)
 		if self.privacy_type and self.privacy_type.buttons and self.privacy_type.buttons.buttonwidgets then
 			for _,option in pairs(self.privacy_type.buttons.options) do
 				if privacy_options[option.text] then
