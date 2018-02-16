@@ -2459,6 +2459,16 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Окно просмотра серверов, двигаем контролсы, исправляем надписи
 	local function ServerListingScreenPost1(self)
+		if self.filters then
+			for i, v in pairs(self.filters) do 
+				if v.label and v.label.SetFont then
+					v.label:SetFont(_G.CHATFONT)
+				end
+				if v.spinner and v.spinner.SetFont then
+					v.spinner:SetFont(_G.CHATFONT)
+				end
+			end
+		end
 		if self.title then
 			local checkstr = STRINGS.UI.SERVERLISTINGSCREEN.SERVER_LIST_TITLE_INTENT:gsub("%%s", "(.+)")
 			local intentions = {}
