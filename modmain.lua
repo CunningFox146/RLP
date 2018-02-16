@@ -2583,6 +2583,15 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		end
 	end)
 
+	AddClassPostConstruct("components/named_replica", function(self)
+		local function OnNameDirtyMoose(inst)
+			inst.name = inst.possiblenames[math.random(#inst.possiblenames)]
+		end
+		if self.inst.prefab=="moose" then
+			self.inst.possiblenames={STRINGS.NAMES["MOOSE1"], STRINGS.NAMES["MOOSE2"]}
+			self.inst:ListenForEvent("namedirty", OnNameDirtyMoose)
+		end
+	end)
 
 
 	--Сохраняем непереведённый текст настроек приватности серверов в свойствах мира (см. ниже)
