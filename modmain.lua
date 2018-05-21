@@ -366,7 +366,7 @@ do
 				TheFrontEnd:GetSound():KillSound("FEPortalSFX")
 				TheFrontEnd:GetSound():PlaySound("dontstarve/music/gramaphone_ragtime", "rlp_ragtime") 
 				
-				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return LanguageOptions() end)
+				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return LanguageOptions() end, nil, "swipe")
 			end, {font=_G.NEWFONT_OUTLINE}))
 			self.submenu:AddCustomItem(self.rlp_settings, _G.Vector3(-605,0,0))
 		end
