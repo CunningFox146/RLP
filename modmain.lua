@@ -810,6 +810,8 @@ function rebuildname(str1,action,objectname)
 					str=repsubstr(str,str:utf8len()-1,"ой")
 				elseif str:utf8sub(str:utf8len()-1)=="ая" then
 					str=repsubstr(str,str:utf8len()-1,"ей")
+				elseif str:utf8sub(str:utf8len()-1)=="ей" then
+					str=repsubstr(str,str:utf8len()-1,"ью")
 				elseif str:utf8sub(str:utf8len()-1)=="яя" then
 					str=repsubstr(str,str:utf8len()-1,"ей")
 				elseif str:utf8sub(str:utf8len()-1)=="ец" then
@@ -925,6 +927,8 @@ function rebuildname(str1,action,objectname)
 						str=repsubstr(str,str:utf8len()-1,"пы")
 					elseif str:utf8sub(str:utf8len()-1)=="ще" then
 						str=repsubstr(str,str:utf8len()-1,"ща")
+					elseif str:utf8sub(str:utf8len()-1)=="це" then
+						str=repsubstr(str,str:utf8len()-1,"ца")
 					elseif sogl[str:utf8sub(str:utf8len())] then
 						str=str.."а"
 					end
@@ -1498,6 +1502,15 @@ for key, val in pairs(STRINGS.NAMES) do
 	end
 	t.SpeechHashTbl.NAMES.Eng2Key[val] = key
 	t.SpeechHashTbl.NAMES.Rus2Eng[t.PO[fullkey] or val] = val
+end
+t.SpeechHashTbl.SANDBOXMENU = {Eng2Key = {}, Rus2Eng = {}}
+for key, val in pairs(STRINGS.UI.SANDBOXMENU) do
+	local fullkey = "STRINGS.UI.SANDBOXMENU."..key
+	if t.PO[fullkey] then
+		t.PO[fullkey] = ExtractMeta(t.PO[fullkey], key)
+	end
+	t.SpeechHashTbl.SANDBOXMENU.Eng2Key[val] = key
+	t.SpeechHashTbl.SANDBOXMENU.Rus2Eng[t.PO[fullkey] or val] = val
 end
 
 --Извлекаем мета-данные из названий скинов
@@ -2446,6 +2459,16 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Окно просмотра серверов, двигаем контролсы, исправляем надписи
 	local function ServerListingScreenPost1(self)
+		if self.filters then
+			for i, v in pairs(self.filters) do 
+				if v.label and v.label.SetFont then
+					v.label:SetFont(_G.CHATFONT)
+				end
+				if v.spinner and v.spinner.SetFont then
+					v.spinner:SetFont(_G.CHATFONT)
+				end
+			end
+		end
 		if self.title then
 			local checkstr = STRINGS.UI.SERVERLISTINGSCREEN.SERVER_LIST_TITLE_INTENT:gsub("%%s", "(.+)")
 			local intentions = {}
@@ -2570,6 +2593,15 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		end
 	end)
 
+	AddClassPostConstruct("components/named_replica", function(self)
+		local function OnNameDirtyMoose(inst)
+			inst.name = inst.possiblenames[math.random(#inst.possiblenames)]
+		end
+		if self.inst.prefab=="moose" then
+			self.inst.possiblenames={STRINGS.NAMES["MOOSE1"], STRINGS.NAMES["MOOSE2"]}
+			self.inst:ListenForEvent("namedirty", OnNameDirtyMoose)
+		end
+	end)
 
 
 	--Сохраняем непереведённый текст настроек приватности серверов в свойствах мира (см. ниже)
@@ -2579,7 +2611,15 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	end
 
 	--Баг разработчиков, не переводятся радиобаттоны в настройках при создании сервера
-	AddClassPostConstruct("widgets/serversettingstab", function(self)
+	AddClassPostConstruct("widgets/redux/serversettingstab", function(self)
+		local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
+		function self:RefreshPrivacyButtons()
+			oldRefreshPrivacyButtons(self)
+			for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
+				v.button.text:SetFont(_G.NEWFONT)
+				v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
+			end  
+		end
 		if self.privacy_type and self.privacy_type.buttons and self.privacy_type.buttons.buttonwidgets then
 			for _,option in pairs(self.privacy_type.buttons.options) do
 				if privacy_options[option.text] then
@@ -2606,93 +2646,120 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 
 	--Виджет выбора свойств мира. Исправляем надписи, согласовываем слова
-	AddClassPostConstruct("widgets/customizationlist", function(self)
-		if self.optionwidgets then
-			for i,v in pairs(self.optionwidgets) do
-				for ii,vv in pairs(v:GetChildren()) do
-					if vv.name and vv.name:upper()=="TEXT" then --Заголовки групп настроек
-						local words = vv:GetString():split(" ")
-						local res
-						if #words==2 then
-							local second = SandboxMenuData[ words[2] ]
-							words[2] = STRINGS.UI.SANDBOXMENU[second] or words[2]
-							if second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.FOREST then
-								if second=="CHOICEAMTDAY" then
-									res = words[2].." в лесу"
-								elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
-									res = words[2].." леса"
-								elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
-									res = words[2]..", доступная в лесу"
-								elseif second=="CHOICEMISC" then
-									res = "Лесной "..firsttolower(words[2])
-								end
-							elseif second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.CAVE then
-								if second=="CHOICEAMTDAY" then
-									res = words[2].." в пещерах"
-								elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
-									res = words[2].." пещер"
-								elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
-									res = words[2]..", доступная в пещерах"
-								elseif second=="CHOICEMISC" then
-									res = "Пещерный "..firsttolower(words[2])
-								end
-							elseif second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.UNKNOWN then
-								if second=="CHOICEAMTDAY" then
-									res = words[2].." в каком-то мире"
-								elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
-									res = words[2].." какого-то мира"
-								elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
-									res = words[2]..", доступная в каком-то мире"
-								elseif second=="CHOICEMISC" then
-									res = words[1].." "..firsttolower(words[2])
-								end
-							end
+	AddClassPostConstruct("widgets/redux/worldcustomizationlist", function(self)
+		if self.optionitems then
+			for i,v in pairs(self.optionitems) do
+				if v.heading_text then
+					v.heading_text=v.heading_text:gsub(" World",": настройки мира")
+					v.heading_text=v.heading_text:gsub(" Resources",": настройки ресурсов")
+					v.heading_text=v.heading_text:gsub(" Food",": настройки еды")
+					v.heading_text=v.heading_text:gsub(" Animals",": настройки животных")
+					v.heading_text=v.heading_text:gsub(" Monsters",": настройки монстров")
+				end
+				if v.option and v.option.options then
+					for ii,vv in pairs(v.option.options) do
+						local txt=STRINGS.UI.SANDBOXMENU[t.SpeechHashTbl.SANDBOXMENU.Eng2Key[vv.text]]
+						if txt then
+							vv.text=txt
+						else
+							vv.text=vv.text:gsub("No Day","Без дня")
+							vv.text=vv.text:gsub("No Dusk","Без вечера")
+							vv.text=vv.text:gsub("No Night","Без ночи")
+							vv.text=vv.text:gsub("Long Day","Длинный день")
+							vv.text=vv.text:gsub("Long Dusk","Длинный вечер")
+							vv.text=vv.text:gsub("Long Night","Длинная ночь")
+							vv.text=vv.text:gsub("Only Day","Только день")
+							vv.text=vv.text:gsub("Only Dusk","Только вечер")
+							vv.text=vv.text:gsub("Only Night","Только ночь")
 						end
-						if res then vv:SetString(res) end
-					elseif vv.name and vv.name:upper()=="OPTION" then --Спиннеры, нужно перевести в них текст
-						for iii,vvv in pairs(vv:GetChildren()) do
-							if vvv.name and vvv.name:upper()=="SPINNER" then
-								for _,opt in ipairs(vvv.options) do
-									if SandboxMenuData[opt.text] then
-										opt.text = STRINGS.UI.SANDBOXMENU[ SandboxMenuData[opt.text] ]
-									elseif opt.text then
-										local words = opt.text:split(" ")
-										for idx, txt in ipairs(words) do
-											local p = SandboxMenuData[txt]
-											words[idx] = p and STRINGS.UI.SANDBOXMENU[p] or words[idx]
-										end
-										if words[2]==STRINGS.UI.SANDBOXMENU.DAY then
-											if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","дня"}
-											elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгий" end
-										elseif words[2]==STRINGS.UI.SANDBOXMENU.DUSK then
-											if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","вечера"}
-											elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгий" end
-										elseif words[2]==STRINGS.UI.SANDBOXMENU.NIGHT then
-											if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","ночи"}
-											elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгая" end
-										end
-										opt.text = words[1] or opt.text
-										for idx=2,#words do opt.text = opt.text.." "..firsttolower(words[idx]) end
+					end
+				end
+				if v.GetChildren then
+					for ii,vv in pairs(v:GetChildren()) do
+						if vv.name and vv.name:upper()=="TEXT" then --Заголовки групп настроек
+							local words = vv:GetString():split(" ")
+							local res
+							if #words==2 then
+								local second = SandboxMenuData[ words[2] ]
+								words[2] = STRINGS.UI.SANDBOXMENU[second] or words[2]
+								if second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.FOREST then
+									if second=="CHOICEAMTDAY" then
+										res = words[2].." в лесу"
+									elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
+										res = words[2].." леса"
+									elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
+										res = words[2]..", доступная в лесу"
+									elseif second=="CHOICEMISC" then
+										res = "Лесной "..firsttolower(words[2])
+									end
+								elseif second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.CAVE then
+									if second=="CHOICEAMTDAY" then
+										res = words[2].." в пещерах"
+									elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
+										res = words[2].." пещер"
+									elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
+										res = words[2]..", доступная в пещерах"
+									elseif second=="CHOICEMISC" then
+										res = "Пещерный "..firsttolower(words[2])
+									end
+								elseif second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.UNKNOWN then
+									if second=="CHOICEAMTDAY" then
+										res = words[2].." в каком-то мире"
+									elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
+										res = words[2].." какого-то мира"
+									elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
+										res = words[2]..", доступная в каком-то мире"
+									elseif second=="CHOICEMISC" then
+										res = words[1].." "..firsttolower(words[2])
 									end
 								end
-								vvv:UpdateState()
-							elseif vvv.name and vvv.name:upper()=="IMAGEPARENT" then
-								local list={["day.tex"]=1,
-											["season.tex"]=1,
-											["season_start.tex"]=1,
-											["world_size.tex"]=1,
-											["world_branching.tex"]=1,
-											["world_loop.tex"]=1,
-											["world_map.tex"]=1,
-											["world_start.tex"]=1,
-											["winter.tex"]=1,
-											["summer.tex"]=1,
-											["autumn.tex"]=1,
-											["spring.tex"]=1}
-								for iiii,vvvv in pairs(vvv:GetChildren()) do
-									if vvvv.name and vvvv.name:upper()=="IMAGE" then
-										if list[vvvv.texture] then
-											vvvv:SetTexture("images/rus_mapgen.xml", "rus_"..vvvv.texture)
+							end
+							if res then vv:SetString(res) end
+						elseif vv.name and vv.name:upper()=="OPTION" then --Спиннеры, нужно перевести в них текст
+							for iii,vvv in pairs(vv:GetChildren()) do
+								if vvv.name and vvv.name:upper()=="SPINNER" then
+									for _,opt in ipairs(vvv.options) do
+										if SandboxMenuData[opt.text] then
+											opt.text = STRINGS.UI.SANDBOXMENU[ SandboxMenuData[opt.text] ]
+										elseif opt.text then
+											local words = opt.text:split(" ")
+											for idx, txt in ipairs(words) do
+												local p = SandboxMenuData[txt]
+												words[idx] = p and STRINGS.UI.SANDBOXMENU[p] or words[idx]
+											end
+											if words[2]==STRINGS.UI.SANDBOXMENU.DAY then
+												if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","дня"}
+												elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгий" end
+											elseif words[2]==STRINGS.UI.SANDBOXMENU.DUSK then
+												if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","вечера"}
+												elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгий" end
+											elseif words[2]==STRINGS.UI.SANDBOXMENU.NIGHT then
+												if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","ночи"}
+												elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгая" end
+											end
+											opt.text = words[1] or opt.text
+											for idx=2,#words do opt.text = opt.text.." "..firsttolower(words[idx]) end
+										end
+									end
+									vvv:UpdateState()
+								elseif vvv.name and vvv.name:upper()=="IMAGEPARENT" then
+									local list={["day.tex"]=1,
+												["season.tex"]=1,
+												["season_start.tex"]=1,
+												["world_size.tex"]=1,
+												["world_branching.tex"]=1,
+												["world_loop.tex"]=1,
+												["world_map.tex"]=1,
+												["world_start.tex"]=1,
+												["winter.tex"]=1,
+												["summer.tex"]=1,
+												["autumn.tex"]=1,
+												["spring.tex"]=1}
+									for iiii,vvvv in pairs(vvv:GetChildren()) do
+										if vvvv.name and vvvv.name:upper()=="IMAGE" then
+											if list[vvvv.texture] then
+												vvvv:SetTexture("images/rus_mapgen.xml", "rus_"..vvvv.texture)
+											end
 										end
 									end
 								end
@@ -2715,14 +2782,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	end
 
 	--Баг разработчиков: Не переведённые пресеты
-	AddClassPostConstruct("widgets/customizationtab", function(self)
-		self.oldUpdateMultilevelUI=self.UpdateMultilevelUI
-		function self:UpdateMultilevelUI()
-			self:oldUpdateMultilevelUI()
-			for i, tabbtn in ipairs(self.multileveltabs.tabs) do
-				tabbtn:SetTextSize(22)
-			end
-		end
+	AddClassPostConstruct("widgets/redux/worldcustomizationtab", function(self)
 		local Levels = require "map/levels"
 		local oldGetDataForLevelID=Levels.GetDataForLevelID
 		Levels.GetDataForLevelID=function(id, nolocation)
@@ -2734,21 +2794,25 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 			return ret
 		end
 		function self:UpdatePresetInfo(level)
-		    if level ~= self.currentmultilevel then
-		        -- this might be called for the "unselected" level, so we don't want to do anything.
-		        return
-		    end
+			if level ~= self.currentmultilevel -- this might be called for the "unselected" level, so we don't want to do anything.
+			    or not self:IsLevelEnabled(level) -- invalid so we can't show anything.
+			    then
+			    return
+			end
 
 		    local clean = self:GetNumberOfTweaks(self.currentmultilevel) == 0
 
 		    if not self.allowEdit then
+		    	
 		    	local levelid=self.slotoptions[self.slot][self.currentmultilevel].id
 		    	self.slotoptions[self.slot][self.currentmultilevel].desc=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[levelid]
 		    	self.slotoptions[self.slot][self.currentmultilevel].name=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[levelid]
 		        self.presetdesc:SetString(self.slotoptions[self.slot][self.currentmultilevel].desc)
+		        --print(self.slotoptions[self.slot][self.currentmultilevel].name)
 		        self.presetspinner.spinner:UpdateText(self.slotoptions[self.slot][self.currentmultilevel].name)
 		    elseif clean then
 		        self.presetdesc:SetString(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).desc)
+		        --print(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name)
 		        self.presetspinner.spinner:UpdateText(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name)
 		    elseif self.current_option_settings[self.currentmultilevel].preset == "MOD_MISSING" then
 		        self.presetdesc:SetString(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC.MOD_MISSING)
@@ -3363,6 +3427,26 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		local oldupdate_fn=self.update_fn
 		self.update_fn=function(context, widget, data, index)
 			oldupdate_fn(context, widget, data, index)
+			if widget.opt_spinner and widget.opt_spinner.spinner.options then
+				if data and data.option and data.option.image then
+					local list={["day.tex"]=1,
+						["season.tex"]=1,
+						["season_start.tex"]=1,
+						["world_size.tex"]=1,
+						["world_branching.tex"]=1,
+						["world_loop.tex"]=1,
+						["world_map.tex"]=1,
+						["world_start.tex"]=1,
+						["winter.tex"]=1,
+						["summer.tex"]=1,
+						["autumn.tex"]=1,
+						["spring.tex"]=1}
+					if list[data.option.image] then
+						widget.opt_spinner.image:SetTexture("images/rus_mapgen.xml", "rus_"..data.option.image)
+						widget.opt_spinner.image:SetSize(70,70)
+					end
+				end
+			end
 			if data and data.item_type and widget.text then
 				local x, y = widget.text:GetRegionSize()
 				widget.text:SetRegionSize(x+30, y+20)
