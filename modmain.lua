@@ -368,7 +368,7 @@ do
 				
 				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return LanguageOptions() end, nil, "swipe")
 			end, {font=_G.NEWFONT_OUTLINE}))
-			self.submenu:AddCustomItem(self.rlp_settings, _G.Vector3(-520,0,0))
+			self.submenu:AddCustomItem(self.rlp_settings, _G.Vector3(-530,0,0))
 		end
 	end
 
