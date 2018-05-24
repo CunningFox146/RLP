@@ -349,7 +349,7 @@ AddGlobalClassPostConstruct("screens/modsscreen", "ModsScreen", function(self)
 	self.ConfigureSelectedMod=NewConfigureSelectedMod
 end)
 ]]
-
+--_G.CHEATS_ENABLED = true
 --Кнопка настойки в главном меню
 do
 	--local RLPButton = require "widgets/rlp_button"
@@ -368,11 +368,11 @@ do
 				
 				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return LanguageOptions() end, nil, "swipe")
 			end, {font=_G.NEWFONT_OUTLINE}))
-			self.submenu:AddCustomItem(self.rlp_settings, _G.Vector3(-605,0,0))
+			self.submenu:AddCustomItem(self.rlp_settings, _G.Vector3(-520,0,0))
 		end
 	end
 
-	AddClassPostConstruct("screens/multiplayermainscreen", AddButton)
+	--AddClassPostConstruct("screens/multiplayermainscreen", AddButton)
 	AddClassPostConstruct("screens/redux/multiplayermainscreen", AddButton)
 end
 
@@ -1415,7 +1415,20 @@ announcerus.STOP_AFK=ru["STRINGS.UI.HUD.STOP_AFK"] or ""
 --	announcerus.VOTINGKICKSTART=ru["STRINGS.VOTING.KICK.START"] or ""
 --	announcerus.VOTINGKICKSUCCESS=ru["STRINGS.VOTING.KICK.SUCCESS"] or ""
 --	announcerus.VOTINGKICKFAILURE=ru["STRINGS.VOTING.KICK.FAILURE"] or ""
+--[[
+--Multitaste Starvation + Hunger Games
+announcerus.BELL_DESTROYED = "Колокол на острорв #%s был уничтожен!"
+announcerus.BELL_DESTOYED_ANNOUNCE = "Колокольчик игрока %s был уничтожен %s."
+announcerus.BELL_DESTOYED_ANNOUNCE_UNKNOWN = "Колокольчик игрока %s был уничтожен неизвестным мобом."
+announcerus.BELL_DBB = "%s уничтожил свой колокол."
 
+announcerus.CLAN_DELETED = "Клан \"%s\" распался!"
+announcerus.CLAN_DELETED_BY_PLAYER = "Клан \"%s\" был уничтожен %s!"
+announcerus.CLAN_PLAYER_JOINED = "%s присоединился к клану \"%s\"."
+announcerus.CLAN_PLAYER_LEFT = "%s покину клан."
+announcerus.CLAN_CREATED = "%s создал клан \"%s\"!"
+announcerus.CLAN_LEVELUP = "Клан \"%s\" получил %i уровень!"
+announcerus.CLAN_PLAYER_KICKED = "%s был изгнан из клана \"%s\"!"]]
 
 --Обнуляем их, чтобы они не перевелись, и сервер всегда писал на английском
 ru["STRINGS.UI.NOTIFICATION.LEFTGAME"]=nil
@@ -1770,6 +1783,7 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 		local gender, player, RussianMessage, name, name2, killerkey
 
 		local function test(adder1,msg1,rusmsg1,adder2,msg2,rusmsg2,ending)
+			--print("Test:", tostring(adder1), tostring(msg1), tostring(rusmsg1), tostring(adder2), tostring(msg2), tostring(rusmsg2), tostring(ending))
 			if name or name2 then return end
 			msg1=msg1 and msg1:gsub("([.%-?])","%%%1"):gsub("%%s","(.*)") or ""
 			msg2=msg2 and msg2:gsub("([.%-?])","%%%1"):gsub("%%s","(.*)") or ""
@@ -1792,13 +1806,29 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 		test(nil,STRINGS.UI.NOTIFICATION.KICKEDFROMGAME, announcerus.KICKEDFROMGAME)
 		test(nil,STRINGS.UI.NOTIFICATION.BANNEDFROMGAME, announcerus.BANNEDFROMGAME)
 		--Моды
+		--[[
+		test(nil, STRINGS.BELL_DESTROYED, announcerus.BELL_DESTROYED)
+		test(nil, STRINGS.BELL_DESTOYED_ANNOUNCE, announcerus.BELL_DESTOYED_ANNOUNCE)
+		test(nil, STRINGS.BELL_DESTOYED_ANNOUNCE_UNKNOWN, announcerus.BELL_DESTOYED_ANNOUNCE_UNKNOWN)
+		test(nil, STRINGS.BELL_DBB, announcerus.BELL_DBB)
+		
+		if STRINGS.MUTS_CLANS then
+			test(nil, STRINGS.MUTS_CLANS.CLAN_DELETED, announcerus.CLAN_DELETED)
+			test(nil, STRINGS.MUTS_CLANS.CLAN_DELETED_BY_PLAYER, announcerus.CLAN_DELETED_BY_PLAYER)
+			test(nil, STRINGS.MUTS_CLANS.PLAYER_JOINED, announcerus.CLAN_PLAYER_JOINED)
+			test(nil, STRINGS.MUTS_CLANS.PLAYER_LEFT, announcerus.CLAN_PLAYER_LEFT)
+			test(nil, STRINGS.MUTS_CLANS.CLAN_CREATED, announcerus.CLAN_CREATED)
+			test(nil, STRINGS.MUTS_CLANS.LEVELUP, announcerus.CLAN_LEVELUP)
+			test(nil, STRINGS.MUTS_CLANS.PLAYER_KICKED, announcerus.CLAN_PLAYER_KICKED)
+		end]]
+		--[[
 		if announcerus.mods and #announcerus.mods > 0 then
 			for id, translate in pairs(announcerus.mods) do
 				if STRINGS.UI.NOTIFICATION[id] and translate then
 					test(nil, STRINGS.UI.NOTIFICATION[id], translate)
 				end
 			end
-		end
+		end]]
 		--Новый скин
 --		test(nil,STRINGS.UI.NOTIFICATION.NEW_SKIN_ANNOUNCEMENT, announcerus.NEW_SKIN_ANNOUNCEMENT)
 		if not name2 then
@@ -2251,6 +2281,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	end)
 
 	--Подменяем русские имена в лобби и правим другие мелочи
+	--[[
 	AddClassPostConstruct("screens/lobbyscreen", function(self)
 		local charlist = {winona=1,wickerbottom=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1,random=1}
 		local texnames = {}
@@ -2265,7 +2296,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		if self.loadout_title then
 			self.loadout_title:SetString(STRINGS.UI.LOBBYSCREEN.LOADOUT_TITLE..self.loadout_title:GetString():sub(1,-#STRINGS.UI.LOBBYSCREEN.LOADOUT_TITLE-1))
 		end
-	end)
+	end)]]
 
 	local function ChangeNamesTex(module)
 		AddClassPostConstruct(module, function(self)
@@ -2333,12 +2364,12 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		for name in pairs(charlist) do texnames["names_"..name] = name end
 		if self.character_name then HookUpImage(self.character_name, "images/", "images/rus_", texnames) end
 	end)
-	
+	--[[
 	AddClassPostConstruct("screens/skinsscreen", function(self)
 		if self.title and self.title:GetString():sub(-#STRINGS.UI.SKINSSCREEN.TITLE)==STRINGS.UI.SKINSSCREEN.TITLE then
 			self.title:SetString(STRINGS.UI.SKINSSCREEN.TITLE..self.title:GetString():sub(1,-#STRINGS.UI.SKINSSCREEN.TITLE-1))
 		end
-	end)
+	end)]]
 
 	AddClassPostConstruct("screens/playerstatusscreen", function(self)
 		if self.OnBecomeActive then
@@ -3480,6 +3511,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	end)
 
 	--Устарело
+	--[[
 	AddClassPostConstruct("screens/morguescreen", function(self) 
 		if self.encounter_widgets then for _,v in ipairs(self.encounter_widgets) do
 			if v.PLAYER_AGE and not v.PLAYER_AGE.RLPFixed then
@@ -3517,9 +3549,10 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 				end
 			end
 		end end
-	end)
+	end)]]
 
 	--Исправляем последовательность слов в заголовке окна настройки модов
+	--[[
 	AddClassPostConstruct("screens/modconfigurationscreen", function(self)
 		for title,val in pairs(self.root.children) do
 			if title.name and string.lower(title.name)=="text" then 
@@ -3528,10 +3561,10 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 				title:SetString(STRINGS.UI.MODSSCREEN.CONFIGSCREENTITLESUFFIX.." \""..tmp.."\"")
 			end
 		end
-	end)
+	end)]]
 
 
-
+	--[[
 	AddClassPostConstruct("screens/networkloginpopup", function(self)
 		if self.menu and self.menu.items then
 			for i,v in pairs(self.menu.items) do
@@ -3542,7 +3575,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 				end
 			end
 		end
-	end)
+	end)]]
 
 	--Подвигаем всё красивенько в окне подписки
 	AddClassPostConstruct("screens/emailsignupscreen", function(self)
@@ -3575,6 +3608,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			return res
 		end
 	end
+	--[[
 	--Уменьшаем шрифт в окне создания сервера
 	AddClassPostConstruct("screens/servercreationscreen", function(self)
 		if self.save_slots then --Уменьшаем шрифт в слотах слева
@@ -3585,7 +3619,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		if self.create_button then --Уменьшаем текст на кнопке "создать"
 			self.create_button.text:SetSize(self.create_button.text.size-7)
 		end
-	end)
+	end)]]
 	--[[
 	--Подвигаем текст в списках серверов
 	local function ServerListingScreenPost(self)
@@ -3636,7 +3670,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		end
 	end
 	
-	AddClassPostConstruct("screens/servercreationscreen", ServerCreationScreenPost)
+	--AddClassPostConstruct("screens/servercreationscreen", ServerCreationScreenPost)
 	AddClassPostConstruct("screens/redux/servercreationscreen", ServerCreationScreenPost)
 
 	
