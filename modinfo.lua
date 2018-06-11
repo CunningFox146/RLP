@@ -1,5 +1,5 @@
 name = "Russification Pack for DST"
-version = "1.5"
+version = "1.6"
 
 local desc = {
 	en = "\nThe best russian localisation at the moment. Soure code was taken from the Russian Language Pack. Special thanks to Some1 and Alevastor!\n\nVersion: "..version,
@@ -8,7 +8,7 @@ local desc = {
 
 description = language and desc[language] or desc["en"]
 
-author = "Cunning fox, ma3ok, 💔何も💔, Hunger Artist, Sky Fly, Demi, Sinimolik"--Макс. 67 символов
+author = "Cunning fox, ma3ok, 何も, Hunger Artist, Sky Fly, Demi, Sinimolik" --Макс. 67 символов
 
 forumthread = ""
 
