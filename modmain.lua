@@ -1,5 +1,7 @@
 _G = GLOBAL
 
+_G.CHEATS_ENABLED = true
+
 mods = _G.rawget(_G, "mods")
 if not mods then
 	mods = {}
@@ -198,10 +200,51 @@ function ApplyLocalizedFonts()
 	end
 end
 
+--Для тех, кто пользуется ps4 или NACL должна быть возможность сохранять не в ини файле, а в облаке.
+--Для этого дорабатываем функционал стандартного класса PlayerProfile
+local function SetLocalizaitonValue(self,name,value) --Метод, сохраняющий опцию с именем name и значением value
+	local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
+	if USE_SETTINGS_FILE then
+		TheSim:SetSetting("translation", tostring(name), tostring(value))
+	else
+		self:SetValue(tostring(name), tostring(value))
+		self.dirty = true
+		self:Save() --Сохраняем сразу, поскольку у нас нет кнопки "применить"
+	end
+end
+local function GetLocalizaitonValue(self,name) --Метод, возвращающий значение опции name
+	local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
+	if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("translation", tostring(name))
+	else
+		return self:GetValue(tostring(name))
+	end
+end
+
+--Расширяем функционал PlayerProfile дополнительной инициализацией двух методов и заданием дефолтных значений опций нашего перевода.
+--После обновления ни один из этих способов не работает, поэтому делаем тупо через require.
+
+--AddGlobalClassPostConstruct("playerprofile", "PlayerProfile", function(self)
+--AddClassPostConstruct("playerprofile", function(self)
+do
+	local self = require "playerprofile"
+	
+	local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
+	
+	if not USE_SETTINGS_FILE then
+			self.persistdata.update_is_allowed = true --Разрешено запускать обновление по умолчанию
+			self.persistdata.update_frequency = t.UpdatePeriod[3] --Раз в неделю по умолчанию
+		local date=_G.os.date("*t")
+		self.persistdata.last_update_date = tostring(date.day.."."..date.month.."."..date.year) --Текущая дата по умолчанию
+	end
+	
+	self.SetLocalizaitonValue=SetLocalizaitonValue --метод задачи значения опции
+	self.GetLocalizaitonValue=GetLocalizaitonValue --метод получения значения опции
+end
+
 function t.escapeR(str) --Удаляет \r из конца строки. Нужна для строк, загружаемых в юниксе.
 	if string.sub(str, #str)=="\r" then return string.sub(str, 1, #str-1) else return str end
 end
-
 
 _G.getmetatable(TheSim).__index.UnregisterAllPrefabs = (function()
 	local oldUnregisterAllPrefabs = _G.getmetatable(TheSim).__index.UnregisterAllPrefabs
@@ -210,7 +253,6 @@ _G.getmetatable(TheSim).__index.UnregisterAllPrefabs = (function()
 		ApplyLocalizedFonts()
 	end
 end)()
-
 
 --Вставляем функцию, подключающую русские шрифты
 local OldRegisterPrefabs = _G.ModManager.RegisterPrefabs --Подменяем функцию,в которой нужно подгрузить шрифты и исправить глобальные шрифтовые константы
@@ -221,10 +263,6 @@ local function NewRegisterPrefabs(self)
 	_G.TheFrontEnd.consoletext:SetRegionSize(900, 404) --Чуть-чуть увеличил по вертикали, чтобы не обрезало буквы в нижней строке
 end
 _G.ModManager.RegisterPrefabs=NewRegisterPrefabs
-
-
-
-
 
 --Узнаём тип локализации, и меняем содержимое таблицы с переводом PO, если нужно
 --	t.CurrentTranslationType=_G.Profile:GetLocalizaitonValue("translation_type")
@@ -244,7 +282,6 @@ if not t.IsModTranslEnabled then --Если нет записи о типе, т�
 end
 
 require("RLP_support")
-
 
 --Переопределяем функцию AddClassPostConstruct, чтобы она проверяла наличие файла и не падала при его отсутствии
 local OldAddClassPostConstruct = AddClassPostConstruct
@@ -275,44 +312,6 @@ AddClassPostConstruct("widgets/chatqueue", function(self)
 		end
 	end
 end)]]
-
---Для тех, кто пользуется ps4 или NACL должна быть возможность сохранять не в ини файле, а в облаке.
---Для этого дорабатываем функционал стандартного класса PlayerProfile
-local function SetLocalizaitonValue(self,name,value) --Метод, сохраняющий опцию с именем name и значением value
-	local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
-	if USE_SETTINGS_FILE then
-		TheSim:SetSetting("translation", tostring(name), tostring(value))
-	else
-		self:SetValue(tostring(name), tostring(value))
-		self.dirty = true
-		self:Save() --Сохраняем сразу, поскольку у нас нет кнопки "применить"
-	end
-end
-local function GetLocalizaitonValue(self,name) --Метод, возвращающий значение опции name
-	local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
-	if USE_SETTINGS_FILE then
-		return TheSim:GetSetting("translation", tostring(name))
-	else
-		return self:GetValue(tostring(name))
-	end
-end
-
---Расширяем функционал PlayerProfile дополнительной инициализацией двух методов и заданием дефолтных значений опций нашего перевода.
-AddGlobalClassPostConstruct("playerprofile", "PlayerProfile", function(self)
-	local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
-	if not USE_SETTINGS_FILE then
-			self.persistdata.update_is_allowed = true --Разрешено запускать обновление по умолчанию
-			self.persistdata.update_frequency = t.UpdatePeriod[3] --Раз в неделю по умолчанию
-		local date=_G.os.date("*t")
-		self.persistdata.last_update_date = tostring(date.day.."."..date.month.."."..date.year) --Текущая дата по умолчанию
-	end
-	self["SetLocalizaitonValue"]=SetLocalizaitonValue --метод задачи значения опции
-	self["GetLocalizaitonValue"]=GetLocalizaitonValue --метод получения значения опции
-end)
-
-
-
-
 
 --Добавление кнопки настроек меню модов при наведении на русский мод
 --[[
@@ -349,7 +348,7 @@ AddGlobalClassPostConstruct("screens/modsscreen", "ModsScreen", function(self)
 	self.ConfigureSelectedMod=NewConfigureSelectedMod
 end)
 ]]
---_G.CHEATS_ENABLED = true
+
 --Кнопка настойки в главном меню
 do
 	--local RLPButton = require "widgets/rlp_button"
@@ -360,7 +359,7 @@ do
 		if self.rlp_settings == nil then
 			local TheFrontEnd = _G.TheFrontEnd
 
-			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/rus_button_icon.xml", "rus_button.tex", "Русификатор", false, true, function() 
+			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/rus_button_icon.xml", "rus_button.tex", "RLP", false, true, function() 
 
 				TheFrontEnd:GetSound():KillSound("FEMusic")
 				TheFrontEnd:GetSound():KillSound("FEPortalSFX")
@@ -368,7 +367,7 @@ do
 				
 				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return LanguageOptions() end, nil, "swipe")
 			end, {font=_G.NEWFONT_OUTLINE}))
-			self.submenu:AddCustomItem(self.rlp_settings, _G.Vector3(-530,0,0))
+			self.submenu:AddCustomItem(self.rlp_settings--[[, _G.Vector3(-530,0,0)]])
 		end
 	end
 
@@ -2065,6 +2064,7 @@ if _G.TheNet.Talker then
 		end
 	end)()
 end
+
 --Перевод на русский произносимого на сервере
 --[[if _G.TheNet.Talker then
 	_G.getmetatable(_G.TheNet).__index.Talker = (function()
@@ -2085,6 +2085,46 @@ end
 		end
 	end)()
 end--]]
+
+--Мамка не говорит фразы на русском, значит заставляем её.
+AddClassPostConstruct("components/talker", function(self)
+	local _Say = self.Say
+	
+	function self:Say(script, time, noanim, ...)
+		local lines = type(script) == "string" and { _G.Line(script, noanim) } or script
+		if lines ~= nil then
+			for i, line in ipairs(lines) do
+				local display_message = _G.GetSpecialCharacterPostProcess(
+					self.inst.prefab,
+					self.mod_str_fn ~= nil and self.mod_str_fn(line.message) or line.message
+				)
+			
+				if self.inst.prefab=="quagmire_goatmum"	then
+					print("Мамка сказала:", tostring(display_message))
+					local mum=nil
+					local j=0
+					local sayings={"SNACK","MEAT","SOUP","VEGETABLE","FISH","BREAD","CHEESE","PASTA","DESSERT"}
+					for i=1, #display_message do
+						if string.sub(display_message,i,i)==" " or string.sub(display_message,i,i)=="!" or string.sub(display_message,i,i)=="," or  string.sub(display_message,i,i)=="." then
+							if i~=j then
+								mum=string.sub(display_message,j+1,i-1)
+								j=i
+								--print(mum)
+							end
+							
+							if table.contains(sayings,mum) then
+								print("Корммим мамку этим: "..tostring(mum))
+							end
+						end
+					end
+				end
+			end
+		end
+		
+		return _Say(self, script, time, noanim, ...)
+	end
+end)
+
 local SKETCHES = 
 {
     {item="chesspiece_pawn",        recipe="chesspiece_pawn_builder"},

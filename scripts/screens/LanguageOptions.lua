@@ -1,6 +1,6 @@
 local t = mods.RussianLanguagePack
 
-require("constants")
+--require("constants")
 local Widget = require "widgets/widget"
 local Screen = require "widgets/screen"
 local ImageButton = require "widgets/imagebutton"
@@ -20,7 +20,7 @@ local RLPModButton = require "widgets/mod_settings_button"
 local TranslationTypeSave = nil
 
 local LanguageOptions = Class(Screen, function(self)
-    Widget._ctor(self, "LanguageOptions")
+    Screen._ctor(self, "LanguageOptions")
 	
 	if kleifileexists("images/bg_redux_dark_right.xml") then
 		self.bg = self:AddChild(Image("images/bg_redux_dark_right.xml", "dark_right.tex"))
@@ -173,7 +173,7 @@ local LanguageOptions = Class(Screen, function(self)
 	local transtype = Profile:GetLocalizaitonValue("translation_type")
 	if not transtype then --Если нет записи о типе, то делаем по умолчанию полный перевод
 		transtype = t.TranslationTypes.Full
-		Profile:SetLocalizaitonValue("translation_type",transtype)
+		Profile:SetLocalizaitonValue("translation_type", transtype)
 	end
 	TranslationTypeSave = transtype --сохраняем то значение, которое у нас при входе в это окно
 
