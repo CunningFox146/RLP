@@ -3481,7 +3481,15 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		end
 	end)
 
-
+	--Зашифрованные строки загружаются после модов, поэтому сделал такой вот хак
+	AddClassPostConstruct("widgets/redux/quagmire_recipebook", function(self)
+		for i,v in pairs(STRINGS.NAMES) do
+			if type(i)=="string" and string.find(i, "QUAGMIRE_FOOD_") then
+				STRINGS.NAMES[i]=t.PO["STRINGS.NAMES."..i]
+			end
+		end
+	end)
+	
 	AddClassPostConstruct("widgets/writeablewidget", function(self)
 		if self.menu and self.menu.items then
 			local translations={["Cancel"]="Отмена",["Random"]="Случайно",["Write it!"]="Написать!"}
