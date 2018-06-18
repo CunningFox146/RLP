@@ -1556,6 +1556,12 @@ for i,v in pairs(STRINGS.BUNNYMANNAMES) do
 	t.PO["STRINGS.BUNNYMANNAMES."..i]=nil
 end
 
+t.SpeechHashTbl.SWAMPIGNAMES={Eng2Rus={}}
+for i,v in pairs(STRINGS.SWAMPIGNAMES) do
+	t.SpeechHashTbl.SWAMPIGNAMES.Eng2Rus[v]=t.PO["STRINGS.SWAMPIGNAMES."..i] or v
+	t.PO["STRINGS.SWAMPIGNAMES."..i]=nil
+end
+
 --Подгружаем в "хэш" фразы Мамси
 t.SpeechHashTbl.GOATMUM_CRAVING_HINTS={Eng2Rus={}}
 for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS) do
@@ -3372,7 +3378,10 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 					if type(v)=="string" and v~="" and string.sub(name,1,#v)==v then Prefix=v break end
 				end 
 				if string.sub(name,1,#STRINGS.WITHEREDITEM)==STRINGS.WITHEREDITEM then Prefix=STRINGS.WITHEREDITEM 
-				elseif string.sub(name,1,#STRINGS.SMOLDERINGITEM)==STRINGS.SMOLDERINGITEM then Prefix=STRINGS.SMOLDERINGITEM end
+				elseif string.sub(name,1,#STRINGS.SMOLDERINGITEM)==STRINGS.SMOLDERINGITEM then Prefix=STRINGS.SMOLDERINGITEM 
+				end
+				local puresalt = string.sub(STRINGS.NAMES.QUAGMIRE_SALTED_FOOD_FMT,1,6)
+				if string.sub(name,1,#puresalt)==puresalt then Prefix=puresalt end
 				if Prefix then --Нашли префикс. Меняем его и удаляем из имени для его дальнейшей корректной обработки
 					name=string.sub(name,#Prefix+2)--Убираем префикс из имени
 					if act then
@@ -3394,6 +3403,8 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 					name=t.SpeechHashTbl.PIGNAMES.Eng2Rus[name] or name
 				elseif self.prefab=="bunnyman" then 
 					name=t.SpeechHashTbl.BUNNYMANNAMES.Eng2Rus[name] or name
+				elseif self.prefab=="quagmire_swampig" then 
+					name=t.SpeechHashTbl.SWAMPIGNAMES.Eng2Rus[name] or name
 				end
 			end
 			if act then --Если есть действие
@@ -3405,7 +3416,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 					else
 						name=rebuildname(name,act,self.prefab)
 					end
-					if (not self.prefab or self.prefab~="pigman" and self.prefab~="pigguard" and self.prefab~="bunnyman")
+					if (not self.prefab or self.prefab~="pigman" and self.prefab~="pigguard" and self.prefab~="bunnyman" and self.prefab~="quagmire_trader_merm" and self.prefab~="quagmire_trader_merm2"  and self.prefab~="quagmire_swampigelder"  and self.prefab~="quagmire_goatmum" and self.prefab~="quagmire_goatkid" and self.prefab~="quagmire_swampig")
 					 and not t.ShouldBeCapped[self.prefab] and name and type(name)=="string" and #name>0 then
 						--меняем первый символ названия предмета в нижний регистр
 						name=firsttolower(name)
