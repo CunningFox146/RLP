@@ -3613,8 +3613,32 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	AddClassPostConstruct("widgets/redux/quagmire_recipebook", function(self)
 		for i,v in pairs(STRINGS.NAMES) do
 			if type(i)=="string" and string.find(i, "QUAGMIRE_FOOD_") then
+				local key=i
+				local val=v
+				local fullkey = "STRINGS.NAMES."..key
+				if t.PO[fullkey] then
+					t.PO[fullkey] = ExtractMeta(t.PO[fullkey], key)
+				end
+				t.SpeechHashTbl.NAMES.Eng2Key[val] = key
+				t.SpeechHashTbl.NAMES.Rus2Eng[t.PO[fullkey] or val] = val
+
 				STRINGS.NAMES[i]=t.PO["STRINGS.NAMES."..i]
 			end
+		end
+	end)
+	AddPrefabPostInitAny(function(inst)
+		if string.find(inst.prefab,'quagmire_food_') then
+			local key=string.upper(inst.prefab)
+			local val=STRINGS.NAMES[string.upper(inst.prefab)]
+			local fullkey = "STRINGS.NAMES."..key
+			if t.PO[fullkey] then
+				t.PO[fullkey] = ExtractMeta(t.PO[fullkey], key)
+			end
+			t.SpeechHashTbl.NAMES.Eng2Key[val] = key
+			t.SpeechHashTbl.NAMES.Rus2Eng[t.PO[fullkey] or val] = val
+			
+			STRINGS.NAMES[string.upper(inst.prefab)]=t.PO["STRINGS.NAMES."..string.upper(inst.prefab)]
+			inst.name = STRINGS.NAMES[string.upper(inst.prefab)]
 		end
 	end)
 
