@@ -22,6 +22,7 @@ end
 
 mods.RussianLanguagePack = {}
 local t = mods.RussianLanguagePack
+
 t.modinfo = modinfo
 --Путь, по которому будут сохраняться рабочие версии po файла и лога обновлений.
 --Он нужен потому, что сейчас при синхронизации стим затирает все файлы в папке мода на версии из стима.
@@ -1525,6 +1526,15 @@ for key, val in pairs(STRINGS.UI.SANDBOXMENU) do
 	t.SpeechHashTbl.SANDBOXMENU.Rus2Eng[t.PO[fullkey] or val] = val
 end
 
+-- t.SpeechHashTbl.GOATMUM_WELCOME_INTRO = {Eng2Key = {}, Rus2Eng = {}}
+-- for key, val in pairs(STRINGS.GOATMUM_WELCOME_INTRO) do
+-- 	local fullkey = "STRINGS.GOATMUM_WELCOME_INTRO."..key
+-- 	if t.PO[fullkey] then
+-- 		t.PO[fullkey] = ExtractMeta(t.PO[fullkey], key)
+-- 	end
+-- 	t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Key[val] = key
+-- 	t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Rus2Eng[t.PO[fullkey] or val] = val
+-- end
 --Извлекаем мета-данные из названий скинов
 for key, val in pairs(STRINGS.SKIN_NAMES) do
 	local fullkey = "STRINGS.SKIN_NAMES."..key
@@ -1546,7 +1556,68 @@ for i,v in pairs(STRINGS.BUNNYMANNAMES) do
 	t.PO["STRINGS.BUNNYMANNAMES."..i]=nil
 end
 
+--Подгружаем в "хэш" фразы Мамси
+t.SpeechHashTbl.GOATMUM_CRAVING_HINTS={Eng2Rus={}}
+for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS) do
+	t.SpeechHashTbl.GOATMUM_CRAVING_HINTS.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_HINTS."..i] or v
+	t.PO["STRINGS.GOATMUM_CRAVING_HINTS."..i]=nil
+end
+for i,v in pairs(STRINGS.GOATMUM_CRAVING_MATCH) do
+	if string.find(t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i],'%%s') then 
+		t.SpeechHashTbl.GOATMUM_CRAVING_HINTS.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i] or v
+		t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i]=nil
+	end
+end
+for i,v in pairs(STRINGS.GOATMUM_CRAVING_MISMATCH) do
+	if string.find(t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i],'%%s') then 
+		t.SpeechHashTbl.GOATMUM_CRAVING_HINTS.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i] or v
+		t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i]=nil
+	end
+end
 
+
+t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2={Eng2Rus={}}
+for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS_PART2) do
+	t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2."..i] or v
+	t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2."..i]=nil
+end
+for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS_PART2_IMPATIENT) do
+	t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2_IMPATIENT."..i] or v
+	t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2_IMPATIENT."..i]=nil
+end
+
+t.SpeechHashTbl.GOATMUM_CRAVING_MAP={Eng2Rus={}}
+for i,v in pairs(STRINGS.GOATMUM_CRAVING_MAP) do
+	t.SpeechHashTbl.GOATMUM_CRAVING_MAP.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MAP."..i] or v
+	t.PO["STRINGS.GOATMUM_CRAVING_MAP."..i]=nil
+end
+
+
+t.SpeechHashTbl.GOATMUM_WELCOME_INTRO={Eng2Rus={}}
+for i,v in pairs(STRINGS.GOATMUM_WELCOME_INTRO) do
+	t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_WELCOME_INTRO."..i] or v
+	t.PO["STRINGS.GOATMUM_WELCOME_INTRO."..i]=nil
+end
+for i,v in pairs(STRINGS.GOATMUM_LOST) do
+	t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_LOST."..i] or v
+	t.PO["STRINGS.GOATMUM_LOST."..i]=nil
+end
+for i,v in pairs(STRINGS.GOATMUM_VICTORY) do
+	t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_VICTORY."..i] or v
+	t.PO["STRINGS.GOATMUM_VICTORY."..i]=nil
+end
+for i,v in pairs(STRINGS.GOATMUM_CRAVING_MATCH) do
+	if t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i] then 
+		t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i] or v
+		t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i]=nil
+	end
+end
+for i,v in pairs(STRINGS.GOATMUM_CRAVING_MISMATCH) do
+	if t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i] then 
+		t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i] or v
+		t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i]=nil
+	end
+end
 
 --t.SpeechHashTbl.PIGTALKS={}
 --t.SpeechHashTbl.BUNNYMANTALKS={}
@@ -1920,12 +1991,28 @@ function t.GetFromSpeechesHash(message, char)
 	return message, mentions
 end
 
-
+local function GetMentioned1(message)
+	for i,v in pairs(t.SpeechHashTbl.GOATMUM_CRAVING_HINTS.Eng2Rus) do
+		local regex=string.gsub(i,"%.","%%.")
+		regex=string.gsub(regex,"{craving}","(.-)")
+		regex=string.gsub(regex,"{part2}","(.+)")
+		-- print(regex)
+		local mentions={string.match(message,"^"..(regex).."$")}
+		if mentions and #mentions>0 and  string.find(mentions[1],'%.%.%.')==nil then
+			-- print(v,mentions[1])
+			-- if #mentions>1 then print(mentions[2]) end
+			return v, mentions --возвращаем перевод (с незаменёнными %s) и список отсылок
+		end
+	end
+	return nil
+end
+-- _G.GetMentioned=GetMentioned1
+-- _G.t=t
 --Переводит сообщение на русский, пользуясь хеш-таблицами
 --message - сообщение на английском
 --entity - ссылка на говорящего это сообщение персонажа
 function t.TranslateToRussian(message, entity)
---	print("t.TranslateToRussian", message, entity)
+	--print("t.TranslateToRussian", message, entity.prefab)
 	if not (entity and entity.prefab and entity.components.talker and type(message)=="string") then return message end
 	if entity:HasTag("playerghost") then --Если это реплика игрока-привидения
 		message=string.gsub(message,"h","у")
@@ -1938,9 +2025,39 @@ function t.TranslateToRussian(message, entity)
 --	elseif entity.prefab=="bunnyman" then --Если это реплика зайца
 --		return t.SpeechHashTbl.BUNNYMANTALKS[message] or message
 	end
+
+	
+	if entity.prefab =='quagmire_goatmum' then
+
+		if t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[message] then 
+			return t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[message]
+		end
+
+		local NotTranslated=message
+		local msg, mentions=GetMentioned1(message)
+		message=msg or message
+
+		if NotTranslated==message then return message end
+		local part2
+		local craving
+		if mentions and #mentions>0 and mentions[1] then
+			craving=t.SpeechHashTbl.GOATMUM_CRAVING_MAP.Eng2Rus[mentions[1]]
+			if #mentions>1 then
+				part2=t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2.Eng2Rus[mentions[2]]
+			end
+			if  #mentions==1 and craving then
+				message=string.format(message,craving)
+			elseif #mentions==2 and craving and part2 then
+				message=string.format(message,craving,part2)
+			end	
+		end
+		return message
+	end
+
 	if t.SpeechHashTbl.EPITAPHS[message] then --если это описание эпитафии
 		return t.SpeechHashTbl.EPITAPHS[message]
 	end
+
 	local ent=entity
 	entity=entity.prefab:upper()
 	if entity=="WILSON" then entity="GENERIC" end
@@ -2032,7 +2149,7 @@ if rawget(_G,"Networking_Talk") then
 	local OldNetworking_Talk=_G.Networking_Talk
 
 	function Networking_Talk(guid, message, ...)
---		print("Networking_Talk", guid, message, ...)
+		-- print("Networking_Talk", guid, message, ...)
 		local entity = _G.Ents[guid]
 		message=t.TranslateToRussian(message,entity) or message --Переводим на русский
 		if OldNetworking_Talk then OldNetworking_Talk(guid, message, ...) end
@@ -3489,7 +3606,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			end
 		end
 	end)
-	
+
 	AddClassPostConstruct("widgets/writeablewidget", function(self)
 		if self.menu and self.menu.items then
 			local translations={["Cancel"]="Отмена",["Random"]="Случайно",["Write it!"]="Написать!"}
