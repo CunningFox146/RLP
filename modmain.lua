@@ -3639,10 +3639,11 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			if val and key and t.SpeechHashTbl.NAMES.Eng2Key then
 				t.SpeechHashTbl.NAMES.Eng2Key[val] = key
 				t.SpeechHashTbl.NAMES.Rus2Eng[t.PO[fullkey] or val] = val
-			end
 			
-			STRINGS.NAMES[string.upper(inst.prefab)]=t.PO["STRINGS.NAMES."..string.upper(inst.prefab)]
-			inst.name = STRINGS.NAMES[string.upper(inst.prefab)]
+			
+				STRINGS.NAMES[string.upper(inst.prefab)]=t.PO["STRINGS.NAMES."..string.upper(inst.prefab)]
+				inst.name = STRINGS.NAMES[string.upper(inst.prefab)]
+			end
 		end
 	end)
 
