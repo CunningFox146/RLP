@@ -3380,8 +3380,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 				if string.sub(name,1,#STRINGS.WITHEREDITEM)==STRINGS.WITHEREDITEM then Prefix=STRINGS.WITHEREDITEM 
 				elseif string.sub(name,1,#STRINGS.SMOLDERINGITEM)==STRINGS.SMOLDERINGITEM then Prefix=STRINGS.SMOLDERINGITEM 
 				end
-				local puresalt = string.sub(STRINGS.NAMES.QUAGMIRE_SALTED_FOOD_FMT,1,6)
-				if string.sub(name,1,#puresalt)==puresalt then Prefix=puresalt end
+
 				if Prefix then --Нашли префикс. Меняем его и удаляем из имени для его дальнейшей корректной обработки
 					name=string.sub(name,#Prefix+2)--Убираем префикс из имени
 					if act then
