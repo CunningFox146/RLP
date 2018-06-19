@@ -3636,8 +3636,10 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			if t.PO[fullkey] then
 				t.PO[fullkey] = ExtractMeta(t.PO[fullkey], key)
 			end
-			t.SpeechHashTbl.NAMES.Eng2Key[val] = key
-			t.SpeechHashTbl.NAMES.Rus2Eng[t.PO[fullkey] or val] = val
+			if val and key and t.SpeechHashTbl.NAMES.Eng2Key then
+				t.SpeechHashTbl.NAMES.Eng2Key[val] = key
+				t.SpeechHashTbl.NAMES.Rus2Eng[t.PO[fullkey] or val] = val
+			end
 			
 			STRINGS.NAMES[string.upper(inst.prefab)]=t.PO["STRINGS.NAMES."..string.upper(inst.prefab)]
 			inst.name = STRINGS.NAMES[string.upper(inst.prefab)]
