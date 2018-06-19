@@ -1,6 +1,6 @@
 _G = GLOBAL
 
-_G.CHEATS_ENABLED = true
+--_G.CHEATS_ENABLED = true
 
 mods = _G.rawget(_G, "mods")
 if not mods then
