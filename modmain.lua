@@ -3610,6 +3610,21 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			end
 		end
 	end)
+	
+	AddClassPostConstruct("widgets/quagmire_recipepopup", function(self) --Для горга то же самое
+		local _Refresh = self.Refresh or function(...) end
+		
+		function self:Refresh(...)
+			_Refresh(self, ...)
+			
+			if self.desc then
+				self.desc:SetSize(28)
+				--Перезаписмываем строку
+				self.desc:SetString("")
+				self.desc:SetMultilineTruncatedString(STRINGS.RECIPE_DESC[string.upper(self.recipe.product) or "ERROR!"], 2, 320, nil, true)
+			end
+		end
+	end)
 
 	--Зашифрованные строки загружаются после модов, поэтому сделал такой вот хак
 	AddClassPostConstruct("widgets/redux/quagmire_recipebook", function(self)
