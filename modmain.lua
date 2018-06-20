@@ -3662,6 +3662,40 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		end
 	end)
 
+	--Перевод настроек приватности при создании сервера
+	AddClassPostConstruct("screens/redux/cloudserversettingspopup", function(self)
+		PRIVACY_TYPE =
+		{
+		    PUBLIC = 0,
+		    FRIENDS = 1,
+		    LOCAL = 2,
+		    CLAN = 3,
+		}
+		local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
+		function self:RefreshPrivacyButtons()
+			oldRefreshPrivacyButtons(self)
+			for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
+				v.button.text:SetFont(_G.NEWFONT)
+				v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
+			end  
+		end
+		if self.privacy_type and self.privacy_type.buttons and self.privacy_type.buttons.buttonwidgets then
+			for _,option in pairs(self.privacy_type.buttons.options) do
+				if option.data==PRIVACY_TYPE.PUBLIC then
+					option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.PUBLIC
+				end
+				if option.data==PRIVACY_TYPE.CLAN then
+					option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.CLAN
+				end
+			end 
+			for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
+				v.button.text:SetFont(_G.NEWFONT)
+				v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
+			end   
+		end
+		self.privacy_type.buttons:UpdateButtons()
+	end)
+
 	AddClassPostConstruct("widgets/writeablewidget", function(self)
 		if self.menu and self.menu.items then
 			local translations={["Cancel"]="Отмена",["Random"]="Случайно",["Write it!"]="Написать!"}
