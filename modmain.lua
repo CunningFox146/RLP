@@ -4018,9 +4018,38 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		end
 	end)
 	
+	--Не переводится т.к. таблица создаётся до загрузки модов.
+	AddClassPostConstruct("screens/redux/hostcloudserverpopup", function(self)
+		local phases =
+		{
+			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_GETTINGREGIONS"],         -- eRequestingPingServers,
+			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_DETERMININGREGION"],      -- eWaitingForPingEndpoints,
+			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_DETERMININGREGION"],      -- eReadyToPing,
+			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_REQUESTINGSERVER"],       -- eWaitingForPingResults,
+			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_REQUESTINGSERVER"],       -- eReadyToRequestServer,
+			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_WAITINGFORWORLD"],        -- eWaitingForServer,
+			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_CONNECTINGTOSERVER"],     -- eServerReady,
+		}
+		
+		local _OnUpdate = self.OnUpdate or function(...) end
+		function self:OnUpdate(dt)
+			_OnUpdate(self, dt)
+			
+			local cloudServerRequestState = _G.TheNet:GetCloudServerRequestState() or 0
+			
+			if cloudServerRequestState >= 8 then return end
+			
+			self.status_msg:SetString("")
+			self.status_msg:SetString(phases[cloudServerRequestState] or "")
+		end
+	end)
+	
 	--Русификация модов. Подгружаем в самом конце (!!!)
 	if t.IsModTranslEnabled ~= t.ModTranslationTypes.disabled then
+		print("RLP: Загрузка перевода модов...")
 		modimport("scripts/mod_rusification/mod_russification_main.lua")
+	else
+		print("RLP: Загрузка перевода модов отключена.")
 	end
 	
 end --t.CurrentTranslationType~=t.TranslationTypes.ChatOnly
