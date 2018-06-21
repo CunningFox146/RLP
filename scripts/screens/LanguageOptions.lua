@@ -1072,7 +1072,7 @@ function LanguageOptions:OnControl(control, down)
 			self:ChangeLogPage(-1)
     		end
 		elseif control == CONTROL_ACTION then
-			if self.updateoptionsspinner.focus then
+			if self.updateoptionsspinner and self.updateoptionsspinner.focus then
 				TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
 				self.updateoptionsspinner:Next(true)
 			end
