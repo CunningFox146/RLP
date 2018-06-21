@@ -7,7 +7,7 @@ local Image = require "widgets/image"
 local ImageButton = require "widgets/imagebutton"
 local UIAnim = require "widgets/uianim"
 local Widget = require "widgets/widget"
-local TEMPLATES = require "widgets/templates"
+local TEMPLATES = require "widgets/redux/templates"
 
 
 local MATERIALS =
@@ -25,7 +25,10 @@ local MATERIALS =
 local ErrorPopup = Class(Screen, function(self, buttons, spacing_override)
 	Screen._ctor(self, "ErrorPopup")
 
-    --assert(MATERIALS)
+    local function CreateCheckBox(labeltext, onclicked, checked)
+        local w = TEMPLATES.OptionsLabelCheckbox(onclicked, labeltext, checked, 200, 200, 200, 50, 5, UIFONT, 35, -50)
+        return w.button
+    end
 
     self.black = self:AddChild(ImageButton("images/global.xml", "square.tex"))
     self.black.image:SetVRegPoint(ANCHOR_MIDDLE)
@@ -52,13 +55,28 @@ local ErrorPopup = Class(Screen, function(self, buttons, spacing_override)
 
     --text
     self.text = self.proot:AddChild(Text(CHATFONT, 25))
-    self.text:SetPosition(5, -15, 0)
+    self.text:SetPosition(5, 5, 0)
     self.text:SetString("У Вас включён режим \"Маленькие текстуры (Small Textutes)\". В этом режиме Klei отключили загрузку всех шрифтов, кроме основных, из-за чего некоторые буквы могут стать вопросами (???). Мы сделали обход, но он может не сработать. Вы предупреждены.")
     self.text:SetColour({1,1,1,1})
     self.text:EnableWordWrap(true)
     self.text:SetRegionSize(500, 160)
     self.text:SetVAlign(ANCHOR_MIDDLE)
-    
+	
+	self.show_agin = self.proot:AddChild(CreateCheckBox("",
+		function()
+			local opt_in = Profile:GetShowSTWarning()
+			
+			Profile:SetShowSTWarning(not opt_in)
+
+			return not opt_in
+		end,
+		Profile:GetShowSTWarning()
+	))
+    self.show_agin:SetPosition(-100, -77)
+	
+	self.show_agin.txt = self.show_agin:AddChild(Text(CHATFONT, 25, "Не показывать при запуске"))
+	self.show_agin.txt:SetPosition(self.show_agin.txt:GetRegionSize()*.5+15, 2)
+	
     local spacing = spacing_override or 200
 
 	self.menu = self.proot:AddChild(Menu(buttons, spacing, true))

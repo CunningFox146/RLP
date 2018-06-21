@@ -249,8 +249,7 @@ local LanguageOptions = Class(Screen, function(self)
 	self.URLButton:SetFocusChangeDir(MOVE_UP, self.TranslationTypeSpinner)
 	self.URLButton:SetFocusChangeDir(MOVE_DOWN, self.backbutton)
 	self.backbutton:SetFocusChangeDir(MOVE_UP, self.URLButton)
-	
-	
+	----------------------------------------------------------------------
 	
 	self.logspanel = self.root:AddChild(Widget("logspanel"))
 	self.logspanel:SetPosition(right_col,0,0)

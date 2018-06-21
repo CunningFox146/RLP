@@ -221,6 +221,18 @@ local function GetLocalizaitonValue(self,name) --Метод, возвращаю�
 		return self:GetValue(tostring(name))
 	end
 end
+--Так же делаем для маленьких текстур
+local function SetShowSTWarning(self,value)
+	print("SetShowSTWarning", tostring(value))
+	self:SetValue("show_st_warning", value)
+	self.dirty = true
+	self:Save() --Сохраняем сразу, поскольку у нас нет кнопки "применить"
+end
+
+local function GetShowSTWarning(self)
+	print("GetShowSTWarning", tostring(self:GetValue("show_st_warning")))
+	return self:GetValue("show_st_warning")
+end
 
 --Расширяем функционал PlayerProfile дополнительной инициализацией двух методов и заданием дефолтных значений опций нашего перевода.
 --После обновления ни один из этих способов не работает, поэтому делаем тупо через require.
@@ -241,6 +253,9 @@ do
 	
 	self.SetLocalizaitonValue=SetLocalizaitonValue --метод задачи значения опции
 	self.GetLocalizaitonValue=GetLocalizaitonValue --метод получения значения опции
+	
+	self.SetShowSTWarning = SetShowSTWarning
+	self.GetShowSTWarning = GetShowSTWarning
 end
 
 function t.escapeR(str) --Удаляет \r из конца строки. Нужна для строк, загружаемых в юниксе.
@@ -495,13 +510,14 @@ do
 	function _G.Start() 
 		ApplyLocalizedFonts()
 		OldStart()
-			if _G.TheFrontEnd ~= nil and _G.TheFrontEnd:GetGraphicsOptions():IsSmallTexturesMode() and _G.TheWorld == nil then -- Не запускаем в игре. Только в лобби
-			
+		--Не запускаем в игре. Только в лобби
+		if _G.Profile and _G.TheFrontEnd and _G.TheFrontEnd:GetGraphicsOptions():IsSmallTexturesMode() and not _G.InGamePlay() and _G.Profile.GetShowSTWarning and not _G.Profile:GetShowSTWarning() then
+		--if _G.TheFrontEnd ~= nil and _G.TheFrontEnd:GetGraphicsOptions():IsSmallTexturesMode() and not _G.InGamePlay() then
 			local PopupDialogScreen = require "screens/ErrorPopup"
-				_G.TheFrontEnd:PushScreen(PopupDialogScreen(
-				{{text="Ok.", cb = function() 
-					_G.TheFrontEnd:PopScreen() 
-				end}}))
+			_G.TheFrontEnd:PushScreen(PopupDialogScreen(
+			{{text="Ok", cb = function() 
+				_G.TheFrontEnd:PopScreen() 
+			end}}))
 		end
 	end
 end
@@ -4043,6 +4059,9 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			self.status_msg:SetString(phases[cloudServerRequestState] or "")
 		end
 	end)
+	
+	--"Достать печь"
+	--_G.ACTIONS
 	
 	--Русификация модов. Подгружаем в самом конце (!!!)
 	if t.IsModTranslEnabled ~= t.ModTranslationTypes.disabled then
