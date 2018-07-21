@@ -15,10 +15,10 @@ Assets = {
     _G.Asset( "ATLAS", "images/frontscreen.xml" ),
 	
 	_G.Asset( "IMAGE", "images/tradescreen.tex" ),
-	_G.Asset( "IMAGE", "images/tradescreen.xml" ),
+	_G.Asset( "ATLAS", "images/tradescreen.xml" ),
 	
 	_G.Asset( "IMAGE", "images/tradescreen_overflow.tex" ),
-	_G.Asset( "IMAGE", "images/tradescreen_overflow.xml" ),
+	_G.Asset( "ATLAS", "images/tradescreen_overflow.xml" ),
 }
 --Вставляем проверку на наличие старого русификатора.
 local IS_ENABLED_OLD_RLP
