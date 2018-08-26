@@ -1,19 +1,15 @@
 _G = GLOBAL
 
---_G.CHEATS_ENABLED = true
-
 mods = _G.rawget(_G, "mods")
 if not mods then
 	mods = {}
 	_G.rawset(_G, "mods", mods)
 end
-Assets = {
-    _G.Asset( "IMAGE", "images/rus_button_icon.tex" ),
-    _G.Asset( "ATLAS", "images/rus_button_icon.xml" ),
 
-    _G.Asset( "IMAGE", "images/frontscreen.tex" ),
-    _G.Asset( "ATLAS", "images/frontscreen.xml" ),
+PrefabFiles = {
+	"russian_assets"
 }
+
 --Вставляем проверку на наличие старого русификатора.
 local IS_ENABLED_OLD_RLP
 if mods.RussianLanguagePack ~= nil and mods.RussianLanguagePack ~= {} or _G.KnownModIndex:IsModEnabled("workshop-354836336") or _G.KnownModIndex:IsModEnabled("workshop-1224043697") then
@@ -36,11 +32,10 @@ t.TranslationTypes = {Full = "Full", InterfaceChat = "InterfaceChat", ChatOnly =
 t.ModTranslationTypes = {enabled = "enabled", disabled = "disabled"}
 t.CurrentTranslationType = nil
 t.IsModTranslEnabled = nil
-t.SteamURL = "http://steamcommunity.com/sharedfiles/filedetails/?id=1240565842"
 t.SteamID = "1240565842"
+t.SteamURL = "http://steamcommunity.com/sharedfiles/filedetails/?id="..t.SteamID
 t.SelectedLanguage = "ru"
 
-t.DataFile = "scripts/rlp_data.json"--Сюда будем записывать разную инфу
 --Склонения
 t.AdjectiveCaseTags = {	nominative = "nom", --Именительный	Кто/что
 						accusative = "acc", --Винительный	Кого/что
@@ -67,6 +62,18 @@ require = _G.require
 dumptable = _G.dumptable
 GetPlayer = rawget(_G, "ThePlayer") and (function() return ThePlayer end) or _G.GetPlayer
 TheSim = _G.TheSim
+
+if true then
+	_G.CHEATS_ENABLED = true
+	
+	local to_test = require "screens/LanguageOptions"
+
+	local function test_screen()
+		_G.TheFrontEnd:FadeToScreen(_G.TheFrontEnd:GetActiveScreen(), function() return to_test() end, nil, "swipe")
+	end
+
+	_G.TheInput:AddKeyUpHandler(113, test_screen)
+end
 
 --Отключаем предупреждение о модах.
 _G.getmetatable(TheSim).__index.ShouldWarnModsLoaded = function() 
@@ -375,7 +382,7 @@ do
 		if self.rlp_settings == nil then
 			local TheFrontEnd = _G.TheFrontEnd
 
-			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/rus_button_icon.xml", "rus_button.tex", "RLP", false, true, function() 
+			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/rus_button_icon.xml", "rus_button_icon.tex", "RLP", false, true, function() 
 
 				TheFrontEnd:GetSound():KillSound("FEMusic")
 				TheFrontEnd:GetSound():KillSound("FEPortalSFX")
@@ -596,15 +603,10 @@ function _G.Start()
 	OldStart()
 end
 
-
-
-PrefabFiles = {
-	"russian_assets"
-}
-
 modimport("scripts/ver_checker.lua")
 
-if t.CurrentTranslationType==t.TranslationTypes.ChatOnly then
+if t.CurrentTranslationType == t.TranslationTypes.ChatOnly then
+	print("[RLP] Загрузка ChatOnly версии завершена.")
 	return
 end
 
@@ -630,40 +632,6 @@ end
 
 
 
-
-
-
---[[
-Assets = {
-	Asset("ATLAS","images/gradient.xml"), --Градиент на слишком длинных строках лога в настройках перевода
-	Asset("ATLAS","images/rus_mapgen.xml"), --Русифицированные пиктограммы в окне генерирования нового мира
-	--Персонажи
-	Asset("ATLAS","images/rus_locked.xml"), 
-	Asset("ATLAS","images/rus_wickerbottom.xml"), 
-	Asset("ATLAS","images/rus_waxwell.xml"), 
-	Asset("ATLAS","images/rus_willow.xml"), 
-	Asset("ATLAS","images/rus_wilson.xml"), 
-	Asset("ATLAS","images/rus_woodie.xml"), 
-	Asset("ATLAS","images/rus_wes.xml"), 
-	Asset("ATLAS","images/rus_wolfgang.xml"), 
-	Asset("ATLAS","images/rus_wendy.xml"),
-	Asset("ATLAS","images/rus_wathgrithr.xml"),
-	Asset("ATLAS","images/rus_webber.xml"),
-	Asset("ATLAS","images/rus_random.xml"),
-
-	Asset("ATLAS","images/rus_names_wickerbottom.xml"), 
-	Asset("ATLAS","images/rus_names_willow.xml"), 
-	Asset("ATLAS","images/rus_names_wilson.xml"), 
-	Asset("ATLAS","images/rus_names_woodie.xml"), 
-	Asset("ATLAS","images/rus_names_wes.xml"), 
-	Asset("ATLAS","images/rus_names_wolfgang.xml"), 
-	Asset("ATLAS","images/rus_names_wendy.xml"),
-	Asset("ATLAS","images/rus_names_wathgrithr.xml"),
-	Asset("ATLAS","images/rus_names_webber.xml"),
-	Asset("ATLAS","images/rus_names_waxwell.xml"),
-	Asset("ATLAS","images/rus_names_random.xml"),
-}
-]]
 
 
 
@@ -1704,7 +1672,6 @@ elseif t.CurrentTranslationType==t.TranslationTypes.InterfaceChat or t.CurrentTr
 		t.PO={} --Да, вот так. Убираем весь перевод.
 		t.PO["STRINGS.LMB"]=a1
 		t.PO["STRINGS.RMB"]=a2
-		Assets={Assets[1],Assets[2]} --Часть графики тоже отключаем
 	else
 		for i,v in pairs(t.PO) do
 			if string.sub(i,8+1,8+3)~="UI." then t.PO[i]=nil end
@@ -2226,6 +2193,7 @@ end
 end--]]
 
 --Мамка не говорит фразы на русском, значит заставляем её.
+--[[
 AddClassPostConstruct("components/talker", function(self)
 	local _Say = self.Say
 	
@@ -2239,7 +2207,7 @@ AddClassPostConstruct("components/talker", function(self)
 				)
 			
 				if self.inst.prefab=="quagmire_goatmum"	then
-					print("Мамка сказала:", tostring(display_message))
+					--print("Мамка сказала:", tostring(display_message))
 					local mum=nil
 					local j=0
 					local sayings={"SNACK","MEAT","SOUP","VEGETABLE","FISH","BREAD","CHEESE","PASTA","DESSERT"}
@@ -2252,7 +2220,7 @@ AddClassPostConstruct("components/talker", function(self)
 							end
 							
 							if table.contains(sayings,mum) then
-								print("Корммим мамку этим: "..tostring(mum))
+								--print("Корммим мамку этим: "..tostring(mum))
 							end
 						end
 					end
@@ -2262,7 +2230,7 @@ AddClassPostConstruct("components/talker", function(self)
 		
 		return _Say(self, script, time, noanim, ...)
 	end
-end)
+end)]]
 
 local SKETCHES = 
 {
@@ -2319,7 +2287,7 @@ AddPrefabPostInit("skeleton_player", function(inst)
 			if t.SpeechHashTbl.NAMES.Rus2Eng[killer] and inst.pkname == nil then
 				local mentions=t.SpeechHashTbl.NAMES.Rus2Eng[killer]
 				killerkey=t.SpeechHashTbl.NAMES.Eng2Key[mentions] --Получаем ключ имени убийцы
-				print(killerkey)
+				print("[RLP DEBUG] 2302 "..killerkey)
 				if not killerkey and key=="WX78" then --тут только полный перебор, т.к. он говорит всё в верхнем регистре
 					for eng, key in pairs(t.SpeechHashTbl.NAMES.Eng2Key) do
 						if eng:upper()==mentions then killerkey = key break end
@@ -3118,7 +3086,7 @@ end
 _G.TranslateStringTable(_G.STRINGS)
 
 
-
+--[[
 local function fixupper()
 	print("fixupper begin")
 	local f = io.open(MODROOT.."russian_new_.po")
@@ -3176,7 +3144,7 @@ local function fixupper()
 	print("fixupper end")
 end
 
---fixupper()
+fixupper()]]
 
 
 

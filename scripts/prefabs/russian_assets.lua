@@ -1,54 +1,34 @@
-local mods = rawget(_G, "mods")
-
-if not mods then
-	mods = {}
-	rawset(_G, "mods", mods)
-end
-
+local mods = rawget(_G, "mods") or {}
 local t = mods.RussianLanguagePack
 
 --Это подгружаем всегда
 local assets =
 {
+    Asset( "ATLAS", "images/rus_button_icon.xml" ),
+    Asset( "ATLAS", "images/frontscreen.xml" ),
+
     Asset("ANIM", "anim/text_sparkle.zip"),
     Asset("ANIM", "anim/mods_button.zip"),
 	
     Asset("ATLAS", "images/rusif_icon.xml"),
-    Asset("IMAGE", "images/rusif_icon.tex"),
 	
 	Asset("ATLAS","images/eyebutton.xml"),
-	Asset("IMAGE","images/eyebutton.tex"),
 	
 	Asset("ATLAS","images/rus_group.xml"),
-	Asset("IMAGE","images/rus_group.tex"),
 	
 	Asset("ATLAS","images/rus_wiki.xml"),
-	Asset("IMAGE","images/rus_wiki.tex"),
 	
 	Asset("ATLAS","images/vk_group.xml"),
-	Asset("IMAGE","images/vk_group.tex"),
 	
 	Asset("ATLAS","images/web_button.xml"),
-	Asset("IMAGE","images/web_button.tex"),
 	
 	Asset("ATLAS","images/text_bg.xml"),
-	Asset("IMAGE","images/text_bg.tex"),
-	
-	Asset("ATLAS","images/black_fill.xml"),
-	Asset("IMAGE","images/black_fill.tex"),
 	
 	Asset("ATLAS","images/inf_btn.xml"),
-	Asset("IMAGE","images/inf_btn.tex"),
 }
 
 if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё остальное
-	local function AddAssets(arr)
-		for i,v in ipairs(arr) do
-			table.insert(assets, v)
-		end
-	end
-
-	AddAssets({
+	local ass = {
 		Asset("ATLAS","images/gradient.xml"), --Градиент на слишком длинных строках лога в настройках перевода
 		Asset("ATLAS","images/rus_mapgen.xml"), --Русифицированные пиктограммы в окне генерирования нового мира
 		--Персонажи
@@ -91,12 +71,12 @@ if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё ост�
 		Asset("ATLAS","images/rus_names_gold_random.xml"),
 		Asset("ATLAS","images/rus_names_gold_wx78.xml"),
 		Asset("ATLAS","images/rus_names_gold_winona.xml"),
-	})
-end	
-	
---На самом деле префаб не деаем. Это только для assets
-local function fn()
-    return CreateEntity()
-end
+	}
 
-return Prefab("russian_assets", fn, assets)
+	for _, v in ipairs(ass) do
+		table.insert(assets, v)
+	end
+end	
+
+
+return Prefab("russian_assets", function() return CreateEntity() end, assets)

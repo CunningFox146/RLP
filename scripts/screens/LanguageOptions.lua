@@ -124,15 +124,16 @@ local LanguageOptions = Class(Screen, function(self)
 	self.updateoptionstitle_fx:Hide()
 	
 	self.updateoptionstitle.modicon = self.updateoptionstitle:AddChild(Image("images/rusif_icon.xml", "rusif_icon.tex"))
-	self.updateoptionstitle.modicon:SetScale(.380, .380, 1)
+	self.updateoptionstitle.modicon:SetScale(.5)
 	self.updateoptionstitle.modicon:Hide()
 	
 	self.updateoptionstitle.modicon.version = self.updateoptionstitle.modicon:AddChild(Image("images/ui.xml", "button_small.tex"))
-	self.updateoptionstitle.modicon.version:SetPosition(100, -137, 1)
-	self.updateoptionstitle.modicon.version:SetScale(1.5, 1.5, 1)
+	self.updateoptionstitle.modicon.version:SetPosition(72, -105, 0)
+	self.updateoptionstitle.modicon.version:SetScale(1.5)
 	
     self.updateoptionstitle.modicon.version.text = self.updateoptionstitle.modicon.version:AddChild(Text(UIFONT, 25))
     self.updateoptionstitle.modicon.version.text:SetString("Версия: "..t.modinfo.version)
+    self.updateoptionstitle.modicon.version.text:SetPosition(0, -2)
 	
 	
 	--Красивая шту4ка
@@ -182,11 +183,6 @@ local LanguageOptions = Class(Screen, function(self)
 		{text = "Интерфейс и чат", data = t.TranslationTypes.InterfaceChat, description = "Переведён только интерфейс и чат. Пригодится тем, кто привык к оригинальной английской терминологии."},
 		{text = "Только чат", data = t.TranslationTypes.ChatOnly, description = "Подойдёт тем, кто не хочет перевода игры. Подгружаются только русские шрифты."}
 	}
-	
-	--Под этим всем нужна чтука, перекрывающая штуку сверху
-	self.SeparatorBG = self.updateoptionspanelbg:AddChild(Image("images/black_fill.xml", "black_fill.tex"))
-	self.SeparatorBG:SetScale(.525, .5, 1)
-	self.SeparatorBG:SetPosition(0,-55,1)
 	
 	--Нам нужен bg. Выше спинера
 	self.SpinnerBG = self.updateoptionspanel:AddChild(Image("images/ui.xml", "single_option_bg_large_gold.tex"))
