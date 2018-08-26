@@ -31,6 +31,8 @@ if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё ост�
 	local ass = {
 		Asset("ATLAS","images/gradient.xml"), --Градиент на слишком длинных строках лога в настройках перевода
 		Asset("ATLAS","images/rus_mapgen.xml"), --Русифицированные пиктограммы в окне генерирования нового мира
+		Asset("ATLAS","images/tradescreen_overflow.xml"), --Экран обмена
+		Asset("ATLAS","images/tradescreen.xml"), --Экран обмена
 		--Персонажи
 		Asset("ATLAS","images/rus_locked.xml"), 
 		Asset("ATLAS","images/rus_wickerbottom.xml"), 
