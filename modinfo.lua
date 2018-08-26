@@ -1,9 +1,9 @@
 name = "Russification Pack for DST"
-version = "1.9"
+version = "1.10"
 
 local desc = {
 	en = "\nThe best russian localisation at the moment. Soure code was taken from the Russian Language Pack. Special thanks to Some1 and Alevastor!\n\nVersion: "..version,
-	ru = "\nЛучший, на данный момент, русификатор. Код для базы был взят из мода Russian Language Pack. Огромное спасибо Some1'у и Alevastor'у за проделанную работу!\n\nВерсия: "..version
+	ru = "\nЛучший, на данный момент, русификатор. Код для базы был взят из мода Russian Language Pack. Огромное спасибо Some1'у и Alevastor'у за проделанную работу!\n\nНовый логотип был сделан Globalastick'ом.\n\t\nВерсия: "..version
 }
 
 description = language and desc[language] or desc["en"]

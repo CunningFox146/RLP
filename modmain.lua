@@ -63,7 +63,7 @@ dumptable = _G.dumptable
 GetPlayer = rawget(_G, "ThePlayer") and (function() return ThePlayer end) or _G.GetPlayer
 TheSim = _G.TheSim
 
-if true then
+if false then
 	_G.CHEATS_ENABLED = true
 	
 	local to_test = require "screens/LanguageOptions"
