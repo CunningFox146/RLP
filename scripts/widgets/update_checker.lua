@@ -32,26 +32,13 @@ local UpdateChecker = Class(Widget, function(self)
 	
 	self:Hide()
 	
-	self.inst:DoTaskInTime(0, function() self:SyncVersion() end)
+	self.inst:DoTaskInTime(1, function() self:SyncVersion() end)
 end)
 
-function UpdateChecker:SyncVersion()	
-	TheSim:QueryServer("https://cunningfox146.github.io",
-		function( result, isSuccessful, resultCode )
-			if isSuccessful and string.len(result) > 1 and resultCode == 200 then
-				self.last_ver = result
-			
-				print("[RusificationSyncVersion]: Current version - "..tostring(t.modinfo.version)..". Last version - "..tostring(self.last_ver))
-			else
-				print("[RusificationSyncVersion]: ERROR! FAILED TO LOAD LAST VERSION!")
-				self.is_error = true
-			end
-		end,
-	"GET")
-	
-	self.inst:DoTaskInTime(1 + math.random(), function()
-		if not self.is_error and self.last_ver ~= nil and t.modinfo.version ~= self.last_ver then
-			self.last_ver_text:SetString(self.last_ver)
+function UpdateChecker:SyncVersion()
+	t.VerChecker:GetData(function(data)
+		if data.last_ver ~= nil and t.modinfo.version ~= data.last_ver then
+			self.last_ver_text:SetString(data.last_ver)
 			self.last_ver_text:SetColour(COLOUR_RED)
 			
 			self:Show()

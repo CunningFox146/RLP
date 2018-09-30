@@ -60,8 +60,11 @@ assert = _G.assert
 rawget = _G.rawget
 require = _G.require
 dumptable = _G.dumptable
-GetPlayer = rawget(_G, "ThePlayer") and (function() return ThePlayer end) or _G.GetPlayer
 TheSim = _G.TheSim
+
+local VerChecker = require "ver_checker"
+t.VerChecker = VerChecker
+VerChecker:GetData()
 
 if false then
 	_G.CHEATS_ENABLED = true
@@ -276,6 +279,14 @@ _G.getmetatable(TheSim).__index.UnregisterAllPrefabs = (function()
 		ApplyLocalizedFonts()
 	end
 end)()
+
+local UpdateChecker = require("widgets/update_checker")
+--А теперь виджет и принты
+AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self, ...)
+	self.update_checker = self.fixed_root:AddChild(UpdateChecker())
+	self.update_checker:SetScale(.7)
+	self.update_checker:SetPosition(500, -100)
+end)
 
 --Вставляем функцию, подключающую русские шрифты
 local OldRegisterPrefabs = _G.ModManager.RegisterPrefabs --Подменяем функцию,в которой нужно подгрузить шрифты и исправить глобальные шрифтовые константы
@@ -2273,7 +2284,7 @@ AddPrefabPostInit("skeleton_player", function(inst)
 			_G.GetDescription=oldGetDescription
 			if not message then return message end
 
-			local player=rawget(_G,"ThePlayer") or _G.GetPlayer()
+			local player=_G.ThePlayer
 			local key=player and player.prefab:upper() or "GENERIC"
 --				local key=inst.char:upper()
 			local deadgender=_G.GetGenderStrings(inst.char)
@@ -3089,7 +3100,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		function self:StartTimer()
 			self:oldStartTimer()
 			if self.survived_message then
-				local age = self.owner.Network:GetPlayerAge()
+				local age = self.owner.Network:ThePlayerAge()
 				local newmsg=self.survived_message:GetString()
 				self.survived_message:SetString(newmsg:gsub("дней",StringTime(age),1))
 			end
@@ -3347,7 +3358,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		function GetAdjectiveNew(self)
 			local str=GetAdjectiveOld(self)
 			if str and self.prefab then
-				local player=rawget(_G,"ThePlayer") or _G.GetPlayer()
+				local player=_G.ThePlayer
 				local act=player.components.playercontroller:GetLeftMouseAction() --Получаем текущее действие
 				if act then act=act.action.id or "NOACTION" else act="NOACTION" end
 				str=FixPrefix(str,act,self.prefab) --склоняем окончание префикса
@@ -3389,7 +3400,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		function GetDisplayNameNew(self, act) --Подмена функции, выводящей название предмета. В ней реализовано склонение в зависимости от действия (переменная аct)
 
 			local name = GetDisplayNameOld(self)
-			local player = rawget(_G,"ThePlayer") or _G.GetPlayer()
+			local player = _G.ThePlayer
 			
 		--	if not player then return name end --Если не удалось получить instance игрока, то возвращаем имя на англ. и выходим
 			

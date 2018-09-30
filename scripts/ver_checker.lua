@@ -1,7 +1,20 @@
-local UpdateChecker = require("widgets/update_checker")
---А теперь виджет и принты
-AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self, ...)
-	self.update_checker = self.fixed_root:AddChild(UpdateChecker())
-	self.update_checker:SetScale(.7)
-	self.update_checker:SetPosition(500, -100)
-end)
+local VerChecker = {
+	URL = "https://cunningfox146.github.io/RLP.htm",
+}
+
+function VerChecker:GetData(fn)
+	if VerChecker.data then
+		fn(VerChecker.data)
+	end
+	-- Но всё равно обновляем
+	TheSim:QueryServer(VerChecker.URL, function (result, isSuccessful, resultCode)
+		if resultCode ~= 200 or not isSuccessful or #result < 1 then
+			print("[VerChecker]: Server Error.")
+			return
+		end
+		print("[VerChecker]: Got data:", result)
+		VerChecker.data = json.decode(result)
+	end, "GET")
+end
+
+return VerChecker
