@@ -2505,6 +2505,14 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 			-- 	self.new_items.items.text:SetString("Декоративный столик \"Драконья муха\"")
 			-- end
 		end
+		if self.most_friend and self.most_friend.name and self.most_friend.name.SetRegionSize then 
+			if self.most_friend.name.GetRegionSize then
+				local w,h = self.most_friend.name:GetRegionSize()
+				self.most_friend.name:SetRegionSize(w+100,h+50)
+			else
+				self.most_friend.name:SetRegionSize(400,100)
+			end
+		end
 		if self.most_died and self.most_died.name and self.most_died.name.SetRegionSize then 
 			if self.most_died.name.GetRegionSize then
 				local w,h = self.most_died.name:GetRegionSize()
