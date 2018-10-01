@@ -1978,6 +1978,9 @@ function t.GetFromSpeechesHash(message, char)
 		message = msg or message
 		--если есть разные варианты переводов, то выбираем один из них случайным образом
 		message = (type(message)=="table") and _G.GetRandomItem(message) or message
+		if char=="WATHGRITHR" and _G.Profile:IsWathgrithrFontEnabled() then
+			message = message:gsub("о","ö"):gsub("О","Ö") or message
+		end
 		-- if umlautified then
 		-- 	if rawget(_G, "GetSpecialCharacterPostProcess") then
 		-- 		--подменяем русские на английские, чтобы работала Umlautify
@@ -2505,6 +2508,14 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 			-- 	self.new_items.items.text:SetString("Декоративный столик \"Драконья муха\"")
 			-- end
 		end
+		if self.most_friend and self.most_friend.name and self.most_friend.name.SetRegionSize then 
+			if self.most_friend.name.GetRegionSize then
+				local w,h = self.most_friend.name:GetRegionSize()
+				self.most_friend.name:SetRegionSize(w+100,h+50)
+			else
+				self.most_friend.name:SetRegionSize(400,100)
+			end
+		end
 		if self.most_died and self.most_died.name and self.most_died.name.SetRegionSize then 
 			if self.most_died.name.GetRegionSize then
 				local w,h = self.most_died.name:GetRegionSize()
@@ -2640,11 +2651,26 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 				if image_group._text.OldSetMultilineTruncatedString then
 					image_group._text.SetMultilineTruncatedString = function(s,str, maxlines, maxwidth, maxcharsperline, ellipses)
 						maxwidth = maxwidth+20
+						image_group._text:SetSize(20)
 						image_group._text.OldSetMultilineTruncatedString(s,str, maxlines, maxwidth, maxcharsperline, ellipses)
 					end
 				end
 			end
 			self.oldUpdateEquipWidgetForSlot(b,image_group, slot, name)
+		end
+		self.oldUpdateSkinWidgetForSlot=self.UpdateSkinWidgetForSlot
+		self.UpdateSkinWidgetForSlot=function(b,image_group, slot, name)
+			if not image_group._text.OldSetMultilineTruncatedString then
+				image_group._text.OldSetMultilineTruncatedString = image_group._text.SetMultilineTruncatedString
+				if image_group._text.OldSetMultilineTruncatedString then
+					image_group._text.SetMultilineTruncatedString = function(s,str, maxlines, maxwidth, maxcharsperline, ellipses)
+						maxwidth = maxwidth+20
+						image_group._text:SetSize(20)
+						image_group._text.OldSetMultilineTruncatedString(s,str, maxlines, maxwidth, maxcharsperline, ellipses)
+					end
+				end
+			end
+			self.oldUpdateSkinWidgetForSlot(b,image_group, slot, name)
 		end
 
 		self.oldUpdateData=self.UpdateData
