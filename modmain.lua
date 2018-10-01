@@ -1978,7 +1978,7 @@ function t.GetFromSpeechesHash(message, char)
 		message = msg or message
 		--если есть разные варианты переводов, то выбираем один из них случайным образом
 		message = (type(message)=="table") and _G.GetRandomItem(message) or message
-		if char=="WATHGRITHR" then
+		if char=="WATHGRITHR" and _G.Profile:IsWathgrithrFontEnabled() then
 			message = message:gsub("о","ö"):gsub("О","Ö") or message
 		end
 		-- if umlautified then
