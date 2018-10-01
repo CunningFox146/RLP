@@ -2651,11 +2651,26 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 				if image_group._text.OldSetMultilineTruncatedString then
 					image_group._text.SetMultilineTruncatedString = function(s,str, maxlines, maxwidth, maxcharsperline, ellipses)
 						maxwidth = maxwidth+20
+						image_group._text:SetSize(20)
 						image_group._text.OldSetMultilineTruncatedString(s,str, maxlines, maxwidth, maxcharsperline, ellipses)
 					end
 				end
 			end
 			self.oldUpdateEquipWidgetForSlot(b,image_group, slot, name)
+		end
+		self.oldUpdateSkinWidgetForSlot=self.UpdateSkinWidgetForSlot
+		self.UpdateSkinWidgetForSlot=function(b,image_group, slot, name)
+			if not image_group._text.OldSetMultilineTruncatedString then
+				image_group._text.OldSetMultilineTruncatedString = image_group._text.SetMultilineTruncatedString
+				if image_group._text.OldSetMultilineTruncatedString then
+					image_group._text.SetMultilineTruncatedString = function(s,str, maxlines, maxwidth, maxcharsperline, ellipses)
+						maxwidth = maxwidth+20
+						image_group._text:SetSize(20)
+						image_group._text.OldSetMultilineTruncatedString(s,str, maxlines, maxwidth, maxcharsperline, ellipses)
+					end
+				end
+			end
+			self.oldUpdateSkinWidgetForSlot(b,image_group, slot, name)
 		end
 
 		self.oldUpdateData=self.UpdateData
