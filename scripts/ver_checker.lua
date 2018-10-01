@@ -12,7 +12,6 @@ function VerChecker:GetData(fn)
 			print("[VerChecker]: Server Error.")
 			return
 		end
-		print("[VerChecker]: Got data:", result)
 		VerChecker.data = json.decode(result)
 	end, "GET")
 end
