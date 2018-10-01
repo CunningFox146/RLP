@@ -2258,6 +2258,8 @@ local SKETCHES =
     {item="chesspiece_bearger",     recipe="chesspiece_bearger_builder"},
     {item="chesspiece_moosegoose",  recipe="chesspiece_moosegoose_builder"},
     {item="chesspiece_dragonfly",   recipe="chesspiece_dragonfly_builder"},
+    { item = "chesspiece_clayhound",    recipe = "chesspiece_clayhound_builder",    image = "chesspiece_clayhound_sketch" },
+    { item = "chesspiece_claywarg",     recipe = "chesspiece_claywarg_builder",     image = "chesspiece_claywarg_sketch" },
 }
 AddPrefabPostInit("sketch",function(inst)
 	if inst.sketchid and SKETCHES[inst.sketchid] and SKETCHES[inst.sketchid].recipe  and STRINGS.NAMES[string.upper(SKETCHES[inst.sketchid].recipe)] then 
