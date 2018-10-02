@@ -3128,7 +3128,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		function self:StartTimer()
 			self:oldStartTimer()
 			if self.survived_message then
-				local age = self.owner.Network:ThePlayerAge()
+				local age = self.owner.Network:GetPlayerAge()
 				local newmsg=self.survived_message:GetString()
 				self.survived_message:SetString(newmsg:gsub("дней",StringTime(age),1))
 			end
