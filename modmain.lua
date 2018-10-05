@@ -4137,28 +4137,37 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		print("RLP: Загрузка перевода модов отключена.")
 	end
 	
-	-- AddClassPostConstruct("widgets/redux/mainmenu_motdpanel", function(self)
-		-- local strtable={}
+	AddClassPostConstruct("widgets/redux/mainmenu_motdpanel", function(self)
+		local strtable={}
 		
-		-- local motd_data = TheFrontEnd.MotdManager:GetMotd()
-		-- local data = mods.RussianLanguagePack.VerChecker.data
-		-- if motd_data and data and data.motd then
-			-- for i = 1, 6 do
-				-- local boxid = "box"..tostring(i)
-				-- if data.motd[boxid] then
-					-- for _, v in ipairs({"title", "text"}) do
-						-- strtable[motd_data[boxid][1][v]] = data.motd[boxid][v]
-					-- end
-				-- end
-			-- end
-		-- end
-
-		-- for child,v in pairs(self.fg.children) do
-			-- if child.GetString then
-				-- if strtable[child:GetString()] then
-					-- child:SetString(strtable[child:GetString()])
-				-- end		
-			-- end
-		-- end
-	-- end)
+		local motd_data = TheFrontEnd.MotdManager:GetMotd()
+		local data = mods.RussianLanguagePack.VerChecker.data
+		if motd_data and data and data.motd then
+			for i = 1, 6 do
+				local boxid = "box"..tostring(i)
+				if data.motd[boxid] then
+					for _, v in ipairs({"title", "text"}) do
+						strtable[motd_data[boxid][1][v]] = data.motd[boxid][v]
+						print(motd_data[boxid][1][v])
+						print(data.motd[boxid][v])
+					end
+				end
+			end
+		end
+		strtable["Checkout what we have planned in the upcoming months for Don't Starve Together."]="Узнайте что мы планируем на ближайшие \nмесяцы для Don't Starve Together!"
+		strtable["Hallowed Nights returns this October with some new tricks and a few treats!"]="Хэллоуинские ночи возвращаются с новыми \nсладостями и гадостями!"
+		strtable["Check out the new Klei Accounts page."]="Зайдите на обновлённую страницу \nаккаунта Klei."
+		strtable["Checkout the newest update!"]="Узнайте что было добавлено \nв последнем обновлении!"
+		strtable["Art Stream - Tuesdays at 4:00 Pacific Dev Stream - Thursdays at 3:30 Pacific"]="Арт стрим - Вторник в 4:00 \nСтрим разработчиков - Среда 3:30"
+		for child,v in pairs(self.fg.children) do
+			if child.GetString then
+				local line = string.gsub(child:GetString(),"\n","")
+				if strtable[line] then
+					print("Переводим:", child:GetString(), strtable[line])
+					child:SetString(strtable[line])
+				end		
+			end
+		end
+	end)
+	end)
 end
