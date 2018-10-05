@@ -4137,29 +4137,28 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		print("RLP: Загрузка перевода модов отключена.")
 	end
 	
-	AddClassPostConstruct("widgets/redux/mainmenu_motdpanel", function(self)
-		local strtable={}
+	-- AddClassPostConstruct("widgets/redux/mainmenu_motdpanel", function(self)
+		-- local strtable={}
 		
-		local motd_data = TheFrontEnd.MotdManager:GetMotd()
-		local data = mods.RussianLanguagePack.VerChecker.data
-		if motd_data and data and data.motd then
-			for i = 1, 6 do
-				local boxid = "box"..tostring(i)
-				if data.motd[boxid] then
-					for _, v in ipairs({"title", "text"}) do
-						strtable[motd_data[boxid][1][v]] = data.motd[boxid][v]
-					end
-				end
-			end
-		end
+		-- local motd_data = TheFrontEnd.MotdManager:GetMotd()
+		-- local data = mods.RussianLanguagePack.VerChecker.data
+		-- if motd_data and data and data.motd then
+			-- for i = 1, 6 do
+				-- local boxid = "box"..tostring(i)
+				-- if data.motd[boxid] then
+					-- for _, v in ipairs({"title", "text"}) do
+						-- strtable[motd_data[boxid][1][v]] = data.motd[boxid][v]
+					-- end
+				-- end
+			-- end
+		-- end
 
-		for child,v in pairs(self.fg.children) do
-			if child.GetString then
-				if strtable[child:GetString()] then
-					print("Переводим:", child:GetString(), strtable[child:GetString()])
-					child:SetString(strtable[child:GetString()])
-				end		
-			end
-		end
-	end)
+		-- for child,v in pairs(self.fg.children) do
+			-- if child.GetString then
+				-- if strtable[child:GetString()] then
+					-- child:SetString(strtable[child:GetString()])
+				-- end		
+			-- end
+		-- end
+	-- end)
 end
