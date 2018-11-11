@@ -10,47 +10,41 @@ PrefabFiles = {
 	"russian_assets"
 }
 
---Вставляем проверку на наличие старого русификатора.
-local IS_ENABLED_OLD_RLP
-if mods.RussianLanguagePack ~= nil and mods.RussianLanguagePack ~= {} or _G.KnownModIndex:IsModEnabled("workshop-354836336") or _G.KnownModIndex:IsModEnabled("workshop-1224043697") then
-	IS_ENABLED_OLD_RLP = true
-end
+local SteamID = "1240565842"
 
-mods.RussianLanguagePack = {}
-local t = mods.RussianLanguagePack
+mods.RussianLanguagePack = {
+	modinfo = modinfo,
+	--Путь, по которому будут сохраняться рабочие версии po файла и лога обновлений.
+	--Он нужен потому, что сейчас при синхронизации стим затирает все файлы в папке мода на версии из стима.
+	StorePath = MODROOT,--"scripts/languages/"
 
-t.modinfo = modinfo
---Путь, по которому будут сохраняться рабочие версии po файла и лога обновлений.
---Он нужен потому, что сейчас при синхронизации стим затирает все файлы в папке мода на версии из стима.
-t.StorePath = MODROOT--"scripts/languages/"
+	UpdateLogFileName = "updatelog.txt",
+	MainPOfilename = "DST.po",
+	ModsPOfilename = "MODS.po",
+	UpdatePeriod = {"OncePerLaunch", "OncePerDay", "OncePerWeek", "OncePerMonth", "Never"},
+	TranslationTypes = {Full = "Full", InterfaceChat = "InterfaceChat", ChatOnly = "ChatOnly"},
+	ModTranslationTypes = {enabled = "enabled", disabled = "disabled"},
+	CurrentTranslationType = nil,
+	IsModTranslEnabled = nil,
+	SteamID = SteamID,
+	SteamURL = "http://steamcommunity.com/sharedfiles/filedetails/?id="..SteamID,
+	SelectedLanguage = "ru",
 
-t.UpdateLogFileName = "updatelog.txt"
-t.MainPOfilename = "DST.po"
-t.ModsPOfilename = "MODS.po"
-t.UpdatePeriod = {"OncePerLaunch", "OncePerDay", "OncePerWeek", "OncePerMonth", "Never"}
-t.TranslationTypes = {Full = "Full", InterfaceChat = "InterfaceChat", ChatOnly = "ChatOnly"}
-t.ModTranslationTypes = {enabled = "enabled", disabled = "disabled"}
-t.CurrentTranslationType = nil
-t.IsModTranslEnabled = nil
-t.SteamID = "1240565842"
-t.SteamURL = "http://steamcommunity.com/sharedfiles/filedetails/?id="..t.SteamID
-t.SelectedLanguage = "ru"
-
---Склонения
-t.AdjectiveCaseTags = {	nominative = "nom", --Именительный	Кто/что
-						accusative = "acc", --Винительный	Кого/что
-						dative = "dat",		--Дательный		Кому/чему
-						ablative = "abl",	--Творительный	Кем/чем
-						genitive = "gen",	--Родительный	Кого/чего
-						vocative = "voc",	--Звательный
-						locative = "loc",	--Предложный	О ком/о чём
-						instrumental = "ins"}--unused
-t.DefaultActionCase = "accusative"
-
---Для модов
-t.announcerus = {
-	mods = {}
+	--Склонения
+	AdjectiveCaseTags = {
+		nominative = "nom", --Именительный	Кто/что
+		accusative = "acc", --Винительный	Кого/что
+		dative = "dat",		--Дательный		Кому/чему
+		ablative = "abl",	--Творительный	Кем/чем
+		genitive = "gen",	--Родительный	Кого/чего
+		vocative = "voc",	--Звательный
+		locative = "loc",	--Предложный	О ком/о чём
+		instrumental = "ins"--unused
+	},
+	DefaultActionCase = "accusative",
 }
+
+local t = mods.RussianLanguagePack
 
 io = _G.io
 STRINGS = _G.STRINGS
@@ -60,23 +54,17 @@ assert = _G.assert
 rawget = _G.rawget
 require = _G.require
 dumptable = _G.dumptable
+deepcopy = _G.deepcopy
 TheSim = _G.TheSim
+TheNet = _G.TheNet
 
+local UpvalueHacker = require "tools/upvaluehacker"
 local VerChecker = require "ver_checker"
+
 t.VerChecker = VerChecker
 VerChecker:GetData()
 
-if false then
-	_G.CHEATS_ENABLED = true
-	
-	local to_test = require "screens/LanguageOptions"
-
-	local function test_screen()
-		_G.TheFrontEnd:FadeToScreen(_G.TheFrontEnd:GetActiveScreen(), function() return to_test() end, nil, "swipe")
-	end
-
-	_G.TheInput:AddKeyUpHandler(113, test_screen)
-end
+_G.CHEATS_ENABLED = true
 
 --Отключаем предупреждение о модах.
 _G.getmetatable(TheSim).__index.ShouldWarnModsLoaded = function() 
@@ -461,45 +449,7 @@ end
 ]]
 --Проверяем наличие мода-переводчика модов. Если включен, то отключаем.
 
-
---Перед загрузкой делаем проверку
 do
-	if IS_ENABLED_OLD_RLP then
-		local OldStart=_G.Start --Переопределяем функцию, после выполнения которой можно будет вывести попап и перезагрузиться
-		function _G.Start() 
-			ApplyLocalizedFonts()
-			OldStart()
-			
-			local a,b="/","\\"
-			if _G.PLATFORM == "NACL" or _G.PLATFORM == "PS4" or _G.PLATFORM == "LINUX_STEAM" or _G.PLATFORM == "OSX_STEAM" then
-				a,b=b,a
-			end
-			
-			local text="Внимание! Обнаружена устаревшая русификация (Russian Language Pack). В игре может работать только однин русификатор, поэтому она будет отключена."
-			local PopupDialogScreen = require "screens/popupdialog"
-				_G.TheFrontEnd:PushScreen(PopupDialogScreen("Обнаружена устаревшая \nрусификация!", text,
-				{{text="Хорошо.", cb = function() 
-						_G.TheFrontEnd:PopScreen() 
-						--Отрубаем.
-						_G.KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-354836336")
-						_G.KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-1224043697")
-						
-						_G.ForceAssetReset()
-						_G.KnownModIndex:Save(function()
-							_G.SimReset()
-						end)
-					end
-					}},nil,nil,"dark"))
-					
-			print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") 
-			print("!!!!!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!!!") 
-			print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") 
-			print("!FOUND OLD RUSSIAN LANGUAGE PACK!") 
-			print("!!!!!!!!!!!!!DISABLEING MOD...!!!!!!!!!!!!!!") 
-			print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") 
-		end
-	end
-	
 	--У нас уже встроен перевод модов.
 	if (mods.RusMods ~= nil or _G.KnownModIndex:IsModEnabled("workshop-55043536")) and _G.TheWorld == nil then
 		local OldStart=_G.Start
@@ -1699,7 +1649,7 @@ end
 
 
 --Подменяем названия режимов игры
-if rawget(_G,"GAME_MODES") and STRINGS.UI.GAMEMODES then
+if rawget(_G, "GAME_MODES") and STRINGS.UI.GAMEMODES then
 	for i,v in pairs(_G.GAME_MODES) do
 		for ii,vv in pairs(STRINGS.UI.GAMEMODES) do
 			if v.text==vv then
@@ -1711,19 +1661,6 @@ if rawget(_G,"GAME_MODES") and STRINGS.UI.GAMEMODES then
 		end
 	end
 end
-
---Подменяем шрифт, потому что тут уже инициализировался английский
-AddClassPostConstruct("widgets/loadingwidget", function(self)
-	local OldKeepAlive = self.KeepAlive
-	function self:KeepAlive(...)
-		local res = OldKeepAlive(self, ...)
-		if self.loading_widget then
-			self.loading_widget:SetFont(_G.UIFONT)
-		end
-		return res
-	end
-end)
-
 
 local _utf8=require("1251")
 local _1251=require("utf-8")
@@ -1751,9 +1688,9 @@ end
 local AllPlayersList={} --Список всех игроков в игре, бывших за сессию. Нужен для случаев, когда игрока уже нет, а сообщение пришло
 
 --Исправляем русские имена персонажей, которые приходят к нам в другой кодировке, и обновляем AllPlayersList
-if _G.TheNet.GetClientTable then
-	_G.getmetatable(_G.TheNet).__index.GetClientTable = (function()
-		local oldGetClientTable = _G.getmetatable(_G.TheNet).__index.GetClientTable
+if TheNet.GetClientTable then
+	_G.getmetatable(TheNet).__index.GetClientTable = (function()
+		local oldGetClientTable = _G.getmetatable(TheNet).__index.GetClientTable
 		return function(self, ... )
 			local res = oldGetClientTable(self, ...)
 			if res and type(res)=="table" then for i,v in pairs(res) do
@@ -1937,7 +1874,7 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 			end
 		end
 		if name and RussianMessage then
-			if _G.TheNet.GetClientTable then _G.TheNet:GetClientTable()	end --обновляем список игроков
+			if TheNet.GetClientTable then TheNet:GetClientTable()	end --обновляем список игроков
 			announcement = string.format((t.ParseTranslationTags(RussianMessage, AllPlayersList[name], "announce", killerkey)), name or "", name2 or "", "" ,"") or announcement
 		end
 		OldShowNewAnnouncement(self, announcement, ...)
@@ -2166,9 +2103,9 @@ end
 
 
 --Перевод на русский произносимого на сервере
-if _G.TheNet.Talker then
-	_G.getmetatable(_G.TheNet).__index.Talker = (function()
-		local oldTalker = _G.getmetatable(_G.TheNet).__index.Talker
+if TheNet.Talker then
+	_G.getmetatable(TheNet).__index.Talker = (function()
+		local oldTalker = _G.getmetatable(TheNet).__index.Talker
 		return function(self, message, entity, ... )
 			oldTalker(self, message, entity, ...)
  
@@ -2190,9 +2127,9 @@ if _G.TheNet.Talker then
 end
 
 --Перевод на русский произносимого на сервере
---[[if _G.TheNet.Talker then
-	_G.getmetatable(_G.TheNet).__index.Talker = (function()
-		local oldTalker = _G.getmetatable(_G.TheNet).__index.Talker
+--[[if TheNet.Talker then
+	_G.getmetatable(TheNet).__index.Talker = (function()
+		local oldTalker = _G.getmetatable(TheNet).__index.Talker
 		return function(self, message, entity, ... )
 			oldTalker(self, message, entity, ...)
 
@@ -2706,9 +2643,9 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 	end)
 
 	--Переводим названия дней недели
-	if _G.TheNet.ListSnapshots then
-		_G.getmetatable(_G.TheNet).__index.ListSnapshots = (function()
-			local oldListSnapshots = _G.getmetatable(_G.TheNet).__index.ListSnapshots
+	if TheNet.ListSnapshots then
+		_G.getmetatable(TheNet).__index.ListSnapshots = (function()
+			local oldListSnapshots = _G.getmetatable(TheNet).__index.ListSnapshots
 			return function(self, ...)
 				local list=oldListSnapshots(self, ...)
 				if list and #list>0 and list[1].timestamp then
@@ -4121,7 +4058,7 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		function self:OnUpdate(dt)
 			_OnUpdate(self, dt)
 			
-			local cloudServerRequestState = _G.TheNet:GetCloudServerRequestState() or 0
+			local cloudServerRequestState = TheNet:GetCloudServerRequestState() or 0
 			
 			if cloudServerRequestState >= 8 then return end
 			
@@ -4133,6 +4070,118 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	--"Достать печь"
 	--_G.ACTIONS
 	
+	--No warning about mods in events
+	AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self)
+		if mods.disabled_event_warning then
+			return
+		end
+		
+		local TheFrontEnd = _G.TheFrontEnd
+		local PopupDialogScreen = require "screens/redux/popupdialog"
+		
+		--I don't know how to get it from here, so just replacing it
+		function self:OnFestivalEventButton()
+			if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
+				TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_TITLE, STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_BODY[WORLD_FESTIVAL_EVENT], 
+					{
+						{text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
+								_G.SimReset()
+							end},
+						{text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_BACK, cb=function() TheFrontEnd:PopScreen() end },
+					}))
+			else
+				self:_GoToFestfivalEventScreen()
+			end
+		end
+		
+		mods.disabled_event_warning = true
+	end)
+	
+	local pugna_sayings = {
+		["Ha!"] = "Ха!",
+		["You are unworthy."] = "Вы недостойны.",
+		["You never stood a chance."] = "У вас не было и шанса.",
+		["Ha ha!"] = "Ха ха!",
+		["Weak."] = "Слабаки.",
+		["We are stronger."] = "Мы сильнее.",
+		["Well struck!"] = "Хороший удар!",
+		["At last, our realm returns to glory!"] = "Наконец, наше царство обретёт славу!",
+		["Warriors, rekindle the Gateway..."] = "Воины, пробудите Врата...",
+		["Today we take the Throne!"] = "Сегодня мы захватим Трон!",
+		["It's good to have a challenge once again!"] = "Хорошо принять вызов снова!",
+		["This should be fun."] = "Это должно быть весело.",
+		["More pigs! Overwhelm them!"] = "Больше! Сокрушите их!",
+		["More pigs!"] = "Больше свиней!",
+		["What have we here?"] = "Что у нас здесь?",
+		["Gatekeepers? Ha! Have you come to return us to the Throne?"] = "Хранители Врат? Ха! Вы пришли, чтобы вернуть нас к Трону?",
+		["I am Battlemaster Pugna, and I protect what is mine."] = "Я - Военачальник Пугна, и я защищаю то, что принадлежит мне.",
+		["Warriors. Release the pigs!"] = "Воины. Выпускайте свиней!",
+		["For the Forge!"] = "За Кузню!",
+		["Give the Gatekeepers no quarter!"] = "Не дайте Хранителям Врат и четвертака!",
+		["Fly your banners proudly, warriors!"] = "Пусть ваши знамёна реют гордо, воины!",
+		["Impressive. You handled our foot soldiers with ease."] = "Впечатляет. Вы легко справились с нашими пехотинцами.",
+		["But our battalions are trained to work together."] = "Но наши батальоны натренированы работать вместе.",
+		["Can you do the same? Crocommanders, to the ring!"] = "Сможете ли вы сделать то же самое? Крокомандиры, на ринг!",
+		["We've endured more here than you know."] = "Мы вынесли здесь больше, чем вы можете представить.",
+		["And as forging fires temper steel,"] = "И как огонь горна закаляет сталь,",
+		["Hardship has only made us stronger."] = "Так и трудности только сделали нас сильнее.",
+		["Now, Snortoises. Attack!"] = "А теперь, Бронепахи. Атакуйте!",
+		["End this now my warriors!"] = "Покончите с этим сейчас же, мои воины!",
+		["We... cannot lose the Forge..."] = "Мы... не можем потерять Кузню...",
+		["No! How can this be?!"] = "Нет! Как такое может быть?!",
+		["You have defeated the mighty Boarilla!"] = "Вы победили могучую Бориллу!",
+		["You may have won the battle, Gatekeepers... but not the war!"] = "Возможно вы выиграли битву, Хранители Врат... но не войну!",
+		["..Do you understand the forces you serve?"] = "..Вы понимаете силы, которым вы служите?",
+		["They destroy all They touch..."] = "Они уничтожают всё, к чему прикасаются...",
+		["We were severed from the Throne, trapped in a realm of stone and fire!"] = "Мы были отделены от Трона, захваченного царством камня и огня!",
+		["That is why we cannot let you win."] = "Поэтому мы не можем позволить вам победить.",
+		["Send in the Boarilla."] = "Послать Бориллу.",
+		["Grand Forge Boarrior!"] = "Великий Боров-воин Кузни!",
+		["The ring is yours! Destroy them, my champion!"] = "Ринг твой! Уничтожь их, мой чемпион!",
+		["The Gatekeepers must not take the Forge!"] = "Хранители Врат не должны захватить Кузню!",
+		["Drive the interlopers back!"] = "Верните нарушителей обратно!",
+		["Do not hold back! Kill them!"] = "Не отступать! Убейте их!",
+		["Why are the Gatekeepers still not dead?!"] = "Почему Хранители Врат все ещё живы?!",
+		["Destroy them!!"] = "Уничтожьте их!!",
+		["We will not live in the Throne's shadow!"] = "Мы не будем жить в тени Трона!",
+		["What?! My champion!?!"] = "Что?! Мой чемпион!?!",
+		["Gatekeepers you have proven yourself mighty."] = "Хранители Врат, вы доказали своё могущество.",
+		["...But we will live to fight again!!"] = "...Но мы будем жить, чтобы снова сражаться!!",
+		["Know this, Gatekeepers:"] = "Запомните вот что, Хранители Врат:",
+		["Once you are dead, we will activate the Gateway."] = "Как только вы умрёте, мы активируем Врата.",
+		["We'll return to the hub and destroy the Throne."] = "Мы вернёмся и уничтожим Трон.",
+		["We will end this, once and for all."] = "Мы покончим с этим раз и навсегда.",
+		["You have won the battle,"] = "Вы выиграли битву,",
+		["But the war rages on eternally."] = "Но война продолжается вечно.",
+		["We are not ready to give up yet."] = "Мы ещё не готовы сдаться.",
+		["We do not fear you, Gatekeepers!"] = "Мы не боимся вас, Хранители Врат!",
+		["But you will fear us!"] = "Но вы будете бояться нас!",
+		["Fear my new champions! Fear the Rhinocebros!"] = "На колени перед моими новыми чемпионами! Бойтесь Нособуров!",
+		["No! My Forge, felled by the Throne's lapdogs!"] = "Нет! Моя кузня пала от лап шавок Трона!",
+		["Please. No more, Gatekeepers. We surrender."] = "Прошу. Довольно, Хранители Врат. Мы сдаёмся.",
+		["The day is yours, as is the Gateway."] = "День ваш, как и Врата.",
+		["You have had many victories, Gatekeepers..."] = "У вас было много побед, Хранители Врат...",
+		["...but from our dungeons comes our most brutal warrior."] = "...но из подземелий выходит наш самый жестокий воин.",
+		["Behold: The Infernal Swineclops!"] = "Бойтесь! Инфернальный Свиноклоп!",
+	}
+	
+	AddPrefabPostInit("lavaarena_boarlord", function(inst)
+		local _ontalkfn = inst.components.talker.ontalkfn
+		local function OnTalk(inst, data)
+			_ontalkfn(inst, data)
+			if data ~= nil and data.message ~= nil and inst.speechroot then
+				if pugna_sayings[data.message] then
+					inst.speechroot.SetBoarloadSpeechString(pugna_sayings[data.message])
+				else
+					inst.speechroot.SetBoarloadSpeechString("ПУКАЛО НЕ ПУКАЕТ!")
+				end
+			end
+		end
+		
+		inst.components.talker.ontalkfn = OnTalk
+		inst.components.talker.donetalkingfn = OnTalk
+	end)
+	
 	--Русификация модов. Подгружаем в самом конце (!!!)
 	if t.IsModTranslEnabled ~= t.ModTranslationTypes.disabled then
 		print("RLP: Загрузка перевода модов...")
@@ -4140,37 +4189,4 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	else
 		print("RLP: Загрузка перевода модов отключена.")
 	end
-	
-	-- AddClassPostConstruct("widgets/redux/mainmenu_motdpanel", function(self)
-		-- local strtable={}
-		
-		-- local motd_data = TheFrontEnd.MotdManager:GetMotd()
-		-- local data = mods.RussianLanguagePack.VerChecker.data
-		-- if motd_data and data and data.motd then
-			-- for i = 1, 6 do
-				-- local boxid = "box"..tostring(i)
-				-- if data.motd[boxid] then
-					-- for _, v in ipairs({"title", "text"}) do
-						-- strtable[motd_data[boxid][1][v]] = data.motd[boxid][v]
-						-- print(motd_data[boxid][1][v])
-						-- print(data.motd[boxid][v])
-					-- end
-				-- end
-			-- end
-		-- end
-		-- strtable["Checkout what we have planned in the upcoming months for Don't Starve Together."]="Узнайте что мы планируем на ближайшие \nмесяцы для Don't Starve Together!"
-		-- strtable["Hallowed Nights returns this October with some new tricks and a few treats!"]="Хэллоуинские ночи возвращаются с новыми \nсладостями и гадостями!"
-		-- strtable["Check out the new Klei Accounts page."]="Зайдите на обновлённую страницу \nаккаунта Klei."
-		-- strtable["Checkout the newest update!"]="Узнайте что было добавлено \nв последнем обновлении!"
-		-- strtable["Art Stream - Tuesdays at 4:00 Pacific Dev Stream - Thursdays at 3:30 Pacific"]="Арт стрим - Вторник в 4:00 \nСтрим разработчиков - Среда 3:30"
-		-- for child,v in pairs(self.fg.children) do
-			-- if child.GetString then
-				-- local line = string.gsub(child:GetString(),"\n","")
-				-- if strtable[line] then
-					-- print("Переводим:", child:GetString(), strtable[line])
-					-- child:SetString(strtable[line])
-				-- end		
-			-- end
-		-- end
-	-- end)
 end
