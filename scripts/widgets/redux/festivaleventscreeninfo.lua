@@ -15,7 +15,7 @@ local FestivalEventScreenInfo = Class(Widget, function(self, atlas, image, str, 
 
 	if str ~= nil then
 		local title = self:AddChild(Text(HEADERFONT, 22, "", UICOLOURS.HIGHLIGHT_GOLD))
-		title:SetMultilineTruncatedString(str, 2, 250)
+		title:SetMultilineTruncatedString(str, 2, 250)             -- Тут увеличил ширинус 200 до 250, чтобы влезало нормально
 		title:SetPosition(0, -110)
 	end
 

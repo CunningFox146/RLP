@@ -229,7 +229,7 @@ local function MakeDailyEntry(quest_info, festival_key, season)
 
     local icon = w:AddChild(Image("images/lavaarena_quests.xml", quest_icon))
     icon:SetScale(.45)
-    icon:SetPosition(0, 45)
+    icon:SetPosition(0, 45)      --чуть-чуть подвинул выше, с 34 на 45, чтобы не перекрывало надписи
 
 	local title = w:AddChild(Text(HEADERFONT, 28, STRINGS.UI.LAVAARENA_SUMMARY_PANEL[string.upper(quest_info.quest)], UICOLOURS.BROWN_DARK))
 	title:SetPosition(-35, -12)
@@ -274,7 +274,7 @@ local function MakeQuestEntry(quest_info, row_w, festival_key, season)
 
 	local details_w = row_w - 50
 
-	local quest_type = w:AddChild(Text(NEWFONT, 24, quest_type_desc .. "\n" .. STRINGS.UI.ACHIEVEMENTS[string.upper(festival_key)].ACHIEVEMENT[quest_info.quest].DESC, UICOLOURS.BROWN_MEDIUM))
+	local quest_type = w:AddChild(Text(NEWFONT, 24, quest_type_desc .. "\n" .. STRINGS.UI.ACHIEVEMENTS[string.upper(festival_key)].ACHIEVEMENT[quest_info.quest].DESC, UICOLOURS.BROWN_MEDIUM))    -- Увеличил с 23 на 24, поменял шрифт с CHATFONT на NEWFONT, чтобы лучше было видно
 	quest_type:EnableWordWrap(true)
     quest_type:SetRegionSize(details_w, 80)
     quest_type:SetHAlign(ANCHOR_LEFT)
@@ -316,7 +316,7 @@ function CommunityProgress:BuildQuestPanel(active_quests)
 	local time_str = (exp_date > 0 and (hours > 0 or minutes > 3)) and subfmt(STRINGS.UI.LAVAARENA_COMMUNITY_UNLOCKS.DAILY_RESET, {hours = hours, minutes = minutes}) 
 					or (TheWorld ~= nil and STRINGS.UI.LAVAARENA_COMMUNITY_UNLOCKS.DAILY_RESET_SOON_INGAME)
 					or STRINGS.UI.LAVAARENA_COMMUNITY_UNLOCKS.DAILY_RESET_SOON
-	local time = w:AddChild(Text(CHATFONT, 27, time_str, UICOLOURS.BROWN_DARK))
+	local time = w:AddChild(Text(CHATFONT, 27, time_str, UICOLOURS.BROWN_DARK))    --увеличил с 22 до 27, чтобы было лучше видно
 	time:SetPosition(-300, -195)
 
 	exp_date = os.difftime(active_quests.quest_expiry, cur_time)
@@ -325,7 +325,7 @@ function CommunityProgress:BuildQuestPanel(active_quests)
 	time_str = (exp_date > 0 and (hours > 0 or minutes > 3)) and subfmt(STRINGS.UI.LAVAARENA_COMMUNITY_UNLOCKS.QUEST_RESET, {hours = hours, minutes = minutes}) 
 				or (TheWorld ~= nil and STRINGS.UI.LAVAARENA_COMMUNITY_UNLOCKS.QUEST_RESET_SOON_INGAME)
 				or STRINGS.UI.LAVAARENA_COMMUNITY_UNLOCKS.QUEST_RESET_SOON
-	time = w:AddChild(Text(CHATFONT, 27, time_str, UICOLOURS.BROWN_DARK))
+	time = w:AddChild(Text(CHATFONT, 27, time_str, UICOLOURS.BROWN_DARK))             --увеличил с 22 до 27, чтобы было лучше видно
 	time:SetPosition(300, -195)
 
 

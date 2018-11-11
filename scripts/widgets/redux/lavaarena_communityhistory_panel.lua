@@ -85,7 +85,7 @@ local function MakeDetailsEntry(item)
 		local title = w:AddChild(Text(HEADERFONT, 18, str or STRINGS.UI.LAVAARENA_COMMUNITY_UNLOCKS.UNKNOWN, UICOLOURS.BROWN_DARK))
 		title:SetPosition(20, 16)
 
-		local desc = w:AddChild(Text(NEWFONT, 15, "", UICOLOURS.BROWN_MEDIUM))
+		local desc = w:AddChild(Text(NEWFONT, 15, "", UICOLOURS.BROWN_MEDIUM))                  -- Поменял шрифт с CHATFONT на NEWFONT, чтобы было видно
 		desc:SetPosition(20, -9)
 		desc:SetMultilineTruncatedString(STRINGS.UI.LAVAARENA_COMMUNITY_UNLOCKS.UNLOCKED_DESC[string.upper(item.id)], 2, 280, 65, true)
 

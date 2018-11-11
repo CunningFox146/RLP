@@ -121,7 +121,7 @@ function LavaarenaQuestHistoryPanel:_BuildAchievementsExplorer(festival_key, sea
 
 		local details_w = row_w - 50
 
-		w.quest_type = w.root:AddChild(Text(NEWFONT, 24, "", UICOLOURS.BROWN_MEDIUM))
+		w.quest_type = w.root:AddChild(Text(NEWFONT, 24, "", UICOLOURS.BROWN_MEDIUM))         --- с 23 увеличил до 24 и поменял с CHATFONT на NEWFONT, чтобы было как в первой вкладке и так-же, для видимости
 		w.quest_type:EnableWordWrap(true)
 		w.quest_type:SetRegionSize(details_w, 80)
 		w.quest_type:SetHAlign(ANCHOR_LEFT)
