@@ -58,9 +58,7 @@ deepcopy = _G.deepcopy
 TheSim = _G.TheSim
 TheNet = _G.TheNet
 
-local UpvalueHacker = require "tools/upvaluehacker"
 local VerChecker = require "ver_checker"
-
 t.VerChecker = VerChecker
 VerChecker:GetData()
 
