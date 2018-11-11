@@ -64,8 +64,6 @@ local VerChecker = require "ver_checker"
 t.VerChecker = VerChecker
 VerChecker:GetData()
 
-_G.CHEATS_ENABLED = true
-
 --Отключаем предупреждение о модах.
 _G.getmetatable(TheSim).__index.ShouldWarnModsLoaded = function() 
 	return false 
