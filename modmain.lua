@@ -237,8 +237,7 @@ local function GetLocalizaitonValue(self,name) --Метод, возвращаю�
 	end
 end
 --Так же делаем для маленьких текстур
-local function SetShowSTWarning(self,value)
-	print("SetShowSTWarning", tostring(value))
+local function SetShowSTWarning(self, value)
 	self:SetValue("show_st_warning", value)
 	self.dirty = true
 	self:Save() --Сохраняем сразу, поскольку у нас нет кнопки "применить"
@@ -339,54 +338,7 @@ AddClassPostConstruct("screens/chatinputscreen", function(self)
 	if self.chat_edit then
 		self.chat_edit:SetCharacterFilter(nil)
 	end
-
 end)
-
---[[--Увеличим область для текста в чате, чтобы не пропадали длинные русские буквы
-AddClassPostConstruct("widgets/chatqueue", function(self)
-	if self.messages and type(self.messages)=="table" and #self.messages>0 then
-		for i,v in pairs(self.messages) do
-			local w,h=v:GetRegionSize()
-			v:SetRegionSize(w,h+2)
-		end
-	end
-end)]]
-
---Добавление кнопки настроек меню модов при наведении на русский мод
---[[
-local OldHasModConfigurationOptions = _G.KnownModIndex and _G.KnownModIndex.HasModConfigurationOptions
-if OldHasModConfigurationOptions then
-	function _G.KnownModIndex:HasModConfigurationOptions(modname, ...)
-		local res = OldHasModConfigurationOptions(self,modname)
-		if self:GetModInfo(modname).name==modinfo.name then return true end
-		return res
-	end
-end
-
---Переопределяем действие кнопки
-AddGlobalClassPostConstruct("screens/modsscreen", "ModsScreen", function(self)
-
-	if self.detailwarning and self.CreateDetailPanel then
-		self.detailwarning:SetSize(25)
-		local OldCreateDetailPanel=self.CreateDetailPanel
-		function self:CreateDetailPanel(...)
-			OldCreateDetailPanel(self,...)
-			self.detailwarning:SetSize(25)
-		end
-	end
-	if not self.ConfigureSelectedMod then return end
-	self.OldConfigureSelectedMod=self.ConfigureSelectedMod
-	local function NewConfigureSelectedMod(self)
-		if _G.KnownModIndex:GetModInfo(self.currentmodname).name==modinfo.name then
-			local LanguageOptions = require "screens/LanguageOptions"
-			_G.TheFrontEnd:PushScreen(LanguageOptions())
-		else
-			self:OldConfigureSelectedMod()
-		end
-	end
-	self.ConfigureSelectedMod=NewConfigureSelectedMod
-end)
-]]
 
 --Кнопка настойки в главном меню
 do
@@ -394,43 +346,28 @@ do
 	local TEMPLATES = require "widgets/redux/templates"
 	local LanguageOptions = require "screens/LanguageOptions"
 
-	local function AddButton(self, ...)
+	AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self, ...)
 		if self.rlp_settings == nil then
 			local TheFrontEnd = _G.TheFrontEnd
 
 			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/rus_button_icon.xml", "rus_button_icon.tex", "RLP", false, true, function() 
-
 				TheFrontEnd:GetSound():KillSound("FEMusic")
 				TheFrontEnd:GetSound():KillSound("FEPortalSFX")
 				TheFrontEnd:GetSound():PlaySound("dontstarve/music/gramaphone_ragtime", "rlp_ragtime") 
 				
 				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return LanguageOptions() end, nil, "swipe")
 			end, {font=_G.NEWFONT_OUTLINE}))
-			self.submenu:AddCustomItem(self.rlp_settings--[[, _G.Vector3(-530,0,0)]])
+			self.submenu:AddCustomItem(self.rlp_settings)
+			local _pos = self.submenu:GetPosition()
+			self.submenu:SetPosition(_pos.x - 50, _pos.y)
 		end
-	end
-
-	--AddClassPostConstruct("screens/multiplayermainscreen", AddButton)
-	AddClassPostConstruct("screens/redux/multiplayermainscreen", AddButton)
+	end)
 end
 
 --Исправление бага с шрифтом в спиннерах
 AddClassPostConstruct("widgets/spinner", function(self, options, width, height, textinfo, ...) --Выполняем подмену шрифта в спиннере из-за глупой ошибки разрабов в этом виджете
 	if textinfo then return end
-	
 	self.text:SetFont(_G.BUTTONFONT)
-	--Насильно заменяем
-	--[[
-	if self.text.string == nil then return end
-	print(self.text.string)
-	if self.text.string == "Disabled" then
-		self.text:SetString("Отключено")
-	end
-	
-	if self.text.string == "Enabled" then
-		self.text:SetString("Включено")
-	end
-	]]
 end)
 
 local function GetPoFileVersion(file) --Возвращает версию po файла
@@ -444,27 +381,6 @@ local function GetPoFileVersion(file) --Возвращает версию po ф�
 	if not ver then ver = "не задана" end
 	return ver
 end
---[[
---Проверяем версию по файла, и если она не соответствует текущей версии, то отключаем перевод
-local poversion = GetPoFileVersion(t.StorePath..t.MainPOfilename)
-if poversion~=modinfo.version then
-	local OldStart = _G.Start --Переопределяем функцию, после выполнения которой можно будет вывести попап.
-	function _G.Start() 
-		ApplyLocalizedFonts()
-		OldStart()
-		local a,b="/","\\"
-		if _G.PLATFORM == "NACL" or _G.PLATFORM == "PS4" or _G.PLATFORM == "LINUX_STEAM" or _G.PLATFORM == "OSX_STEAM" then
-			a,b=b,a
-		end
-		local text="Версия игры: "..modinfo.version..", версия PO файла: "..poversion.."\nПуть: "..string.gsub(_G.CWD..t.StorePath,a,b)..t.MainPOfilename.."\nПеревод работает в режиме «Только чат»."
-		local PopupDialogScreen = require "screens/popupdialog"
-			_G.TheFrontEnd:PushScreen(PopupDialogScreen("Неверная версия PO файла", text,
-			{{text="Понятно", cb = function() _G.TheFrontEnd:PopScreen() end}},nil,nil,"dark"))
-	end
-	return
-end
-]]
---Проверяем наличие мода-переводчика модов. Если включен, то отключаем.
 
 do
 	--У нас уже встроен перевод модов.
@@ -511,7 +427,6 @@ end
 function language_lua_has_rusification(filename)
 	if not _G.kleifileexists(filename) then return false end --Нет файла? Нет проблем
 
-
 	local f = assert(io.open(filename,"r")) --Читаем весь файл в буфер
 	local content =""
 	for line in f:lines() do
@@ -552,7 +467,6 @@ function language_lua_has_rusification(filename)
 	f:close()
 	return true
 end
-
 
 local languageluapath ="scripts/languages/language.lua"
 
@@ -1679,29 +1593,6 @@ if rawget(_G, "GAME_MODES") and STRINGS.UI.GAMEMODES then
 	end
 end
 
-local _utf8=require("1251")
-local _1251=require("utf-8")
-
-local function converttoutf8(str)
-		return str:gsub('.',_1251)
-end
-
-local function convertfromutf8(str)
-	return str
---[[		if not str or type(str)~="string" then return str end
-	local str2=""
-	for uchar in string.gfind(str, "([%z\1-\127\194-\244][\128-\191]*)") do
-		if #uchar==1 then
-			str2=str2..uchar
-		elseif #uchar==2 then
-			local res=(uchar:byte(1)-0xC0)*0x40+uchar:byte(2)-0x80
-			if _utf8[res] then str2=str2..string.char(_utf8[res]) end
-		end
-	end
-	return str2]]
-end
-
-
 local AllPlayersList={} --Список всех игроков в игре, бывших за сессию. Нужен для случаев, когда игрока уже нет, а сообщение пришло
 
 --Исправляем русские имена персонажей, которые приходят к нам в другой кодировке, и обновляем AllPlayersList
@@ -2164,46 +2055,6 @@ end
 	end)()
 end--]]
 
---Мамка не говорит фразы на русском, значит заставляем её.
---[[
-AddClassPostConstruct("components/talker", function(self)
-	local _Say = self.Say
-	
-	function self:Say(script, time, noanim, ...)
-		local lines = type(script) == "string" and { _G.Line(script, noanim) } or script
-		if lines ~= nil then
-			for i, line in ipairs(lines) do
-				local display_message = _G.GetSpecialCharacterPostProcess(
-					self.inst.prefab,
-					self.mod_str_fn ~= nil and self.mod_str_fn(line.message) or line.message
-				)
-			
-				if self.inst.prefab=="quagmire_goatmum"	then
-					--print("Мамка сказала:", tostring(display_message))
-					local mum=nil
-					local j=0
-					local sayings={"SNACK","MEAT","SOUP","VEGETABLE","FISH","BREAD","CHEESE","PASTA","DESSERT"}
-					for i=1, #display_message do
-						if string.sub(display_message,i,i)==" " or string.sub(display_message,i,i)=="!" or string.sub(display_message,i,i)=="," or  string.sub(display_message,i,i)=="." then
-							if i~=j then
-								mum=string.sub(display_message,j+1,i-1)
-								j=i
-								--print(mum)
-							end
-							
-							if table.contains(sayings,mum) then
-								--print("Корммим мамку этим: "..tostring(mum))
-							end
-						end
-					end
-				end
-			end
-		end
-		
-		return _Say(self, script, time, noanim, ...)
-	end
-end)]]
-
 local SKETCHES = 
 {
     {item="chesspiece_pawn",        recipe="chesspiece_pawn_builder"},
@@ -2603,7 +2454,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		    end
 		end
 	end)
-	AddClassPostConstruct("widgets/playeravatarpopup", function(self)
+	AddClassPostConstruct("widgets/playeravatarpopup", function(self)--[[
 		self.oldUpdateEquipWidgetForSlot=self.UpdateEquipWidgetForSlot
 		self.UpdateEquipWidgetForSlot=function(b,image_group, slot, name)
 			if not image_group._text.OldSetMultilineTruncatedString then
@@ -2631,32 +2482,17 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 				end
 			end
 			self.oldUpdateSkinWidgetForSlot(b,image_group, slot, name)
-		end
+		end]]
 
-		self.oldUpdateData=self.UpdateData
+		local _UpdateData = self.UpdateData
 		function self:UpdateData(data)
-			--data.playerage=21
-			self:oldUpdateData(data)
+			_UpdateData(self, data)
 			if self.age and data.playerage then
 				local newstr=self.age:GetString()
-				newstr=newstr:gsub("Прожито",StringTime(data.playerage, {"Прожит", "Прожито", "Прожиты"}),1)
-				self.age:SetString(newstr:gsub("Дней",StringTime(data.playerage),1))
+				newstr = newstr:gsub("Прожито", StringTime(data.playerage, {"Прожит", "Прожито", "Прожиты"}),1)
+				self.age:SetString(newstr:gsub("Дней", StringTime(data.playerage),1))
 			end
 		end
-		-- if self.age then
-		-- 	local OldSetString = self.age.SetString
-		-- 	function self.age:SetString(str, ...)
-		-- 		if str then
-		-- 			str = str:gsub(STRINGS.UI.PLAYER_AVATAR.AGE_SURVIVED.."(.+)(%d+)(%s+)(.+)", function (sep1, days, sep2, word)
-		-- 				if word~=STRINGS.UI.PLAYER_AVATAR.AGE_DAY and word~=STRINGS.UI.PLAYER_AVATAR.AGE_DAYS then return end
-		-- 				return StringTime(days, {"Прожит", "Прожито", "Прожиты"})..sep1..days..sep2..StringTime(days)
-		-- 			end)
-		-- 		end
-		-- 		local res = OldSetString(self, str, ...)
-		-- 		return res
-		-- 	end
-		-- 	self.age:SetString(self.age:GetString())
-		-- end
 	end)
 
 	--Переводим названия дней недели
