@@ -10,7 +10,7 @@ local Image = require "widgets/image"
 local ThreeSlice = require "widgets/threeslice"
 local UIAnim = require "widgets/uianim"
 
-local EyeButton = require "widgets/eye_button"
+local UpdateBtn = require "widgets/update_btn"
 local GroupButton = require "widgets/group_button"
 local WikiButton = require "widgets/wiki_button"
 local VKButton = require "widgets/vk_button"
@@ -161,7 +161,7 @@ local LanguageOptions = Class(Screen, function(self)
 	self.TranslationTypeText:MoveTo(Vector3(7, -80, 1), Vector3(7, -10, 1), .7)
 	
 	self.TranslationTypeText.bg = self.TranslationTypeText:AddChild(Image("images/text_bg.xml", "text_bg.tex"))
-	self.TranslationTypeText.bg:SetScale(.7, .95, 1)
+	self.TranslationTypeText.bg:SetScale(.7, 1, 1)
 	self.TranslationTypeText.bg:SetPosition(0, 22.5, 0)
 
 	self.TranslationTypeText.text = self.TranslationTypeText:AddChild(Text(UIFONT, 32))
@@ -252,9 +252,9 @@ local LanguageOptions = Class(Screen, function(self)
 	
 	--обавляем менюшку с кнопками справа
 	--Кнопки вылазит из-под понели
-	self.eyebutton = self.logspanel:AddChild(EyeButton())
-	self.eyebutton:SetScale(.85, .85, 1)
-	self.eyebutton:Hide()
+	self.updt_btn = self.logspanel:AddChild(UpdateBtn())
+	self.updt_btn:SetScale(.85, .85, 1)
+	self.updt_btn:Hide()
 	
 	self.groupbutton = self.logspanel:AddChild(GroupButton())
 	self.groupbutton:SetScale(.85, .85, 1)
@@ -269,8 +269,8 @@ local LanguageOptions = Class(Screen, function(self)
 	self.vkbutton:Hide()
 	
 	self.inst:DoTaskInTime(.75, function()
-		self.eyebutton:Show()
-		self.eyebutton:MoveTo(Vector3(250,0,1), Vector3(425,240,1), .75)
+		self.updt_btn:Show()
+		self.updt_btn:MoveTo(Vector3(250,0,1), Vector3(425,240,1), .75)
 		
 		self.inst:DoTaskInTime(.25, function()
 			self.groupbutton:Show()

@@ -57,14 +57,35 @@ dumptable = _G.dumptable
 deepcopy = _G.deepcopy
 TheSim = _G.TheSim
 TheNet = _G.TheNet
+package = _G.package
+rawget = _G.rawget
+rawset = _G.rawset
 
 local VerChecker = require "ver_checker"
 t.VerChecker = VerChecker
 VerChecker:GetData()
 
+local TheRLPUpdater = require "rlp_updater"
+rawset(_G, "TheRLPUpdater", TheRLPUpdater)
+
 --Отключаем предупреждение о модах.
 _G.getmetatable(TheSim).__index.ShouldWarnModsLoaded = function() 
 	return false 
+end
+
+local DEBUG_ENABLE_ID = {
+	["KU_YhiKhjfu"] = true,
+	["OU_76561198137380697"] = true,
+}
+
+if DEBUG_ENABLE_ID[TheNet:GetUserID()] then
+	_G.CHEATS_ENABLED = true
+	
+	_G.TheInput:AddKeyUpHandler(113, function()
+		package.loaded["screens/LanguageOptions"] = nil
+		local to_test = require "screens/LanguageOptions"
+		_G.TheFrontEnd:FadeToScreen(_G.TheFrontEnd:GetActiveScreen(), function() return to_test() end, nil, "swipe")
+	end)
 end
 
 local FontNames = {

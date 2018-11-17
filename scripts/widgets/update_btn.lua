@@ -2,6 +2,7 @@ local t = mods.RussianLanguagePack
 
 local Widget = require "widgets/widget"
 local ImageButton = require "widgets/imagebutton"
+local UpdateScreen = require "screens/update_screen"
 
 local EyeButton = Class(Widget, function(self)
     Widget._ctor(self, "RLPEyeButton")
@@ -14,7 +15,7 @@ local EyeButton = Class(Widget, function(self)
 	self.btn.highlight:SetClickable(false)
 	self.btn.highlight:Hide()
 
-	self.btn:SetText("Список\nИзменений")
+	self.btn:SetText("Обновить\nПеревод")
 	self.btn:SetTextSize(25)
 	self.btn.text:SetPosition(-12, -80)
 	self.btn:SetFont(CHATFONT)
@@ -23,7 +24,7 @@ local EyeButton = Class(Widget, function(self)
 	self.btn.scale_on_focus = false
 	
 	self.btn:SetOnClick(function()
-		VisitURL("http://steamcommunity.com/sharedfiles/filedetails/changelog/"..t.SteamID)
+		TheFrontEnd:PushScreen(UpdateScreen())
 	end)
 
 	self.btn:SetOnGainFocus(function()
