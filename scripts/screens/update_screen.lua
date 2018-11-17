@@ -6,7 +6,7 @@ local UpdateScreen = Class(GenericWaitingPopup, function(self)
 	self.inst:ListenForEvent("rlp_updated", function(_, updated)
 		TheFrontEnd:PopScreen(self)
 		TheFrontEnd:PushScreen(PopupDialogScreen("Обновление завершено", updated and 
-		"Перевод был успешно обновлен. Для того, чтоб изменения вступили в силу, необходимо перезапустить игру." or
+		"Перевод успешно загружен. Для того, чтобы изменения вступили в силу, необходимо перезапустить игру." or
 		"Не удалось обновить перевод. Перезапустите игру и попробуйте еще раз.",
 			{
 				{text="Продолжить", cb = function()
