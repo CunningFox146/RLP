@@ -246,6 +246,16 @@ local function GetShowSTWarning(self)
 	return self:GetValue("show_st_warning")
 end
 
+local function SetDoncMode(self, value)
+	self:SetValue("donc_mode", value)
+	self.dirty = true
+	self:Save()
+end
+
+local function DoncModeEnabled(self)
+	return self:GetValue("donc_mode")
+end
+
 --Расширяем функционал PlayerProfile дополнительной инициализацией двух методов и заданием дефолтных значений опций нашего перевода.
 --После обновления ни один из этих способов не работает, поэтому делаем тупо через require.
 do
@@ -256,7 +266,23 @@ do
 	
 	self.SetShowSTWarning = SetShowSTWarning
 	self.GetShowSTWarning = GetShowSTWarning
+	
+	self.SetDoncMode = SetDoncMode
+	self.DoncModeEnabled = DoncModeEnabled
 end
+
+_G.TheInput:AddKeyUpHandler(_G.KEY_D, function()
+	if _G.TheInput:IsKeyDown(_G.KEY_CTRL) and _G.TheInput:IsKeyDown(_G.KEY_ALT) and _G.Profile and _G.TheFrontEnd then
+		local val = _G.Profile:DoncModeEnabled() or false
+		local PopupDialogScreen = require "screens/redux/popupdialog"
+		_G.TheFrontEnd:PushScreen(PopupDialogScreen("Режим донца.", "Режим донца был "..(val and "выключен!" or "включен!"),
+		{{text="УРА1!!.", cb = function() 
+			_G.TheFrontEnd:PopScreen() 
+		end
+		}}))
+		_G.Profile:SetDoncMode(not val)
+	end
+end)
 
 function t.escapeR(str) --Удаляет \r из конца строки. Нужна для строк, загружаемых в юниксе.
 	if string.sub(str, #str)=="\r" then return string.sub(str, 1, #str-1) else return str end
@@ -4004,15 +4030,44 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		["Behold: The Infernal Swineclops!"] = "Бойтесь! Инфернальный Свиноклоп!",
 	}
 	
+	local donc = {
+		["KU_KP_V7dEc"] = true,
+		[""] = true
+	}
+	
+	local donc_sayings = {
+		"ЫЫЫЫЫЫЫЫЫЫЫ ПУГНА",
+		"БЛЯТЬ ИНГАЛЯТОР УПАЛ",
+		"ПУКАЛО НЕ ПУКАЕТ!",
+		"ТЫ БЛЯТЬ ОХУЕЛ ТАМ ПЕСНИ ПЕТЬ БЛЯТЬ СУКА",
+		"УЙДИ ВУДИ БЛЯДСКИЙ РОТ",
+		"НЕ БЕЙ В ХИЛЕ СУКААА",
+		"СМОЧИТЬ СЛЮНОЙ ЗАДНИЙ ПРОХОД И ВСТАВИТЬ",
+		"УУУУ, В ХУЙ НЕ ДУЕМ!",
+		"УУУУУ ААААА У У АА",
+		"ПОЛЬЗУЙСЯ КНИЖКАМИ, БЛЯТЬ",
+		"Я по-моему умер",
+		"Ребят, вы обосрались жидко.",
+		"ИЗВИНИТЕ РАМЗАМ АХМАТОВИЧ",
+		"РУКИ НА СТОЛ БЛЯТЬ",
+		"Пойду в Запорожье играть в вк",
+		"ИГРААААЙ ГАРМОООНЬ",
+	}
+	
 	AddPrefabPostInit("lavaarena_boarlord", function(inst)
 		local _ontalkfn = inst.components.talker.ontalkfn
 		local function OnTalk(inst, data)
 			_ontalkfn(inst, data)
+			local donc_mode = _G.Profile and _G.Profile:DoncModeEnabled()
 			if data ~= nil and data.message ~= nil and inst.speechroot then
-				if pugna_sayings[data.message] then
-					inst.speechroot.SetBoarloadSpeechString(pugna_sayings[data.message])
+				if donc_mode then
+					inst.speechroot.SetBoarloadSpeechString(donc_sayings[math.random(#donc_sayings)])
 				else
-					inst.speechroot.SetBoarloadSpeechString("ПУКАЛО НЕ ПУКАЕТ!")
+					if pugna_sayings[data.message] then
+						inst.speechroot.SetBoarloadSpeechString(pugna_sayings[data.message])
+					else
+						inst.speechroot.SetBoarloadSpeechString("ПУКАЛО НЕ ПУКАЕТ!")
+					end
 				end
 			end
 		end
