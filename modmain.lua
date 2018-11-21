@@ -244,7 +244,6 @@ local function SetShowSTWarning(self, value)
 end
 
 local function GetShowSTWarning(self)
-	print("GetShowSTWarning", tostring(self:GetValue("show_st_warning")))
 	return self:GetValue("show_st_warning")
 end
 
