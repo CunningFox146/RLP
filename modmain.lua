@@ -21,7 +21,6 @@ mods.RussianLanguagePack = {
 	UpdateLogFileName = "updatelog.txt",
 	MainPOfilename = "DST.po",
 	ModsPOfilename = "MODS.po",
-	UpdatePeriod = {"OncePerLaunch", "OncePerDay", "OncePerWeek", "OncePerMonth", "Never"},
 	TranslationTypes = {Full = "Full", InterfaceChat = "InterfaceChat", ChatOnly = "ChatOnly"},
 	ModTranslationTypes = {enabled = "enabled", disabled = "disabled"},
 	CurrentTranslationType = nil,
@@ -249,23 +248,11 @@ end
 
 --Расширяем функционал PlayerProfile дополнительной инициализацией двух методов и заданием дефолтных значений опций нашего перевода.
 --После обновления ни один из этих способов не работает, поэтому делаем тупо через require.
-
---AddGlobalClassPostConstruct("playerprofile", "PlayerProfile", function(self)
---AddClassPostConstruct("playerprofile", function(self)
 do
 	local self = require "playerprofile"
 	
-	local USE_SETTINGS_FILE = _G.PLATFORM ~= "PS4" and _G.PLATFORM ~= "NACL"
-	
-	if not USE_SETTINGS_FILE then
-			self.persistdata.update_is_allowed = true --Разрешено запускать обновление по умолчанию
-			self.persistdata.update_frequency = t.UpdatePeriod[3] --Раз в неделю по умолчанию
-		local date=_G.os.date("*t")
-		self.persistdata.last_update_date = tostring(date.day.."."..date.month.."."..date.year) --Текущая дата по умолчанию
-	end
-	
-	self.SetLocalizaitonValue=SetLocalizaitonValue --метод задачи значения опции
-	self.GetLocalizaitonValue=GetLocalizaitonValue --метод получения значения опции
+	self.SetLocalizaitonValue = SetLocalizaitonValue --метод задачи значения опции
+	self.GetLocalizaitonValue = GetLocalizaitonValue --метод получения значения опции
 	
 	self.SetShowSTWarning = SetShowSTWarning
 	self.GetShowSTWarning = GetShowSTWarning
