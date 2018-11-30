@@ -1,3 +1,12 @@
+local t = mods.RussianLanguagePack
+local mk = t.RegisterRussianName
+s = _G.STRINGS
+STRINGS = s
+nm,ch,ch_nm,rec,gendesc = s.NAMES,s.CHARACTERS,mk,s.RECIPE_DESC,s.CHARACTERS.GENERIC.DESCRIBE
+mk_gen = function (n,v) end --заглушка пока что
+slang = function()end
+arr=_G.rawget(_G,"arr")or function() end
+
 mk("BOW","Деревянный лук")
 rec.BOW = "Полезно, если вы умеете целиться."
 pp("I used to be a good archer... then I took an arrow in the knee.","Раньше я был хорошим лучником...")

@@ -1,3 +1,12 @@
+local t = mods.RussianLanguagePack
+local mk = t.RegisterRussianName
+s = _G.STRINGS
+STRINGS = s
+nm,ch,ch_nm,rec,gendesc = s.NAMES,s.CHARACTERS,mk,s.RECIPE_DESC,s.CHARACTERS.GENERIC.DESCRIBE
+mk_gen = function (n,v) end --заглушка пока что
+slang = function()end
+arr=_G.rawget(_G,"arr")or function() end
+
 
 mk("CACTUSMACE","Кактусовая бита",3,0,"Кактусовую биту",false,"Кактусовой битой")
 mk("DARK_AXE","Тёмный топор",1,0,"Тёмный топор",false,"Тёмным топором")
