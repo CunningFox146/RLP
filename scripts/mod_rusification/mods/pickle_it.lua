@@ -1,12 +1,3 @@
-local t = mods.RussianLanguagePack
-local mk = t.RegisterRussianName
-s = _G.STRINGS
-STRINGS = s
-nm,ch,ch_nm,rec,gendesc = s.NAMES,s.CHARACTERS,mk,s.RECIPE_DESC,s.CHARACTERS.GENERIC.DESCRIBE
-mk_gen = function (n,v) end --заглушка пока что
-slang = function()end
-arr=_G.rawget(_G,"arr")or function() end
-
 -------------------------------Pickle it
 pp("If I want that potato, I'll need a shovel","Если я хочу эту картошку, то мне нужна лопата.")
 

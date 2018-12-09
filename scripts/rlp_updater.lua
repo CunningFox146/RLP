@@ -7,7 +7,7 @@ function RLPUpdater:CancelDownloading()
 	RLPUpdater.iscanceled = true
 end
 
-function RLPUpdater:StartUpdating()
+function RLPUpdater:StartUpdating(auto)
 	RLPUpdater.iscanceled = nil
 	TheSim:QueryServer(RLPUpdater.URL, function (result, isSuccessful, resultCode)
 		if resultCode ~= 200 or not isSuccessful or #result < 1 or RLPUpdater.iscanceled then

@@ -81,8 +81,8 @@ if DEBUG_ENABLE_ID[TheNet:GetUserID()] then
 	_G.CHEATS_ENABLED = true
 	
 	-- _G.TheInput:AddKeyUpHandler(113, function()
-		-- package.loaded["screens/LanguageOptions"] = nil
-		-- local to_test = require "screens/LanguageOptions"
+		-- package.loaded["screens/test"] = nil
+		-- local to_test = require "screens/test"
 		-- _G.TheFrontEnd:FadeToScreen(_G.TheFrontEnd:GetActiveScreen(), function() return to_test() end, nil, "swipe")
 	-- end)
 end
@@ -797,8 +797,6 @@ function rebuildname(str1,action,objectname)
 						str=repsubstr(str,str:utf8len()-1,"ка")
 					elseif str:utf8sub(str:utf8len()-1)=="ка" then
 						str=repsubstr(str,str:utf8len()-1,"ки")
-					elseif str:utf8sub(str:utf8len()-2)=="тка" then
-						str=repsubstr(str,str:utf8len()-2,"тки")
 					elseif str:utf8sub(str:utf8len()-1)=="та" then
 						str=repsubstr(str,str:utf8len()-1,"ты")
 					elseif str:utf8sub(str:utf8len()-1)=="ая" then
@@ -1928,6 +1926,8 @@ function FindName(cut_fancy)
 	return mod_by_name_cut[cut_fancy]
 end
 
+env.FindName = FindName
+
 --Эта функция еще более продвинутая. Она ищет название мода по первым словам в нем.
 --Само собой поиск в уже кастрированных от версии названиях.
 function FindNameCut(cut_fancy)
@@ -2108,9 +2108,8 @@ function t.TranslateToRussian(message, entity)
 	return message
 end
 
-function RegisterRussianPhrase(old_eng,new_rus) --Register Phrase
+function RegisterRussianPhrase(old_eng, new_rus) --Register Phrase
 	if old_eng == nil then
-		print("RUSMODS WARNING:",tostring(new_rus))
 		return
 	end
 	if new_phrases[old_eng] ~= nil then
@@ -2118,13 +2117,18 @@ function RegisterRussianPhrase(old_eng,new_rus) --Register Phrase
 		print("String \""..tostring(old_eng).."\" already exists!")
 		print("Rus translation: "..tostring(new_phrases[old_eng]))
 		print("Failed translation: "..tostring(new_rus))
-		--but continue translating...
 	end
 	new_phrases[old_eng] = new_rus
 end
 
 pp = RegisterRussianPhrase --Короткое название (алиас), чтобы было проще вбивать перевод, без копипаста этого длиннющего названия функции.
 t.pp = RegisterRussianPhrase
+
+_G.rawset(_G, "pp", pp)
+
+env.pp = pp
+env.mk = mk
+env.nm, env.ch, env.ch_nm, env.rec, env.gendesc, env.s, env.STRINGS = s.NAMES, s.CHARACTERS, mk, s.RECIPE_DESC, s.CHARACTERS.GENERIC.DESCRIBE, _G.STRINGS, _G.STRINGS
 
 --Регистрирует реплики стандартного персонажа.
 function RegisterCharacterPhrases(char_name,arr)
@@ -4323,9 +4327,49 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		inst.components.talker.donetalkingfn = OnTalk
 	end)
 	
+	
+	local Text = require "widgets/text"
+	local function AddUpdtStr(parent)
+		local self = Text(_G.DEFAULTFONT, 20, nil, _G.UICOLOURS.WHITE)
+
+		self.inst:AddTag("NOCLICK")
+		self.inst.persists = false
+
+		parent:AddChild(self)
+		self:MoveToFront()
+
+		self:SetVAnchor(_G.ANCHOR_TOP)
+		self:SetHAnchor(_G.ANCHOR_RIGHT)
+		self:SetHAlign(_G.ANCHOR_RIGHT)
+
+		local SetString_Old = self.SetString or (function() end)
+
+		self.SetString = function (self, ...)
+			SetString_Old(self, ...)
+			local w, h = self:GetRegionSize()
+			self:SetPosition(-w / 2 - 5, -h / 2 - 5)
+		end
+
+		return self
+	end
+	
+	AddGamePostInit(function(test)
+		if not _G.TheFrontEnd.updt_strt and not _G.InGamePlay() then
+			_G.TheFrontEnd.updt_str = AddUpdtStr(_G.TheFrontEnd.overlayroot)
+			TheRLPUpdater:StartUpdating(true)
+			 _G.TheFrontEnd.updt_str:SetString("Обновление перевода...")
+			_G.TheGlobalInstance:ListenForEvent("rlp_updated", function(_, data)
+				_G.TheFrontEnd.updt_str:SetString(data and"Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
+				_G.TheGlobalInstance:DoTaskInTime(1, function() 
+					_G.TheFrontEnd.updt_str:SetString("")
+				end)
+			end)
+		end
+	end)
+	
 	--Русификация модов. Подгружаем в самом конце (!!!)
 	if t.IsModTranslEnabled ~= t.ModTranslationTypes.disabled then
-		function LoadModLocalisation(file, type)
+		local function LoadModLocalisation(file, type)
 			if type ~= nil then
 				modimport("scripts/mod_rusification/transl/"..file)
 			else
