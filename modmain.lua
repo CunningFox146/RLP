@@ -2797,7 +2797,8 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 		--Вообще никак не перехватить.
 		function self:DoSorting(...)
 			local override = {
-				"Multi Taste"
+				"muts",
+				"hg"
 			}
 			-- This does the trick, but we might want more clever criteria for how a certain column gets ordered
 			-- ("Server 5" < "Server 50" < "Server 6" is current result for Name)
@@ -2833,8 +2834,8 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 				return not server.has_password
 			end
 			local function IsOverride(server)
-				for i, name in ipairs(override) do
-					return string.find(server.name, name) ~= nil
+				for i, tag in ipairs(override) do
+					return string.find(server.tags, tag) ~= nil
 				end
 			end
 			local social_sort_fns = {
