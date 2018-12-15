@@ -104,8 +104,8 @@ if t.CurrentTranslationType==t.TranslationTypes.Full then
 	function t.RenameAction(act, new_name)
 		if rawget(_G,"ACTIONS") and ACTIONS[act] then
 			ACTIONS[act].str = new_name
-			if s.ACTIONS then
-				s.ACTIONS[act] = new_name
+			if STRINGS.ACTIONS then
+				STRINGS.ACTIONS[act] = new_name
 			end
 		end
 	end
