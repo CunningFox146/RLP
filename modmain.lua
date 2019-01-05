@@ -780,50 +780,74 @@ function rebuildname(str1,action,objectname)
 			elseif action=="reskin" and str:utf8len()>3 then
 				if str=="Стол" then
 					str=str.."а"
-				elseif counter==wordcount then
-					if str:utf8sub(str:utf8len()-1)=="ьё" then
-						str=repsubstr(str,str:utf8len()-1,"ья")
-					elseif str:utf8sub(str:utf8len())=="я" then
-						str=repsubstr(str,str:utf8len(),"и")
-					elseif str:utf8sub(str:utf8len())=="а" then
-						str=repsubstr(str,str:utf8len(),"ы")
-					elseif str:utf8sub(str:utf8len()-1)=="на" then
-						str=repsubstr(str,str:utf8len(),"ы")
-					elseif str:utf8sub(str:utf8len()-1)=="ль" then
-						str=repsubstr(str,str:utf8len(),"я")
-					elseif str:utf8sub(str:utf8len())=="ь" then
-						str=repsubstr(str,str:utf8len(),"и")
-					elseif str:utf8sub(str:utf8len()-1)=="ок" then
-						str=repsubstr(str,str:utf8len()-1,"ка")
-					elseif str:utf8sub(str:utf8len()-1)=="ка" then
-						str=repsubstr(str,str:utf8len()-1,"ки")
-					elseif str:utf8sub(str:utf8len()-1)=="та" then
-						str=repsubstr(str,str:utf8len()-1,"ты")
-					elseif str:utf8sub(str:utf8len()-1)=="ая" then
-						str=repsubstr(str,str:utf8len()-1,"ой")
-					elseif str:utf8sub(str:utf8len()-1)=="ло" then
-						str=repsubstr(str,str:utf8len()-1,"ла")
-					elseif str:utf8sub(str:utf8len()-1)=="ол" then
-						str=repsubstr(str,str:utf8len()-1,"ола")
-					elseif str:utf8sub(str:utf8len()-1)=="ом" then
-						str=repsubstr(str,str:utf8len()-1,"ома")
-					elseif str:utf8sub(str:utf8len()-2)=="нец" then
-						str=repsubstr(str,str:utf8len()-2,"нец")
-					elseif str:utf8sub(str:utf8len()-2)=="ий" then
-						str=repsubstr(str,str:utf8len()-2,"ого")
-					elseif str:utf8sub(str:utf8len()-1)=="ья" then
-						str=repsubstr(str,str:utf8len()-1,"ьей")
-					elseif str:utf8sub(str:utf8len()-1)=="па" then
-						str=repsubstr(str,str:utf8len()-1,"пы")
-					elseif str:utf8sub(str:utf8len()-1)=="ще" then
-						str=repsubstr(str,str:utf8len()-1,"ща")
-					elseif str:utf8sub(str:utf8len()-1)=="це" then
-						str=repsubstr(str,str:utf8len()-1,"ца")
-					elseif str:utf8sub(str:utf8len()-1)=="ый" then
-						str=repsubstr(str,str:utf8len()-1,"ого")
-					elseif sogl[str:utf8sub(str:utf8len())] then
-						str=str.."а"
-					end
+					elseif str=="Фонарь" then
+						str="Фонаря"
+					elseif str=="пчеловода" then
+						str=str..""
+					elseif str=="Слизовечка" then
+						str="Слизовечки"
+					elseif str=="Модный" then
+						str="Модного"
+					elseif str=="клетка" then
+						str="клетки"
+					elseif str=="шапка" then
+						str="шапки"
+					elseif str=="каска" then
+						str="каски"
+					elseif str=="Шляпа" then
+						str="Шляпы"
+					elseif str=="Измеритель" then
+						str="Измерителя"
+					elseif str=="Конец" then
+						str="«Конец"
+					elseif str=="близок!" then
+						str="близок!»"
+					elseif counter==wordcount then
+						if str:utf8sub(str:utf8len()-1)=="ьё" then
+							str=repsubstr(str,str:utf8len()-1,"ья")
+						elseif str:utf8sub(str:utf8len())=="я" then
+							str=repsubstr(str,str:utf8len(),"и")
+						elseif str:utf8sub(str:utf8len())=="а" then
+							str=repsubstr(str,str:utf8len(),"ы")
+						elseif str:utf8sub(str:utf8len()-1)=="на" then
+							str=repsubstr(str,str:utf8len(),"ы")
+						elseif str:utf8sub(str:utf8len()-1)=="ль" then
+							str=repsubstr(str,str:utf8len(),"я")
+						elseif str:utf8sub(str:utf8len())=="ь" then
+							str=repsubstr(str,str:utf8len(),"и")
+						elseif str:utf8sub(str:utf8len()-2)=="арь" then
+							str=repsubstr(str,str:utf8len()-2,"аря")
+						elseif str:utf8sub(str:utf8len()-1)=="ок" then
+							str=repsubstr(str,str:utf8len()-1,"ка")
+						elseif str:utf8sub(str:utf8len()-1)=="ка" then
+							str=repsubstr(str,str:utf8len()-1,"ки")
+						elseif str:utf8sub(str:utf8len()-1)=="та" then
+							str=repsubstr(str,str:utf8len()-1,"ты")
+						elseif str:utf8sub(str:utf8len()-1)=="ая" then
+							str=repsubstr(str,str:utf8len()-1,"ой")
+						elseif str:utf8sub(str:utf8len()-1)=="ло" then
+							str=repsubstr(str,str:utf8len()-1,"ла")
+						elseif str:utf8sub(str:utf8len()-1)=="ол" then
+							str=repsubstr(str,str:utf8len()-1,"ола")
+						elseif str:utf8sub(str:utf8len()-1)=="ом" then
+							str=repsubstr(str,str:utf8len()-1,"ома")
+						elseif str:utf8sub(str:utf8len()-2)=="нец" then
+							str=repsubstr(str,str:utf8len()-2,"нец")
+						elseif str:utf8sub(str:utf8len()-2)=="ий" then
+							str=repsubstr(str,str:utf8len()-2,"ого")
+						elseif str:utf8sub(str:utf8len()-1)=="ья" then
+							str=repsubstr(str,str:utf8len()-1,"ьей")
+						elseif str:utf8sub(str:utf8len()-1)=="па" then
+							str=repsubstr(str,str:utf8len()-1,"пы")
+						elseif str:utf8sub(str:utf8len()-1)=="ще" then
+							str=repsubstr(str,str:utf8len()-1,"ща")
+						elseif str:utf8sub(str:utf8len()-1)=="це" then
+							str=repsubstr(str,str:utf8len()-1,"ца")
+						elseif str:utf8sub(str:utf8len()-1)=="ый" then
+							str=repsubstr(str,str:utf8len()-1,"ого")
+						elseif sogl[str:utf8sub(str:utf8len())] then
+							str=str.."а"
+						end
 				else
 					if t.NamesGender["she"][string.lower(objectname)] then --женский род
 						if str:utf8sub(str:utf8len()-1)=="ая" then
