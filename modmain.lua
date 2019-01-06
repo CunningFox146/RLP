@@ -782,6 +782,8 @@ function rebuildname(str1,action,objectname)
 					str=str.."а"
 					elseif str=="Фонарь" then
 						str="Фонаря"
+					elseif str=="Палатка" then
+						str="Палатки"
 					elseif str=="пчеловода" then
 						str=str..""
 					elseif str=="Слизовечка" then
