@@ -1,5 +1,5 @@
 name = "Russification Pack for DST"
-version = "1.41"
+version = "2.0"
 
 local desc = {
 	en = "\nThe best russian localisation at the moment. Soure code was taken from the Russian Language Pack. Special thanks to Some1 and Alevastor!\n\nVersion: "..version,
@@ -17,7 +17,7 @@ api_version = 10
 icon_atlas = "images/rusif_icon.xml"
 icon = "rusif_icon.tex"
 
-priority = .9999999999991 --Сразу после старого русификатора
+priority = 10.1251526619
 
 dont_starve_compatible = false
 dst_compatible = true

@@ -17,7 +17,14 @@ mods.RussianLanguagePack = {
 	--Путь, по которому будут сохраняться рабочие версии po файла и лога обновлений.
 	--Он нужен потому, что сейчас при синхронизации стим затирает все файлы в папке мода на версии из стима.
 	StorePath = MODROOT,--"scripts/languages/"
-
+	
+	mod_phrases = {},
+	mod_announce = {},
+	
+	-- Для дебага
+	debug = true,
+	print = function(...) if mods.RussianLanguagePack.debug then print("[RLP_DEBUG] " .. (...))  end end,
+	
 	UpdateLogFileName = "updatelog.txt",
 	MainPOfilename = "DST.po",
 	ModsPOfilename = "MODS.po",
@@ -42,6 +49,8 @@ mods.RussianLanguagePack = {
 	},
 	DefaultActionCase = "accusative",
 }
+
+print("About to load RLP ver. ", modinfo.version)
 
 local t = mods.RussianLanguagePack
 
@@ -337,7 +346,7 @@ require("RLP_support")
 local OldAddClassPostConstruct = AddClassPostConstruct
 local function AddClassPostConstruct(path, ...)
 	if not _G.kleifileexists("scripts/"..path..".lua") then
-		print("RLP ERROR AddClassPostConstruct: file \""..path..".lua\" is not found. Skipping.")
+		t.print("RLP ERROR AddClassPostConstruct: file \""..path..".lua\" is not found. Skipping.")
 		return
 	end
 	local res = OldAddClassPostConstruct(path, ...)
@@ -396,7 +405,7 @@ end
 
 do
 	--У нас уже встроен перевод модов.
-	if (mods.RusMods ~= nil or _G.KnownModIndex:IsModEnabled("workshop-55043536")) and _G.TheWorld == nil then
+	if (mods.RusMods ~= nil or _G.KnownModIndex:IsModEnabled("workshop-55043536")) and not _G.InGamePlay() then
 		local OldStart=_G.Start
 		function _G.Start() 
 			ApplyLocalizedFonts()
@@ -419,15 +428,49 @@ do
 		end
 	end
 	
-	local OldStart=_G.Start
-	function _G.Start() 
+	local _Start = _G.Start
+	function _G.Start(...) 
 		ApplyLocalizedFonts()
-		OldStart()
-		--Не запускаем в игре. Только в лобби
-		if _G.Profile and _G.TheFrontEnd and _G.TheFrontEnd:GetGraphicsOptions():IsSmallTexturesMode() and not _G.InGamePlay() and _G.Profile.GetShowSTWarning and not _G.Profile:GetShowSTWarning() then
-		--if _G.TheFrontEnd ~= nil and _G.TheFrontEnd:GetGraphicsOptions():IsSmallTexturesMode() and not _G.InGamePlay() then
-			local PopupDialogScreen = require "screens/ErrorPopup"
-			_G.TheFrontEnd:PushScreen(PopupDialogScreen(
+		_Start(...)
+		
+		if _G.InGamePlay() or not _G.TheFrontEnd then
+			return
+		end
+		
+		local PopupDialogScreen = require "screens/popupdialog"
+		local ErrorPopup = require "screens/ErrorPopup"
+		
+		if _G.KnownModIndex:IsModEnabled("workshop-55043536") then
+				_G.TheFrontEnd:PushScreen(PopupDialogScreen(
+				"Обнаружен устаревший\nмод!",
+				"Внимание! В игре обнаружен переводчик модов (Russian For Mods). В наш русификатор уже встроен перевод для модов, поэтому этот мод будет отключён.",
+				{{text="Хорошо", cb = function() 
+						_G.TheFrontEnd:PopScreen() 
+						--Отрубаем.
+						_G.KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-55043536")
+						
+						_G.ForceAssetReset()
+						_G.KnownModIndex:Save(function()
+							_G.SimReset()
+						end)
+					end
+					}},nil,nil,"dark"))
+		elseif _G.KnownModIndex:IsModEnabled("workshop-354836336") then
+			local text="Внимание! В игре обнаружен устаревший перевод (Russian Language Pack). Он будет отключен для корректной работы перевода."
+				_G.TheFrontEnd:PushScreen(PopupDialogScreen("Обнаружена устаревшая\nрусификация!", text,
+				{{text="Хорошо", cb = function() 
+						_G.TheFrontEnd:PopScreen() 
+						--Отрубаем.
+						_G.KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-354836336")
+						
+						_G.ForceAssetReset()
+						_G.KnownModIndex:Save(function()
+							_G.SimReset()
+						end)
+					end
+					}},nil,nil,"dark"))
+		elseif _G.Profile and _G.TheFrontEnd:GetGraphicsOptions():IsSmallTexturesMode() and _G.Profile.GetShowSTWarning and not _G.Profile:GetShowSTWarning() then
+			_G.TheFrontEnd:PushScreen(ErrorPopup(
 			{{text="Ok", cb = function() 
 				_G.TheFrontEnd:PopScreen() 
 			end}}))
@@ -510,7 +553,7 @@ end
 modimport("scripts/ver_checker.lua")
 
 if t.CurrentTranslationType == t.TranslationTypes.ChatOnly then
-	print("[RLP] Загрузка ChatOnly версии завершена.")
+	t.print("[RLP] Загрузка ChatOnly версии завершена.")
 	return
 end
 
@@ -785,7 +828,7 @@ function rebuildname(str1,action,objectname)
 					elseif str=="Палатка" then
 						str="Палатки"
 					elseif str=="пчеловода" then
-						str=str..""
+						str=str
 					elseif str=="Слизовечка" then
 						str="Слизовечки"
 					elseif str=="Модный" then
@@ -933,12 +976,12 @@ t.rebuildname = rebuildname
 
 _G.testname=function(name,key)
 	if name and (not key) and type(name)=="string" and rawget(STRINGS.NAMES,name:upper()) then key=name:upper() name=STRINGS.NAMES[key] end
-	print("Идти к "..rebuildname(name,"WALKTO", key))
-	print("Осмотреть "..rebuildname(name,"DEFAULTACTION", key))
+	t.print("Идти к "..rebuildname(name,"WALKTO", key))
+	t.print("Осмотреть "..rebuildname(name,"DEFAULTACTION", key))
 	if key then
-		print("Был убит "..rebuildname(name,"KILL",key))
+		t.print("Был убит "..rebuildname(name,"KILL",key))
 	end
-	print("Сменить скин у "..rebuildname(name,"reskin", key))
+	t.print("Сменить скин у "..rebuildname(name,"reskin", key))
 end
 
 --Сохраняет в файле fn все имена с действием, указанным в параметре action)
@@ -1330,6 +1373,7 @@ announcerus.GHOST_DEATH_ANNOUNCEMENT_DEFAULT=ru["STRINGS.UI.HUD.GHOST_DEATH_ANNO
 announcerus.REZ_ANNOUNCEMENT=ru["STRINGS.UI.HUD.REZ_ANNOUNCEMENT"] or ""
 announcerus.START_AFK=ru["STRINGS.UI.HUD.START_AFK"] or ""
 announcerus.STOP_AFK=ru["STRINGS.UI.HUD.STOP_AFK"] or ""
+
 --	announcerus.VOTINGKICKSTART=ru["STRINGS.VOTING.KICK.START"] or ""
 --	announcerus.VOTINGKICKSUCCESS=ru["STRINGS.VOTING.KICK.SUCCESS"] or ""
 --	announcerus.VOTINGKICKFAILURE=ru["STRINGS.VOTING.KICK.FAILURE"] or ""
@@ -1762,30 +1806,12 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 		--Кик/Бан
 		test(nil,STRINGS.UI.NOTIFICATION.KICKEDFROMGAME, announcerus.KICKEDFROMGAME)
 		test(nil,STRINGS.UI.NOTIFICATION.BANNEDFROMGAME, announcerus.BANNEDFROMGAME)
-		--Моды
-		--[[
-		test(nil, STRINGS.BELL_DESTROYED, announcerus.BELL_DESTROYED)
-		test(nil, STRINGS.BELL_DESTOYED_ANNOUNCE, announcerus.BELL_DESTOYED_ANNOUNCE)
-		test(nil, STRINGS.BELL_DESTOYED_ANNOUNCE_UNKNOWN, announcerus.BELL_DESTOYED_ANNOUNCE_UNKNOWN)
-		test(nil, STRINGS.BELL_DBB, announcerus.BELL_DBB)
 		
-		if STRINGS.MUTS_CLANS then
-			test(nil, STRINGS.MUTS_CLANS.CLAN_DELETED, announcerus.CLAN_DELETED)
-			test(nil, STRINGS.MUTS_CLANS.CLAN_DELETED_BY_PLAYER, announcerus.CLAN_DELETED_BY_PLAYER)
-			test(nil, STRINGS.MUTS_CLANS.PLAYER_JOINED, announcerus.CLAN_PLAYER_JOINED)
-			test(nil, STRINGS.MUTS_CLANS.PLAYER_LEFT, announcerus.CLAN_PLAYER_LEFT)
-			test(nil, STRINGS.MUTS_CLANS.CLAN_CREATED, announcerus.CLAN_CREATED)
-			test(nil, STRINGS.MUTS_CLANS.LEVELUP, announcerus.CLAN_LEVELUP)
-			test(nil, STRINGS.MUTS_CLANS.PLAYER_KICKED, announcerus.CLAN_PLAYER_KICKED)
-		end]]
-		--[[
-		if announcerus.mods and #announcerus.mods > 0 then
-			for id, translate in pairs(announcerus.mods) do
-				if STRINGS.UI.NOTIFICATION[id] and translate then
-					test(nil, STRINGS.UI.NOTIFICATION[id], translate)
-				end
-			end
-		end]]
+		-- Даем возможность модам переводить аннонсы
+		for eng, rus in pairs(t.mod_announce) do
+			test(nil, eng, rus)
+		end
+		
 		--Новый скин
 --		test(nil,STRINGS.UI.NOTIFICATION.NEW_SKIN_ANNOUNCEMENT, announcerus.NEW_SKIN_ANNOUNCEMENT)
 		if not name2 then
@@ -1915,7 +1941,7 @@ mod_by_name_cut = {} --аналогично, только в качестве к
 do
 	local function SearchForModsByName()
 		if not (_G.KnownModIndex and _G.KnownModIndex.savedata and _G.KnownModIndex.savedata.known_mods) then
-			print("Mod Translation: ERROR! Can't find KnownModIndex!")
+			t.print("Mod Translation: ERROR! Can't find KnownModIndex!")
 			return
 		end
 		for name,mod in pairs(_G.KnownModIndex.savedata.known_mods) do
@@ -1993,34 +2019,33 @@ if not _G.rawget(_G,"test") then
 end
 ]]
 
-local new_phrases = {nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,nil,}
-
 --Переводит сообщение на русский, пользуясь хеш-таблицами
 --message - сообщение на английском
 --entity - ссылка на говорящего это сообщение персонажа
+
+_G.DumpModPhrases = function() _G.printwrap("t.mod_phrases", t.mod_phrases) end
+
 function t.TranslateToRussian(message, entity)
-	--print("t.TranslateToRussian", message, entity.prefab)
+	t.print("t.TranslateToRussian", message, entity.prefab)
+	if not (entity and entity.prefab and entity.components.talker and type(message)=="string") then return message end
 	
 	local new_line = string.find(message,"\n",1,true)
 	if new_line ~= nil then
 		local mess1 = message:sub(1, new_line - 1)
-		if new_phrases[mess1] then
+		if t.mod_phrases[mess1] then
 			local mess2 = message:sub(new_line)
-			message = new_phrases[mess1] .. mess2
+			return t.mod_phrases[mess1] .. mess2
 		end
-	elseif new_phrases[message] then
-		message = new_phrases[message]
+	elseif t.mod_phrases[message] then
+		return t.mod_phrases[message]
 	end
-		
-	if not (entity and entity.prefab and entity.components.talker and type(message)=="string") then return message end
+	
 	if entity:HasTag("playerghost") then --Если это реплика игрока-привидения
 		message=string.gsub(message,"h","у")
 		return message
 	end
 
-	
 	if entity.prefab =='quagmire_goatmum' then
-
 		if t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[message] then 
 			return t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[message]
 		end
@@ -2138,23 +2163,37 @@ function RegisterRussianPhrase(old_eng, new_rus) --Register Phrase
 	if old_eng == nil then
 		return
 	end
-	if new_phrases[old_eng] ~= nil then
-		print("ERROR RUS MODS!")
-		print("String \""..tostring(old_eng).."\" already exists!")
-		print("Rus translation: "..tostring(new_phrases[old_eng]))
-		print("Failed translation: "..tostring(new_rus))
+	if t.mod_phrases[old_eng] ~= nil then
+		t.print("ERROR RUS MODS!")
+		t.print("String \""..tostring(old_eng).."\" already exists!")
+		t.print("Rus translation: "..tostring(t.mod_phrases[old_eng]))
+		t.print("Failed translation: "..tostring(new_rus))
 	end
-	new_phrases[old_eng] = new_rus
+	t.mod_phrases[old_eng] = new_rus
 end
 
 pp = RegisterRussianPhrase --Короткое название (алиас), чтобы было проще вбивать перевод, без копипаста этого длиннющего названия функции.
 t.pp = RegisterRussianPhrase
-
 _G.rawset(_G, "pp", pp)
+
+-- Делаем затычку для старых переводов.
+mods.RusMods = {
+	pp = RegisterRussianPhrase --Старая ссылка
+}
 
 env.pp = pp
 env.mk = mk
 env.nm, env.ch, env.ch_nm, env.rec, env.gendesc, env.s, env.STRINGS = s.NAMES, s.CHARACTERS, mk, s.RECIPE_DESC, s.CHARACTERS.GENERIC.DESCRIBE, _G.STRINGS, _G.STRINGS
+
+-- Добавляет перевод аннонса
+function AddModAnnounce(eng, rus)
+	t.mod_announce[eng] = rus
+end
+
+t.ma = AddModAnnounce
+t.AddModAnnounce = AddModAnnounce
+
+env.ma = AddModAnnounce
 
 --Регистрирует реплики стандартного персонажа.
 function RegisterCharacterPhrases(char_name,arr)
@@ -2346,7 +2385,7 @@ AddPrefabPostInit("skeleton_player", function(inst)
 			if t.SpeechHashTbl.NAMES.Rus2Eng[killer] and inst.pkname == nil then
 				local mentions=t.SpeechHashTbl.NAMES.Rus2Eng[killer]
 				killerkey=t.SpeechHashTbl.NAMES.Eng2Key[mentions] --Получаем ключ имени убийцы
-				print("[RLP DEBUG] 2302 "..killerkey)
+				t.print("[RLP DEBUG] 2302 "..killerkey)
 				if not killerkey and key=="WX78" then --тут только полный перебор, т.к. он говорит всё в верхнем регистре
 					for eng, key in pairs(t.SpeechHashTbl.NAMES.Eng2Key) do
 						if eng:upper()==mentions then killerkey = key break end
@@ -4196,8 +4235,8 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			
 			local text = self[v]:GetSelectedText()
 			if text == nil or type(text) ~= "string" then
+				t.print("ERROR! text == nil or type(text) ~= \"string\"")
 				return
-				print("ERROR! text == nil or type(text) ~= \"string\"")
 			end
 			
 			if text == "Disabled" then
@@ -4402,6 +4441,15 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			else
 				modimport("scripts/mod_rusification/mods/"..file)
 			end
+		end
+		
+		_G.TestModTranslator = function()
+			LoadModLocalisation("hawaiian.lua", 1)
+			LoadModLocalisation("loving_evil.lua", 1)
+			LoadModLocalisation("pickle_it.lua")
+			LoadModLocalisation("archery_mod.lua")
+			LoadModLocalisation("waiter_101.lua")
+			LoadModLocalisation("beefalo_milk.lua")
 		end
 
 		--Засовываем ВЕСЬ старый перевод в post init, чтобы он уж точно работал, независимо от приоритета мода.
@@ -5202,6 +5250,6 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			pp("Shelter from the elements.", "Укрытие от стихий.")
 		end
 	else
-		print("RLP: Загрузка перевода модов отключена.")
+		t.print("RLP: Загрузка перевода модов отключена.")
 	end
 end
