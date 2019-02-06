@@ -1,6 +1,7 @@
 local t = mods.RussianLanguagePack
 local RLPUpdater = {
 	URL = "https://raw.githubusercontent.com/CunningFox146/RLP/master/DST.po",
+	disabled = t.StorePath:find("workshop-") == nil,
 }
 
 function RLPUpdater:CancelDownloading()
@@ -8,6 +9,11 @@ function RLPUpdater:CancelDownloading()
 end
 
 function RLPUpdater:StartUpdating(auto)
+	if self.disabled then
+		print("Disabling updating. We're on git branch")
+		return
+	end
+	
 	RLPUpdater.iscanceled = nil
 	TheSim:QueryServer(RLPUpdater.URL, function (result, isSuccessful, resultCode)
 		if resultCode ~= 200 or not isSuccessful or #result < 1 or RLPUpdater.iscanceled then

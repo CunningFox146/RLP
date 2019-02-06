@@ -403,78 +403,52 @@ local function GetPoFileVersion(file) --Возвращает версию po ф�
 	return ver
 end
 
-do
-	--У нас уже встроен перевод модов.
-	if (mods.RusMods ~= nil or _G.KnownModIndex:IsModEnabled("workshop-55043536")) and not _G.InGamePlay() then
-		local OldStart=_G.Start
-		function _G.Start() 
-			ApplyLocalizedFonts()
-			OldStart()
-			
-			local text="Внимание! В игре обнаружен переводчик модов (Russian For Mods). В наш русификатор уже встроен перевод для модов, поэтому мод (Russian For Mods) будет отключён."
-			local PopupDialogScreen = require "screens/popupdialog"
-				_G.TheFrontEnd:PushScreen(PopupDialogScreen("Обнаружена устаревшая \nрусификация!", text,
-				{{text="Хорошо.", cb = function() 
-						_G.TheFrontEnd:PopScreen() 
-						--Отрубаем.
-						_G.KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-55043536")
-						
-						_G.ForceAssetReset()
-						_G.KnownModIndex:Save(function()
-							_G.SimReset()
-						end)
-					end
-					}},nil,nil,"dark"))
-		end
+local _Start = _G.Start
+function _G.Start(...) 
+	ApplyLocalizedFonts()
+	_Start(...)
+	
+	if _G.InGamePlay() or not _G.TheFrontEnd then
+		return
 	end
 	
-	local _Start = _G.Start
-	function _G.Start(...) 
-		ApplyLocalizedFonts()
-		_Start(...)
-		
-		if _G.InGamePlay() or not _G.TheFrontEnd then
-			return
-		end
-		
-		local PopupDialogScreen = require "screens/popupdialog"
-		local ErrorPopup = require "screens/ErrorPopup"
-		
-		if _G.KnownModIndex:IsModEnabled("workshop-55043536") then
-				_G.TheFrontEnd:PushScreen(PopupDialogScreen(
-				"Обнаружен устаревший\nмод!",
-				"Внимание! В игре обнаружен переводчик модов (Russian For Mods). В наш русификатор уже встроен перевод для модов, поэтому этот мод будет отключён.",
-				{{text="Хорошо", cb = function() 
-						_G.TheFrontEnd:PopScreen() 
-						--Отрубаем.
-						_G.KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-55043536")
-						
-						_G.ForceAssetReset()
-						_G.KnownModIndex:Save(function()
-							_G.SimReset()
-						end)
-					end
-					}},nil,nil,"dark"))
-		elseif _G.KnownModIndex:IsModEnabled("workshop-354836336") then
-			local text="Внимание! В игре обнаружен устаревший перевод (Russian Language Pack). Он будет отключен для корректной работы перевода."
-				_G.TheFrontEnd:PushScreen(PopupDialogScreen("Обнаружена устаревшая\nрусификация!", text,
-				{{text="Хорошо", cb = function() 
-						_G.TheFrontEnd:PopScreen() 
-						--Отрубаем.
-						_G.KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-354836336")
-						
-						_G.ForceAssetReset()
-						_G.KnownModIndex:Save(function()
-							_G.SimReset()
-						end)
-					end
-					}},nil,nil,"dark"))
-		elseif _G.Profile and _G.TheFrontEnd:GetGraphicsOptions():IsSmallTexturesMode() and _G.Profile.GetShowSTWarning and not _G.Profile:GetShowSTWarning() then
-			_G.TheFrontEnd:PushScreen(ErrorPopup(
-			{{text="Ok", cb = function() 
-				_G.TheFrontEnd:PopScreen() 
-			end}}))
-		end
+	local PopupDialogScreen = require "screens/popupdialog"
+	local ErrorPopup = require "screens/ErrorPopup"
+	
+	if _G.KnownModIndex:IsModEnabled("workshop-55043536") then
+			_G.TheFrontEnd:PushScreen(PopupDialogScreen(
+			"Обнаружен устаревший\nмод!",
+			"Внимание! В игре обнаружен переводчик модов (Russian For Mods). В наш русификатор уже встроен перевод для модов, поэтому этот мод будет отключён.",
+			{{text="Хорошо", cb = function() 
+					_G.TheFrontEnd:PopScreen() 
+					--Отрубаем.
+					_G.KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-55043536")
+					
+					_G.ForceAssetReset()
+					_G.KnownModIndex:Save(function()
+						_G.SimReset()
+					end)
+				end
+				}},nil,nil,"dark"))
+	elseif _G.KnownModIndex:IsModEnabled("workshop-354836336") then
+		local text="Внимание! В игре обнаружен устаревший перевод (Russian Language Pack). Он будет отключен для корректной работы перевода."
+			_G.TheFrontEnd:PushScreen(PopupDialogScreen("Обнаружена устаревшая\nрусификация!", text,
+			{{text="Хорошо", cb = function() 
+					_G.TheFrontEnd:PopScreen() 
+					--Отрубаем.
+					_G.KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-354836336")
+					
+					_G.ForceAssetReset()
+					_G.KnownModIndex:Save(function()
+						_G.SimReset()
+					end)
+				end
+				}},nil,nil,"dark"))
+	elseif _G.Profile and _G.TheFrontEnd:GetGraphicsOptions():IsSmallTexturesMode() and _G.Profile.GetShowSTWarning and not _G.Profile:GetShowSTWarning() then
+		_G.TheFrontEnd:PushScreen(ErrorPopup(
+		{{text="Ok", cb = function() 
+			_G.TheFrontEnd:PopScreen() 
+		end}}))
 	end
 end
 
@@ -1853,7 +1827,11 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 	end end
 end) -- для AddClassPostConstruct "widgets/eventannouncer"
 
-
+-- Добавляет переменную в окружение модов.
+local function AddToModEnv(name, val)
+	env[name] = val
+	env.env[name] = val
+end
 
 --Подбирает сообщение из хеш-таблиц по указанному персонажу и сообщению на английском.
 --Если персонаж не указан, используется уилсон.
@@ -1978,7 +1956,7 @@ function FindName(cut_fancy)
 	return mod_by_name_cut[cut_fancy]
 end
 
-env.FindName = FindName
+AddToModEnv("FindName", FindName)
 
 --Эта функция еще более продвинутая. Она ищет название мода по первым словам в нем.
 --Само собой поиск в уже кастрированных от версии названиях.
@@ -2181,10 +2159,6 @@ mods.RusMods = {
 	pp = RegisterRussianPhrase --Старая ссылка
 }
 
-env.pp = pp
-env.mk = mk
-env.nm, env.ch, env.ch_nm, env.rec, env.gendesc, env.s, env.STRINGS = s.NAMES, s.CHARACTERS, mk, s.RECIPE_DESC, s.CHARACTERS.GENERIC.DESCRIBE, _G.STRINGS, _G.STRINGS
-
 -- Добавляет перевод аннонса
 function AddModAnnounce(eng, rus)
 	t.mod_announce[eng] = rus
@@ -2193,7 +2167,23 @@ end
 t.ma = AddModAnnounce
 t.AddModAnnounce = AddModAnnounce
 
-env.ma = AddModAnnounce
+local EnvRef = {
+	pp = pp,
+	mk = mk,
+	ch_nm = mk,
+	nm = s.NAMES,
+	ch = s.CHARACTERS,
+	rec = s.RECIPE_DESC,
+	gendesc = s.CHARACTERS.GENERIC.DESCRIBE,
+	s = s,
+	STRINGS = s,
+	AddModAnnounce = AddModAnnounce,
+	ma = AddModAnnounce,
+}
+
+for name, fn in pairs(EnvRef) do
+	AddToModEnv(name, fn)
+end
 
 --Регистрирует реплики стандартного персонажа.
 function RegisterCharacterPhrases(char_name,arr)
@@ -4420,10 +4410,10 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	end
 	
 	AddGamePostInit(function(test)
-		if not _G.TheFrontEnd.updt_strt and not _G.InGamePlay() then
+		if not _G.TheFrontEnd.updt_strt and not _G.InGamePlay() and not TheRLPUpdater.disabled then
 			_G.TheFrontEnd.updt_str = AddUpdtStr(_G.TheFrontEnd.overlayroot)
 			TheRLPUpdater:StartUpdating(true)
-			 _G.TheFrontEnd.updt_str:SetString("Обновление перевода...")
+			_G.TheFrontEnd.updt_str:SetString("Обновление перевода...")
 			_G.TheGlobalInstance:ListenForEvent("rlp_updated", function(_, data)
 				_G.TheFrontEnd.updt_str:SetString(data and"Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
 				_G.TheGlobalInstance:DoTaskInTime(1, function() 
@@ -4451,7 +4441,9 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 			LoadModLocalisation("waiter_101.lua")
 			LoadModLocalisation("beefalo_milk.lua")
 		end
-
+		
+		-- _G.TestModTranslator()
+		
 		--Засовываем ВЕСЬ старый перевод в post init, чтобы он уж точно работал, независимо от приоритета мода.
 		RegisterTranslation(function() ---НАЧАЛО
 
