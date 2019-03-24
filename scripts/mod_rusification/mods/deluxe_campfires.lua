@@ -1,4 +1,3 @@
-local mk = t.RegisterRussianName
 -------------------------------------------------Deluxe Campfires 2.11
 --https://steamcommunity.com/sharedfiles/filedetails/?id=444235588
 mk("DELUXE_FIREPIT","Роскошный костёр",1,"Роскошному костру",1,false)

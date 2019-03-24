@@ -1,4 +1,3 @@
-local mk = t.RegisterRussianName
 ------ Переводы от Hawaiian ------
 
 local function LoadModTranslation(file)

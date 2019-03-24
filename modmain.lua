@@ -1904,7 +1904,7 @@ local function GetMentioned1(message)
 end
 
 --Простые переменные.
-mk = t.RegisterRussianName
+local mk = t.RegisterRussianName
 s = _G.STRINGS
 STRINGS = s
 nm,ch,ch_nm,rec,gendesc = s.NAMES,s.CHARACTERS,mk,s.RECIPE_DESC,s.CHARACTERS.GENERIC.DESCRIBE
@@ -2163,11 +2163,6 @@ mods.RusMods = {
 
 -- Добавляет перевод аннонса
 function AddModAnnounce(eng, rus)
-	if not eng or not rus then
-		print("ERROR! Tried to translate a nil string!")
-		return
-	end
-	
 	t.mod_announce[eng] = rus
 end
 

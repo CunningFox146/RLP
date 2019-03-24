@@ -1,5 +1,3 @@
-local mk = t.RegisterRussianName
-
 RenameAction("MILK","Доить")
 
 pp("Ow! It kicked me!", "Ай! Она лягнула меня!")

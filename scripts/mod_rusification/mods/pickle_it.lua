@@ -1,4 +1,3 @@
-local mk = t.RegisterRussianName
 -------------------------------Pickle it
 pp("If I want that potato, I'll need a shovel","Если я хочу эту картошку, то мне нужна лопата.")
 
