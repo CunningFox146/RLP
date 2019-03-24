@@ -797,14 +797,8 @@ function rebuildname(str1,action,objectname)
 			elseif action=="reskin" and str:utf8len()>3 then
 				if str=="Стол" then
 					str=str.."а"
-					elseif str=="Деревянный" then
-						str="Деревянного"
 					elseif str=="бифало" then
 						str="бифало"
-					elseif str=="Боевой" then
-						str="Боевого"
-					elseif str=="Платяной" then
-						str="Платяного"
 					elseif str=="Фонарь" then
 						str="Фонаря"
 					elseif str=="Палатка" then
