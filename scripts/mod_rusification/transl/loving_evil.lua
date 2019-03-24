@@ -1,3 +1,4 @@
+local mk = t.RegisterRussianName
 ------------------------workshop-356435289 Fish Farm
 mk("W_POND","Рыбная ферма",3)
 rec.W_POND = "Я смогу остаться дома подольше."

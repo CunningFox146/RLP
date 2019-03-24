@@ -1,3 +1,5 @@
+local mk = t.RegisterRussianName
+
 mk("BOW","Деревянный лук")
 rec.BOW = "Полезно, если вы умеете целиться."
 pp("I used to be a good archer... then I took an arrow in the knee.","Раньше я был хорошим лучником...")

@@ -1,3 +1,4 @@
+local mk = t.RegisterRussianName
 -------------------------------------------------Steampunk DST
 --http://steamcommunity.com/sharedfiles/filedetails/?id=418604101
 

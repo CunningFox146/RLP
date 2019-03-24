@@ -1,3 +1,4 @@
+local mk = t.RegisterRussianName
 -------------------------------------------------Structures and More...
 --http://steamcommunity.com/sharedfiles/filedetails/?id=580851939
 --[[
