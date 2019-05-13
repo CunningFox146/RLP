@@ -2513,7 +2513,7 @@ if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly 
 
 	--Подменяем портреты
 	AddClassPostConstruct("widgets/characterselect", function(self)
-		local charlist = {winona=1,wickerbottom=1,waxwell=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1}
+		local charlist = {wortox=1,winona=1,wickerbottom=1,waxwell=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1}
 		local texnames = {locked="locked",random="random"}
 		for name in pairs(charlist) do texnames[name] = name.."_none" end
 		if self.heroportrait then HookUpImage(self.heroportrait, "bigportraits/", "images/rus_", texnames) end
