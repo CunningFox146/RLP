@@ -2483,7 +2483,7 @@ end
 
 
 --Остальное не выполняется, если перевод в режиме только чата
-if t.CurrentTranslationType~=mods.RussianLanguagePack.TranslationTypes.ChatOnly then
+if t.CurrentTranslationType ~= mods.RussianLanguagePack.TranslationTypes.ChatOnly then
 
 	local function HookUpImage(img, DefaultAtlasPath, NewAtlasPath, ListToChange)
 		if not img then return end
@@ -4432,8 +4432,12 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 	end)
 	
 	--Русификация модов. Подгружаем в самом конце (!!!)
-	if t.IsModTranslEnabled ~= t.ModTranslationTypes.disabled then
+	if t.IsModTranslEnabled ~= t.ModTranslationTypes.disabled and t.CurrentTranslationType == t.TranslationTypes.Full then
 		local function LoadModLocalisation(file, type)
+			-- if t.CurrentTranslationType ~= t.TranslationTypes.Full then	
+				-- t.print("ERROR: Tried to load invalid fn!")
+				-- return
+			-- end
 			if type ~= nil then
 				modimport("scripts/mod_rusification/transl/"..file)
 			else
