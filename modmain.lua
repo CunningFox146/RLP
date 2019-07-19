@@ -107,6 +107,7 @@ local FontNames = {
 	CHATFONT_OUTLINE = _G.CHATFONT_OUTLINE,
 	NUMBERFONT = _G.NUMBERFONT,
 	TALKINGFONT = _G.TALKINGFONT,
+	TALKINGFONT_WORMWOOD = _G.TALKINGFONT_WORMWOOD,
 	SMALLNUMBERFONT = _G.SMALLNUMBERFONT,
 	BODYTEXTFONT = _G.BODYTEXTFONT,
 	NEWFONT = rawget(_G,"NEWFONT"),
@@ -118,6 +119,7 @@ local FontNames = {
 function ApplyLocalizedFonts()
 	--Имена шрифтов, которые нужно загрузить.
 	local LocalizedFontList = {["talkingfont"] = true,
+							   ["talkingfont_wormwood"] = true,
 							   ["stint-ucr50"] = true,
 							   ["stint-ucr20"] = true,
 							   ["opensans50"] = true,
@@ -144,6 +146,7 @@ function ApplyLocalizedFonts()
 	_G.CHATFONT_OUTLINE = FontNames.CHATFONT_OUTLINE
 	_G.NUMBERFONT = FontNames.NUMBERFONT
 	_G.TALKINGFONT = FontNames.TALKINGFONT
+	_G.TALKINGFONT_WORMWOOD = FontNames.TALKINGFONT_WORMWOOD
 	_G.SMALLNUMBERFONT = FontNames.SMALLNUMBERFONT
 	_G.BODYTEXTFONT = FontNames.BODYTEXTFONT
 	if rawget(_G,"NEWFONT") then
@@ -208,6 +211,7 @@ function ApplyLocalizedFonts()
 	_G.CHATFONT_OUTLINE = t.SelectedLanguage.."_bellefair_outline50"
 	_G.NUMBERFONT = t.SelectedLanguage.."_stint-ucr50"
 	_G.TALKINGFONT = t.SelectedLanguage.."_talkingfont"
+	_G.TALKINGFONT_WORMWOOD = t.SelectedLanguage.."_talkingfont_wormwood"
 	_G.SMALLNUMBERFONT = t.SelectedLanguage.."_stint-ucr20"
 	_G.BODYTEXTFONT = t.SelectedLanguage.."_stint-ucr50"
 	if rawget(_G,"NEWFONT") then
@@ -797,6 +801,12 @@ function rebuildname(str1,action,objectname)
 			elseif action=="reskin" and str:utf8len()>3 then
 				if str=="Стол" then
 					str=str.."а"
+					elseif str=="камень" then
+						str="камня"
+					elseif str=="Термальный" then
+						str="Термального"
+					elseif str=="Зажигалка" then
+						str="Зажигалки"
 					elseif str=="Деревянный" then
 						str="Деревянного"
 					elseif str=="бифало" then
