@@ -60,6 +60,8 @@ if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё ост�
 		Asset("ATLAS","images/rus_names_winona.xml"),
 		Asset("ATLAS","images/rus_names_wortox.xml"),
 		Asset("ATLAS","images/rus_names_wormwood.xml"),
+		Asset("ATLAS","images/rus_names_warly.xml"),
+		Asset("ATLAS","images/rus_names_wurt.xml"),
 		Asset("ATLAS","images/rus_names_random.xml"),
 		--Золото
 		Asset("ATLAS","images/rus_names_gold_wickerbottom.xml"), 
@@ -77,6 +79,8 @@ if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё ост�
 		Asset("ATLAS","images/rus_names_gold_winona.xml"),
 		Asset("ATLAS","images/rus_names_gold_wortox.xml"),
 		Asset("ATLAS","images/rus_names_gold_wormwood.xml"),
+		Asset("ATLAS","images/rus_names_gold_warly.xml"),
+		Asset("ATLAS","images/rus_names_gold_wurt.xml"),
 	}
 
 	for _, v in ipairs(ass) do
