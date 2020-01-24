@@ -797,12 +797,78 @@ function rebuildname(str1,action,objectname)
 					str=str.."у"
 					wasnoun=true
 				end
-			-- (Кого? Чего?) Родительный
-			elseif action=="reskin" and str:utf8len()>3 then
-				if str=="Стол" then
-					str=str.."а"
+			-- (Кого? Чего?) Изменяет внешний вид у (кого? чего?) Родительный
+			elseif action=="reskin" then
+					if str=="Стол" then
+						str=str.."а"
+					elseif str=="Дом" then
+						str=str.."а"
 					elseif str=="камень" then
 						str="камня"
+					elseif str=="Деревянные" then
+						str="Деревянных"
+					elseif str=="ворота" then
+						str="ворот"
+					elseif str=="лун" then
+						str=str
+					elseif str=="свина" then
+						str=str
+					elseif str=="разрушения" then
+						str=str
+					elseif str=="Деревянный" then
+						str="Деревянного"
+					elseif str=="забор" then
+						str="забора"
+					elseif str=="табличка" then
+						str="таблички"
+					elseif str=="Теневой" then
+						str="Теневого"
+					elseif str=="Роскошный" then
+						str="Роскошного"
+					elseif str=="Костёр" then
+						str="Костра"
+					elseif str=="Наушники" then
+						str="Наушников"
+					elseif str=="Броня" then
+						str="Брони"
+					elseif str=="Улей" then
+						str="Улья"
+					elseif str=="Чешуйчатая" then
+						str="Чешуйчатой"
+					elseif str=="печка" then
+						str="печки"
+					elseif str=="Светошляпка" then
+						str="Светошляпки"
+					elseif str=="Роскошный" then
+						str="Роскошного"
+					elseif str=="топор" then
+						str="топора"
+					elseif str=="Свиной" then
+						str="Свиного"
+					elseif str=="кирка" then
+						str="кирки"
+					elseif str=="Кирка" then
+						str="Кирки"
+					elseif str=="меч" then
+						str="меча"
+					elseif str=="Тёмный" then
+						str="Тёмного"
+					elseif str=="Сушилка" then
+						str="Сушилки"
+					elseif str=="Хижина" then
+						str="Хижины"
+					elseif str=="зайца" then
+						str=str
+					elseif str=="Ловушка" then
+						str="Ловушки"
+					elseif str=="ловушка" then
+						str="ловушки"
+					elseif str=="звёзд" then
+						str=str
+					elseif str=="Посох" then
+						str="Посоха"
+					elseif str=="печки" then
+						str="печка"
 					elseif str=="Термальный" then
 						str="Термального"
 					elseif str=="Зажигалка" then
