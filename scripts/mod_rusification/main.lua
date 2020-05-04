@@ -10,6 +10,7 @@ local function LoadModLocalisation(file, type)
 	end
 end
 
+--[[
 _G.TestModTranslator = function()
 	LoadModLocalisation("hawaiian.lua", 1)
 	LoadModLocalisation("loving_evil.lua", 1)
@@ -17,7 +18,7 @@ _G.TestModTranslator = function()
 	LoadModLocalisation("archery_mod.lua")
 	LoadModLocalisation("waiter_101.lua")
 	LoadModLocalisation("beefalo_milk.lua")
-end
+end]]
 
 -- TestModTranslator()
 

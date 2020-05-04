@@ -38,19 +38,22 @@ local FontNames = {
 	CHATFONT_OUTLINE = CHATFONT_OUTLINE,
 	NUMBERFONT = NUMBERFONT,
 	TALKINGFONT = TALKINGFONT,
-	TALKINGFONT_WORMWOOD = TALKINGFONT_WORMWOOD,
 	SMALLNUMBERFONT = SMALLNUMBERFONT,
 	BODYTEXTFONT = BODYTEXTFONT,
+	
+	TALKINGFONT_WORMWOOD = TALKINGFONT_WORMWOOD,
+	TALKINGFONT_HERMIT = TALKINGFONT_HERMIT,
+	
 	NEWFONT = rawget(_G, "NEWFONT"),
 	NEWFONT_SMALL = rawget(_G, "NEWFONT_SMALL"),
 	NEWFONT_OUTLINE = rawget(_G, "NEWFONT_OUTLINE"),
-	NEWFONT_OUTLINE_SMALL = rawget(_G, "NEWFONT_OUTLINE_SMALL")}
+	NEWFONT_OUTLINE_SMALL = rawget(_G, "NEWFONT_OUTLINE_SMALL")
+}
 
 --В этой функции происходит загрузка, подключение и применение русских шрифтов
 local function ApplyLocalizedFonts()
 	--Имена шрифтов, которые нужно загрузить.
 	local LocalizedFontList = {["talkingfont"] = true,
-							   ["talkingfont_wormwood"] = true,
 							   ["stint-ucr50"] = true,
 							   ["stint-ucr20"] = true,
 							   ["opensans50"] = true,
@@ -60,6 +63,10 @@ local function ApplyLocalizedFonts()
 							   ["hammerhead50"] = true,
 							   ["bellefair50"] = true,
 							   ["bellefair_outline50"] = true,
+							   
+							   ["talkingfont_wormwood"] = true,
+							   ["talkingfont_hermit"] = true,
+							   
 							   ["spirequal"] = rawget(_G,"NEWFONT") and true or nil,
 							   ["spirequal_small"] = rawget(_G,"NEWFONT_SMALL") and true or nil,
 							   ["spirequal_outline"] = rawget(_G,"NEWFONT_OUTLINE") and true or nil,
@@ -77,9 +84,11 @@ local function ApplyLocalizedFonts()
 	CHATFONT_OUTLINE = FontNames.CHATFONT_OUTLINE
 	NUMBERFONT = FontNames.NUMBERFONT
 	TALKINGFONT = FontNames.TALKINGFONT
-	TALKINGFONT_WORMWOOD = FontNames.TALKINGFONT_WORMWOOD
 	SMALLNUMBERFONT = FontNames.SMALLNUMBERFONT
 	BODYTEXTFONT = FontNames.BODYTEXTFONT
+	
+	TALKINGFONT_WORMWOOD = FontNames.TALKINGFONT_WORMWOOD
+	TALKINGFONT_HERMIT = FontNames.TALKINGFONT_HERMIT
 	
 	if rawget(_G,"NEWFONT") then
 		NEWFONT = FontNames.NEWFONT
@@ -145,9 +154,12 @@ local function ApplyLocalizedFonts()
 	CHATFONT_OUTLINE = t.SelectedLanguage.."_bellefair_outline50"
 	NUMBERFONT = t.SelectedLanguage.."_stint-ucr50"
 	TALKINGFONT = t.SelectedLanguage.."_talkingfont"
-	TALKINGFONT_WORMWOOD = t.SelectedLanguage.."_talkingfont_wormwood"
 	SMALLNUMBERFONT = t.SelectedLanguage.."_stint-ucr20"
 	BODYTEXTFONT = t.SelectedLanguage.."_stint-ucr50"
+	
+	TALKINGFONT_WORMWOOD = t.SelectedLanguage.."_talkingfont_wormwood"
+	TALKINGFONT_HERMIT = t.SelectedLanguage.."_talkingfont_hermit"
+	
 	if rawget(_G,"NEWFONT") then
 		NEWFONT = t.SelectedLanguage.."_spirequal"
 	end
