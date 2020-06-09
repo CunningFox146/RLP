@@ -462,205 +462,220 @@ local function rebuildname(str1, action, objectname)
 	local str=""
 	str1=str1.." "
 	local str1len=str1:utf8len()
+	
+	if objectname then
+		objectname = string.lower(objectname)
+	end
+	
+	-- Оптимизация обрезки. Сохраняем все обрезки чтоб каждый раз не резать заново
+	local subbed = setmetatable({}, {__mode = "k"})
+	local function SubSize(str, num)
+		if not subbed[num] then
+			subbed[num] = str:utf8sub(num)
+		end
+		return subbed[num]
+	end
+	
 	for i=1,str1len do
 		delimetr=str1:utf8sub(i,i)
 		if delimetr~=" " and delimetr~="-" then
 			str=str..delimetr
 		elseif #str>0 and (delimetr==" " or delimetr=="-") then
 			counter=counter+1
-			if action=="KILL" and objectname and str:utf8len()>2 then -- был убит (кем? чем?) Творительный
+			local size = str:utf8len()
+			if action=="KILL" and objectname and size >2 then -- был убит (кем? чем?) Творительный
 				--Особый случай, в objectname передаём имя префаба для более точного анализа его пола
 				--Действие "KILL" не генерируется игрой, а используется только в этом моде для формирования сообщений о смерти в DST
 				local function testnoun()
-					if t.NamesGender["she"][string.lower(objectname)] then --женский род
-						if str:utf8sub(str:utf8len()-1)=="ца" or str:utf8sub(str:utf8len()-1)=="ча" or str:utf8sub(str:utf8len()-1)=="ша" then
-							str=repsubstr(str,str:utf8len(),"ей") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len())=="а" then
-							str=repsubstr(str,str:utf8len(),"ой") FoundNoun=delimetr~="-"
+					if t.NamesGender["she"][objectname] then --женский род
+						if SubSize(str, size -1)=="ца" or SubSize(str, size -1)=="ча" or SubSize(str, size -1)=="ша" then
+							str=repsubstr(str,size ,"ей") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size )=="а" then
+							str=repsubstr(str,size ,"ой") FoundNoun=delimetr~="-"
 						elseif str:utf8sub(-4)=="роня" then
-							str=repsubstr(str,str:utf8len(),"ёй") FoundNoun=delimetr~="-"
+							str=repsubstr(str,size ,"ёй") FoundNoun=delimetr~="-"
 						elseif str:utf8sub(-3)=="мля" then
-							str=repsubstr(str,str:utf8len(),"ёй") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len())=="я" and str:utf8len()>3 then
-							str=repsubstr(str,str:utf8len(),"ей") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len())=="ь" then
+							str=repsubstr(str,size ,"ёй") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size )=="я" and size >3 then
+							str=repsubstr(str,size ,"ей") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size )=="ь" then
 							str=str.."ю" FoundNoun=delimetr~="-"
 						end
-					elseif t.NamesGender["it"][string.lower(objectname)] then --средний род
+					elseif t.NamesGender["it"][objectname] then --средний род
 						if str:utf8sub(-1)~="и" then
 							str=str.."м" FoundNoun=delimetr~="-"
 						end
-					elseif t.NamesGender["plural"][string.lower(objectname)] or 
-						   t.NamesGender["plural2"][string.lower(objectname)] then --множественное число
-						if str:utf8sub(str:utf8len())=="а" or str:utf8sub(str:utf8len())=="ы" then
-							str=repsubstr(str,str:utf8len(),"ами") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len())=="я" then
-							str=repsubstr(str,str:utf8len(),"ями") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len())=="и" then
-							if sogl2[str:utf8sub(str:utf8len()-1,str:utf8len()-1)] then
-								str=repsubstr(str,str:utf8len(),"ами") FoundNoun=delimetr~="-"
+					elseif t.NamesGender["plural"][objectname] or 
+						   t.NamesGender["plural2"][objectname] then --множественное число
+						if SubSize(str, size )=="а" or SubSize(str, size )=="ы" then
+							str=repsubstr(str,size ,"ами") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size )=="я" then
+							str=repsubstr(str,size ,"ями") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size )=="и" then
+							if sogl2[SubSize(str, size -1,size -1)] then
+								str=repsubstr(str,size ,"ами") FoundNoun=delimetr~="-"
 							else 
-								str=repsubstr(str,str:utf8len(),"ями") FoundNoun=delimetr~="-"
+								str=repsubstr(str,size ,"ями") FoundNoun=delimetr~="-"
 							end
 						end
 					else --мужской род
-						if str:utf8sub(-3,-3)=="о" and str:utf8sub(str:utf8len())=="ь" and not sogl3[str:utf8sub(-4,-4) or "р"] then
-							str=str:utf8sub(1,-4)..str:utf8sub(-2,-2).."ём" FoundNoun=delimetr~="-" 
-						elseif str:utf8sub(str:utf8len()-1)=="ок" then
-							str=repsubstr(str,str:utf8len()-1,"ком") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-2)=="чек" then
-							str=repsubstr(str,str:utf8len()-1,"ком") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-1)=="ец" then
-							str=repsubstr(str,str:utf8len()-1,"цем") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-2)=="ень" then
-							str=repsubstr(str,str:utf8len()-2,"нем") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-1)=="дь" then
-							str=repsubstr(str,str:utf8len(),"ем") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-2)=="арь" then
-							str=repsubstr(str,str:utf8len(),"ём") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-1)=="рь" then
-							str=repsubstr(str,str:utf8len(),"ем") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-1)=="ёр" then
-							str=repsubstr(str,str:utf8len()-1,"ром") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-1)=="уй" then
-							str=repsubstr(str,str:utf8len(),"ем") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-1)=="ай" then
-							str=repsubstr(str,str:utf8len(),"ем") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-2)=="лей" then --улей
-							str=repsubstr(str,str:utf8len()-1,"ьем") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-2)=="йль" then
-							str=repsubstr(str,str:utf8len(),"ем") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-2)=="ель" then
-							str=repsubstr(str,str:utf8len(),"ем") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len()-2)=="ень" then
-							str=repsubstr(str,str:utf8len(),"ем") FoundNoun=delimetr~="-"
-						elseif str:utf8sub(str:utf8len())=="ь" then
-							str=repsubstr(str,str:utf8len(),"ём") FoundNoun=delimetr~="-"
+						if str:utf8sub(-3,-3)=="о" and SubSize(str, size )=="ь" and not sogl3[str:utf8sub(-4,-4) or "р"] then
+							str=SubSize(str, 1,-4)..str:utf8sub(-2,-2).."ём" FoundNoun=delimetr~="-" 
+						elseif SubSize(str, size -1)=="ок" then
+							str=repsubstr(str,size -1,"ком") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -2)=="чек" then
+							str=repsubstr(str,size -1,"ком") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -1)=="ец" then
+							str=repsubstr(str,size -1,"цем") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -2)=="ень" then
+							str=repsubstr(str,size -2,"нем") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -1)=="дь" then
+							str=repsubstr(str,size ,"ем") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -2)=="арь" then
+							str=repsubstr(str,size ,"ём") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -1)=="рь" then
+							str=repsubstr(str,size ,"ем") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -1)=="ёр" then
+							str=repsubstr(str,size -1,"ром") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -1)=="уй" then
+							str=repsubstr(str,size ,"ем") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -1)=="ай" then
+							str=repsubstr(str,size ,"ем") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -2)=="лей" then --улей
+							str=repsubstr(str,size -1,"ьем") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -2)=="йль" then
+							str=repsubstr(str,size ,"ем") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -2)=="ель" then
+							str=repsubstr(str,size ,"ем") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size -2)=="ень" then
+							str=repsubstr(str,size ,"ем") FoundNoun=delimetr~="-"
+						elseif SubSize(str, size )=="ь" then
+							str=repsubstr(str,size ,"ём") FoundNoun=delimetr~="-"
 						elseif sogl[str:utf8sub(-1)] then
 							str=str.."ом" FoundNoun=delimetr~="-"
 						end
 					end
 				end
-				if counter~=wordcount and str:utf8len()>3 then --Если это не последнее слово, то это может быть прилагательное
-					if t.NamesGender["she"][string.lower(objectname)] then --женский род
-						if str:utf8sub(str:utf8len()-1)=="ая" then
-							str=repsubstr(str,str:utf8len()-1,"ой")
-						elseif str:utf8sub(str:utf8len()-1)=="яя" then
-							str=repsubstr(str,str:utf8len()-1,"ей")
-						elseif str:utf8sub(str:utf8len()-1)=="ья" then
-							str=repsubstr(str,str:utf8len(),"ей")
+				if counter~=wordcount and size >3 then --Если это не последнее слово, то это может быть прилагательное
+					if t.NamesGender["she"][objectname] then --женский род
+						if SubSize(str, size -1)=="ая" then
+							str=repsubstr(str,size -1,"ой")
+						elseif SubSize(str, size -1)=="яя" then
+							str=repsubstr(str,size -1,"ей")
+						elseif SubSize(str, size -1)=="ья" then
+							str=repsubstr(str,size ,"ей")
 						elseif str:utf8sub(-4)=="аяся" then
-							str=repsubstr(str,str:utf8len()-3,"ейся")
+							str=repsubstr(str,size -3,"ейся")
 						elseif not  FoundNoun then testnoun() end
-					elseif t.NamesGender["it"][string.lower(objectname)] then --средний род
-						if str:utf8sub(str:utf8len()-2)=="кое" then
-							str=repsubstr(str,str:utf8len()-1,"им")
-						elseif str:utf8sub(str:utf8len()-1)=="ое" then
-							str=repsubstr(str,str:utf8len()-1,"ым")
-						elseif str:utf8sub(str:utf8len()-1)=="ее" then
-							str=repsubstr(str,str:utf8len()-1,"им")
+					elseif t.NamesGender["it"][objectname] then --средний род
+						if SubSize(str, size -2)=="кое" then
+							str=repsubstr(str,size -1,"им")
+						elseif SubSize(str, size -1)=="ое" then
+							str=repsubstr(str,size -1,"ым")
+						elseif SubSize(str, size -1)=="ее" then
+							str=repsubstr(str,size -1,"им")
 						elseif not  FoundNoun then testnoun() end
-					elseif t.NamesGender["plural"][string.lower(objectname)] or 
-						   t.NamesGender["plural2"][string.lower(objectname)] then --множественное число
-						if str:utf8sub(str:utf8len()-1)=="ые" then
-							str=repsubstr(str,str:utf8len()-1,"ыми")
-						elseif str:utf8sub(str:utf8len()-1)=="ие" then
-							str=repsubstr(str,str:utf8len()-1,"ими")
-						elseif str:utf8sub(str:utf8len()-1)=="ьи" then
-							str=repsubstr(str,str:utf8len()-1,"ими")
+					elseif t.NamesGender["plural"][objectname] or 
+						   t.NamesGender["plural2"][objectname] then --множественное число
+						if SubSize(str, size -1)=="ые" then
+							str=repsubstr(str,size -1,"ыми")
+						elseif SubSize(str, size -1)=="ие" then
+							str=repsubstr(str,size -1,"ими")
+						elseif SubSize(str, size -1)=="ьи" then
+							str=repsubstr(str,size -1,"ими")
 						elseif not  FoundNoun then testnoun() end
 					else --мужской род
-						if str:utf8sub(str:utf8len()-1)=="ый" then
-							str=repsubstr(str,str:utf8len()-1,"ым")
-						elseif str:utf8sub(str:utf8len()-1)=="ий" then
-							str=repsubstr(str,str:utf8len()-1,"им")
-						elseif str:utf8sub(str:utf8len()-1)=="ой" then
-							str=repsubstr(str,str:utf8len()-1,"ым")
+						if SubSize(str, size -1)=="ый" then
+							str=repsubstr(str,size -1,"ым")
+						elseif SubSize(str, size -1)=="ий" then
+							str=repsubstr(str,size -1,"им")
+						elseif SubSize(str, size -1)=="ой" then
+							str=repsubstr(str,size -1,"ым")
 						elseif not  FoundNoun then testnoun() end
 					end
 				else
 					if not  FoundNoun then testnoun() end
 				end			
 			elseif action=="WALKTO" then --идти к (кому? чему?) Дательный
-				if str:utf8sub(str:utf8len()-1)=="ая" and resstr=="" then
-					str=repsubstr(str,str:utf8len()-1,"ой")
-				elseif str:utf8sub(str:utf8len()-1)=="ая" then
-					str=repsubstr(str,str:utf8len()-1,"ей")
-				elseif str:utf8sub(str:utf8len()-1)=="ей" then
-					str=repsubstr(str,str:utf8len()-1,"ью")
-				elseif str:utf8sub(str:utf8len()-1)=="яя" then
-					str=repsubstr(str,str:utf8len()-1,"ей")
-				elseif str:utf8sub(str:utf8len()-1)=="ец" then
-					str=repsubstr(str,str:utf8len()-1,"цу")
-				elseif str:utf8sub(str:utf8len()-1)=="ый" then
-					str=repsubstr(str,str:utf8len()-1,"ому")
-				elseif str:utf8sub(str:utf8len()-1)=="ий" then
-					str=repsubstr(str,str:utf8len()-1,"ему")
-				elseif str:utf8sub(str:utf8len()-1)=="ое" then
-					str=repsubstr(str,str:utf8len()-1,"ому")
-				elseif str:utf8sub(str:utf8len()-1)=="ее" then
-					str=repsubstr(str,str:utf8len()-1,"ему")
-				elseif str:utf8sub(str:utf8len()-1)=="ые" then
-					str=repsubstr(str,str:utf8len()-1,"ым")
-				elseif str:utf8sub(str:utf8len()-1)=="ой" and resstr=="" then
-					str=repsubstr(str,str:utf8len()-1,"ому")
-				elseif str:utf8sub(str:utf8len()-1)=="ья" and resstr=="" then
-					str=repsubstr(str,str:utf8len()-1,"ьей")
-				elseif str:utf8sub(str:utf8len()-2)=="орь" then
-					str=str:utf8sub(1,str:utf8len()-3).."рю"
-				elseif str:utf8sub(str:utf8len()-1)=="ек" then
-					str=str:utf8sub(1,str:utf8len()-2).."ку"
+				if SubSize(str, size -1)=="ая" and resstr=="" then
+					str=repsubstr(str,size -1,"ой")
+				elseif SubSize(str, size -1)=="ая" then
+					str=repsubstr(str,size -1,"ей")
+				elseif SubSize(str, size -1)=="ей" then
+					str=repsubstr(str,size -1,"ью")
+				elseif SubSize(str, size -1)=="яя" then
+					str=repsubstr(str,size -1,"ей")
+				elseif SubSize(str, size -1)=="ец" then
+					str=repsubstr(str,size -1,"цу")
+				elseif SubSize(str, size -1)=="ый" then
+					str=repsubstr(str,size -1,"ому")
+				elseif SubSize(str, size -1)=="ий" then
+					str=repsubstr(str,size -1,"ему")
+				elseif SubSize(str, size -1)=="ое" then
+					str=repsubstr(str,size -1,"ому")
+				elseif SubSize(str, size -1)=="ее" then
+					str=repsubstr(str,size -1,"ему")
+				elseif SubSize(str, size -1)=="ые" then
+					str=repsubstr(str,size -1,"ым")
+				elseif SubSize(str, size -1)=="ой" and resstr=="" then
+					str=repsubstr(str,size -1,"ому")
+				elseif SubSize(str, size -1)=="ья" and resstr=="" then
+					str=repsubstr(str,size -1,"ьей")
+				elseif SubSize(str, size -2)=="орь" then
+					str=SubSize(str, 1,size -3).."рю"
+				elseif SubSize(str, size -1)=="ек" then
+					str=SubSize(str, 1,size -2).."ку"
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len()-2)=="ень" then
-					str=str:utf8sub(1,str:utf8len()-3).."ню"
-				elseif str:utf8sub(str:utf8len()-1)=="ок" then
-					str=repsubstr(str,str:utf8len()-1,"ку")
+				elseif SubSize(str, size -2)=="ень" then
+					str=SubSize(str, 1,size -3).."ню"
+				elseif SubSize(str, size -1)=="ок" then
+					str=repsubstr(str,size -1,"ку")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len()-1)=="ть" then
-					str=repsubstr(str,str:utf8len(),"и")
+				elseif SubSize(str, size -1)=="ть" then
+					str=repsubstr(str,size ,"и")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len()-1)=="вь" then
-					str=repsubstr(str,str:utf8len(),"и")
+				elseif SubSize(str, size -1)=="вь" then
+					str=repsubstr(str,size ,"и")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len()-1)=="ль" then
-					str=repsubstr(str,str:utf8len(),"и")
+				elseif SubSize(str, size -1)=="ль" then
+					str=repsubstr(str,size ,"и")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len()-1)=="зь" then
-					str=repsubstr(str,str:utf8len(),"и")
+				elseif SubSize(str, size -1)=="зь" then
+					str=repsubstr(str,size ,"и")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len()-1)=="нь" then
-					str=repsubstr(str,str:utf8len(),"ю")
+				elseif SubSize(str, size -1)=="нь" then
+					str=repsubstr(str,size ,"ю")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len()-1)=="рь" then
-					str=repsubstr(str,str:utf8len(),"ю")
+				elseif SubSize(str, size -1)=="рь" then
+					str=repsubstr(str,size ,"ю")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len()-1)=="ьи" then
+				elseif SubSize(str, size -1)=="ьи" then
 					str=str.."м"
-				elseif str:utf8sub(str:utf8len()-1)=="ки" and not wasnoun then
-					str=repsubstr(str,str:utf8len(),"ам")
+				elseif SubSize(str, size -1)=="ки" and not wasnoun then
+					str=repsubstr(str,size ,"ам")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len())=="ы" and not wasnoun then
-					str=repsubstr(str,str:utf8len(),"ам")
+				elseif SubSize(str, size )=="ы" and not wasnoun then
+					str=repsubstr(str,size ,"ам")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len())=="ы" and not wasnoun then
-					str=repsubstr(str,str:utf8len(),"ам")
+				elseif SubSize(str, size )=="ы" and not wasnoun then
+					str=repsubstr(str,size ,"ам")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len())=="а" and not wasnoun then
-					str=repsubstr(str,str:utf8len(),"е")
+				elseif SubSize(str, size )=="а" and not wasnoun then
+					str=repsubstr(str,size ,"е")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len())=="я" and not wasnoun then
-					str=repsubstr(str,str:utf8len(),"е")
+				elseif SubSize(str, size )=="я" and not wasnoun then
+					str=repsubstr(str,size ,"е")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len())=="о" and not wasnoun then
-					str=repsubstr(str,str:utf8len(),"у")
+				elseif SubSize(str, size )=="о" and not wasnoun then
+					str=repsubstr(str,size ,"у")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len()-1)=="це" and not wasnoun then
-					str=repsubstr(str,str:utf8len()-1,"цу")
+				elseif SubSize(str, size -1)=="це" and not wasnoun then
+					str=repsubstr(str,size -1,"цу")
 					wasnoun=true
-				elseif str:utf8sub(str:utf8len())=="е" and not wasnoun then
-					str=repsubstr(str,str:utf8len(),"ю")
+				elseif SubSize(str, size )=="е" and not wasnoun then
+					str=repsubstr(str,size ,"ю")
 					wasnoun=true
-				elseif sogl[str:utf8sub(str:utf8len())] and not wasnoun then
+				elseif sogl[SubSize(str, size )] and not wasnoun then
 					str=str.."у"
 					wasnoun=true
 				end
@@ -774,120 +789,120 @@ local function rebuildname(str1, action, objectname)
 					elseif str=="близок!" then
 						str="близок!»"
 					elseif counter==wordcount then]]
-						if str:utf8sub(str:utf8len()-1)=="ьё" then
-							str=repsubstr(str,str:utf8len()-1,"ья")
-						elseif str:utf8sub(str:utf8len())=="я" then
-							str=repsubstr(str,str:utf8len(),"и")
-						elseif str:utf8sub(str:utf8len())=="а" then
-							str=repsubstr(str,str:utf8len(),"ы")
-						elseif str:utf8sub(str:utf8len()-1)=="на" then
-							str=repsubstr(str,str:utf8len(),"ы")
-						elseif str:utf8sub(str:utf8len()-1)=="ль" then
-							str=repsubstr(str,str:utf8len(),"я")
-						elseif str:utf8sub(str:utf8len())=="ь" then
-							str=repsubstr(str,str:utf8len(),"и")
-						elseif str:utf8sub(str:utf8len()-2)=="арь" then
-							str=repsubstr(str,str:utf8len()-2,"аря")
-						elseif str:utf8sub(str:utf8len()-1)=="ок" then
-							str=repsubstr(str,str:utf8len()-1,"ка")
-						elseif str:utf8sub(str:utf8len()-1)=="ка" then
-							str=repsubstr(str,str:utf8len()-1,"ки")
-						elseif str:utf8sub(str:utf8len()-1)=="та" then
-							str=repsubstr(str,str:utf8len()-1,"ты")
-						elseif str:utf8sub(str:utf8len()-1)=="ая" then
-							str=repsubstr(str,str:utf8len()-1,"ой")
-						elseif str:utf8sub(str:utf8len()-1)=="ло" then
-							str=repsubstr(str,str:utf8len()-1,"ла")
-						elseif str:utf8sub(str:utf8len()-1)=="ол" then
-							str=repsubstr(str,str:utf8len()-1,"ола")
-						elseif str:utf8sub(str:utf8len()-1)=="ом" then
-							str=repsubstr(str,str:utf8len()-1,"ома")
-						elseif str:utf8sub(str:utf8len()-2)=="нец" then
-							str=repsubstr(str,str:utf8len()-2,"нец")
-						elseif str:utf8sub(str:utf8len()-2)=="ий" then
-							str=repsubstr(str,str:utf8len()-2,"ого")
-						elseif str:utf8sub(str:utf8len()-1)=="ья" then
-							str=repsubstr(str,str:utf8len()-1,"ьей")
-						elseif str:utf8sub(str:utf8len()-1)=="па" then
-							str=repsubstr(str,str:utf8len()-1,"пы")
-						elseif str:utf8sub(str:utf8len()-1)=="ще" then
-							str=repsubstr(str,str:utf8len()-1,"ща")
-						elseif str:utf8sub(str:utf8len()-1)=="це" then
-							str=repsubstr(str,str:utf8len()-1,"ца")
-						elseif str:utf8sub(str:utf8len()-1)=="ый" then
-							str=repsubstr(str,str:utf8len()-1,"ого")
-						elseif sogl[str:utf8sub(str:utf8len())] then
+						if SubSize(str, size -1)=="ьё" then
+							str=repsubstr(str,size -1,"ья")
+						elseif SubSize(str, size )=="я" then
+							str=repsubstr(str,size ,"и")
+						elseif SubSize(str, size )=="а" then
+							str=repsubstr(str,size ,"ы")
+						elseif SubSize(str, size -1)=="на" then
+							str=repsubstr(str,size ,"ы")
+						elseif SubSize(str, size -1)=="ль" then
+							str=repsubstr(str,size ,"я")
+						elseif SubSize(str, size )=="ь" then
+							str=repsubstr(str,size ,"и")
+						elseif SubSize(str, size -2)=="арь" then
+							str=repsubstr(str,size -2,"аря")
+						elseif SubSize(str, size -1)=="ок" then
+							str=repsubstr(str,size -1,"ка")
+						elseif SubSize(str, size -1)=="ка" then
+							str=repsubstr(str,size -1,"ки")
+						elseif SubSize(str, size -1)=="та" then
+							str=repsubstr(str,size -1,"ты")
+						elseif SubSize(str, size -1)=="ая" then
+							str=repsubstr(str,size -1,"ой")
+						elseif SubSize(str, size -1)=="ло" then
+							str=repsubstr(str,size -1,"ла")
+						elseif SubSize(str, size -1)=="ол" then
+							str=repsubstr(str,size -1,"ола")
+						elseif SubSize(str, size -1)=="ом" then
+							str=repsubstr(str,size -1,"ома")
+						elseif SubSize(str, size -2)=="нец" then
+							str=repsubstr(str,size -2,"нец")
+						elseif SubSize(str, size -2)=="ий" then
+							str=repsubstr(str,size -2,"ого")
+						elseif SubSize(str, size -1)=="ья" then
+							str=repsubstr(str,size -1,"ьей")
+						elseif SubSize(str, size -1)=="па" then
+							str=repsubstr(str,size -1,"пы")
+						elseif SubSize(str, size -1)=="ще" then
+							str=repsubstr(str,size -1,"ща")
+						elseif SubSize(str, size -1)=="це" then
+							str=repsubstr(str,size -1,"ца")
+						elseif SubSize(str, size -1)=="ый" then
+							str=repsubstr(str,size -1,"ого")
+						elseif sogl[SubSize(str, size )] then
 							str=str.."а"
 						-- end
 				else
-					if t.NamesGender["she"][string.lower(objectname)] then --женский род
-						if str:utf8sub(str:utf8len()-1)=="ая" then
-							str=repsubstr(str,str:utf8len()-1,"ой")
-						elseif str:utf8sub(str:utf8len()-1)=="яя" then
-							str=repsubstr(str,str:utf8len()-1,"ей")
-						elseif str:utf8sub(str:utf8len()-1)=="ья" then
-							str=repsubstr(str,str:utf8len(),"ей")
+					if t.NamesGender["she"][objectname] then --женский род
+						if SubSize(str, size -1)=="ая" then
+							str=repsubstr(str,size -1,"ой")
+						elseif SubSize(str, size -1)=="яя" then
+							str=repsubstr(str,size -1,"ей")
+						elseif SubSize(str, size -1)=="ья" then
+							str=repsubstr(str,size ,"ей")
 						elseif str:utf8sub(-4)=="аяся" then
-							str=repsubstr(str,str:utf8len()-3,"ейся")
+							str=repsubstr(str,size -3,"ейся")
 						end
-					elseif t.NamesGender["it"][string.lower(objectname)] then --средний род
-						if str:utf8sub(str:utf8len()-2)=="кое" then
-							str=repsubstr(str,str:utf8len()-1,"ого")
-						elseif str:utf8sub(str:utf8len()-1)=="ое" then
-							str=repsubstr(str,str:utf8len()-1,"ого")
-						elseif str:utf8sub(str:utf8len()-1)=="ее" then
-							str=repsubstr(str,str:utf8len()-1,"его")
+					elseif t.NamesGender["it"][objectname] then --средний род
+						if SubSize(str, size -2)=="кое" then
+							str=repsubstr(str,size -1,"ого")
+						elseif SubSize(str, size -1)=="ое" then
+							str=repsubstr(str,size -1,"ого")
+						elseif SubSize(str, size -1)=="ее" then
+							str=repsubstr(str,size -1,"его")
 						end
-					elseif t.NamesGender["plural"][string.lower(objectname)] or 
-						   t.NamesGender["plural2"][string.lower(objectname)] then --множественное число
-						if str:utf8sub(str:utf8len()-1)=="ые" then
-							str=repsubstr(str,str:utf8len()-1,"ых")
-						elseif str:utf8sub(str:utf8len()-1)=="ие" then
-							str=repsubstr(str,str:utf8len()-1,"их")
-						elseif str:utf8sub(str:utf8len()-1)=="ьи" then
-							str=repsubstr(str,str:utf8len()-1,"их")
+					elseif t.NamesGender["plural"][objectname] or 
+						   t.NamesGender["plural2"][objectname] then --множественное число
+						if SubSize(str, size -1)=="ые" then
+							str=repsubstr(str,size -1,"ых")
+						elseif SubSize(str, size -1)=="ие" then
+							str=repsubstr(str,size -1,"их")
+						elseif SubSize(str, size -1)=="ьи" then
+							str=repsubstr(str,size -1,"их")
 						end
-					elseif t.NamesGender["he"][string.lower(objectname)] or t.NamesGender["he2"][string.lower(objectname)] then--мужской род
-						if str:utf8sub(str:utf8len()-1)=="ый" then
-							str=repsubstr(str,str:utf8len()-1,"ого")
-						elseif str:utf8sub(str:utf8len()-1)=="ий" then
-							str=repsubstr(str,str:utf8len()-1,"его")
-						elseif str:utf8sub(str:utf8len()-1)=="ой" then
-							str=repsubstr(str,str:utf8len()-1,"ого")
+					elseif t.NamesGender["he"][objectname] or t.NamesGender["he2"][objectname] then--мужской род
+						if SubSize(str, size -1)=="ый" then
+							str=repsubstr(str,size -1,"ого")
+						elseif SubSize(str, size -1)=="ий" then
+							str=repsubstr(str,size -1,"его")
+						elseif SubSize(str, size -1)=="ой" then
+							str=repsubstr(str,size -1,"ого")
 						end
 					end
 				end
 			--Изучить (Кого? Что?) Винительный
 			--применительно к имени свиньи или кролика
 			elseif action and objectname and (objectname=="pigman" or objectname=="pigguard" or objectname=="bunnyman" or objectname:find("critter")~=nil) then 
-				if str:utf8sub(str:utf8len()-2)=="нок" then
-					str=str:utf8sub(1,str:utf8len()-2).."ка"
-				elseif str:utf8sub(str:utf8len()-2)=="лец" then
-					str=str:utf8sub(1,str:utf8len()-2).."ьца"
-				elseif str:utf8sub(str:utf8len()-2)=="ный" then
-					str=str:utf8sub(1,str:utf8len()-2).."ого"
-				elseif str:utf8sub(str:utf8len()-1)=="ец" then
-					str=str:utf8sub(1,str:utf8len()-2).."ца"
-				elseif str:utf8sub(str:utf8len())=="а" then
-					str=str:utf8sub(1,str:utf8len()-1).."у"
-				elseif str:utf8sub(str:utf8len())=="я" then
-					str=str:utf8sub(1,str:utf8len()-1).."ю"
-				elseif str:utf8sub(str:utf8len())=="ь" then
-					str=str:utf8sub(1,str:utf8len()-1).."я"
-				elseif str:utf8sub(str:utf8len())=="й" then
-					str=str:utf8sub(1,str:utf8len()-1).."я"
-				elseif sogl[str:utf8sub(str:utf8len())] then
+				if SubSize(str, size -2)=="нок" then
+					str=SubSize(str, 1,size -2).."ка"
+				elseif SubSize(str, size -2)=="лец" then
+					str=SubSize(str, 1,size -2).."ьца"
+				elseif SubSize(str, size -2)=="ный" then
+					str=SubSize(str, 1,size -2).."ого"
+				elseif SubSize(str, size -1)=="ец" then
+					str=SubSize(str, 1,size -2).."ца"
+				elseif SubSize(str, size )=="а" then
+					str=SubSize(str, 1,size -1).."у"
+				elseif SubSize(str, size )=="я" then
+					str=SubSize(str, 1,size -1).."ю"
+				elseif SubSize(str, size )=="ь" then
+					str=SubSize(str, 1,size -1).."я"
+				elseif SubSize(str, size )=="й" then
+					str=SubSize(str, 1,size -1).."я"
+				elseif sogl[SubSize(str, size )] then
 					str=str.."а"
 				end
 			elseif action and not(objectname and objectname=="sketch") then --Изучить (Кого? Что?) Винительный
-				if str:utf8sub(str:utf8len()-1)=="ая" then
-					str=repsubstr(str,str:utf8len()-1,"ую")
-				elseif str:utf8sub(str:utf8len()-1)=="яя" then
-					str=repsubstr(str,str:utf8len()-1,"юю")
-				elseif str:utf8sub(str:utf8len())=="а" then
-					str=repsubstr(str,str:utf8len(),"у")
-				elseif str:utf8sub(str:utf8len())=="я" then
-					str=repsubstr(str,str:utf8len(),"ю")
+				if SubSize(str, size -1)=="ая" then
+					str=repsubstr(str,size -1,"ую")
+				elseif SubSize(str, size -1)=="яя" then
+					str=repsubstr(str,size -1,"юю")
+				elseif SubSize(str, size )=="а" then
+					str=repsubstr(str,size ,"у")
+				elseif SubSize(str, size )=="я" then
+					str=repsubstr(str,size ,"ю")
 				end
 			end
 			resstr=resstr..str..delimetr
