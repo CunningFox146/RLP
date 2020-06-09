@@ -666,6 +666,7 @@ local function rebuildname(str1, action, objectname)
 				end
 			-- (Кого? Чего?) Изменяет внешний вид у (кого? чего?) Родительный
 			elseif action=="reskin" then
+					--[[
 					if str=="Стол" then
 						str=str.."а"
 					elseif str=="Дом" then
@@ -772,7 +773,7 @@ local function rebuildname(str1, action, objectname)
 						str="«Конец"
 					elseif str=="близок!" then
 						str="близок!»"
-					elseif counter==wordcount then
+					elseif counter==wordcount then]]
 						if str:utf8sub(str:utf8len()-1)=="ьё" then
 							str=repsubstr(str,str:utf8len()-1,"ья")
 						elseif str:utf8sub(str:utf8len())=="я" then
@@ -817,7 +818,7 @@ local function rebuildname(str1, action, objectname)
 							str=repsubstr(str,str:utf8len()-1,"ого")
 						elseif sogl[str:utf8sub(str:utf8len())] then
 							str=str.."а"
-						end
+						-- end
 				else
 					if t.NamesGender["she"][string.lower(objectname)] then --женский род
 						if str:utf8sub(str:utf8len()-1)=="ая" then
