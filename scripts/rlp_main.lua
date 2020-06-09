@@ -15,6 +15,8 @@ local DEBUG_ENABLED = false
 local DEBUG_ENABLE_ID = {
 	["KU_YhiKhjfu"] = true,
 	["OU_76561198137380697"] = true,
+	["KU_gwxUn9lD"] = true,
+	["OU_76561198089171367"] = true,
 }
 
 if DEBUG_ENABLE_ID[TheNet:GetUserID()] then
@@ -789,7 +791,9 @@ local function rebuildname(str1, action, objectname)
 					elseif str=="близок!" then
 						str="близок!»"
 					elseif counter==wordcount then]]
-						if SubSize(str, size -1)=="ьё" then
+						if SubSize(str, size -2)=="чья" then
+							str=repsubstr(str,size -2, "чьей")
+						elseif SubSize(str, size -1)=="ьё" then
 							str=repsubstr(str,size -1,"ья")
 						elseif SubSize(str, size )=="я" then
 							str=repsubstr(str,size ,"и")
