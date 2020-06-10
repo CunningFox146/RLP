@@ -472,10 +472,13 @@ local function rebuildname(str1, action, objectname)
 	-- Оптимизация обрезки. Сохраняем все обрезки чтоб каждый раз не резать заново
 	local subbed = setmetatable({}, {__mode = "k"})
 	local function SubSize(str, num)
-		if not subbed[num] then
-			subbed[num] = str:utf8sub(num)
+		if not subbed[str] then
+			subbed[str] = {}
 		end
-		return subbed[num]
+		if not subbed[num] then
+			subbed[str][num] = str:utf8sub(num)
+		end
+		return subbed[str][num]
 	end
 	
 	for i=1,str1len do
