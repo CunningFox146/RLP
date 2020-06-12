@@ -442,10 +442,11 @@ end
 --Пытается сформировать правильные окончания в словах названия предмета str1 в соответствии действию action
 --objectname - название префаба предмета
 local function rebuildname(str1, action, objectname)
-	local function repsubstr(str,pos,substr)--вставить подстроку substr в строку str в позиции pos
-		pos=pos-1
-		return str:utf8sub(1,pos)..substr..str:utf8sub(pos+substr:utf8len()+1,str:utf8len())
+	local function repsubstr(str, pos, substr)--вставить подстроку substr в строку str в позиции pos
+		pos = pos - 1
+		return str:utf8sub(1, pos)..substr..str:utf8sub(pos+substr:utf8len()+1, str:utf8len())
 	end
+	
 	if not str1 then
 		return nil
 	end
@@ -711,17 +712,17 @@ local function rebuildname(str1, action, objectname)
 						elseif SubSize(str, size -2)=="ики" then
 							str=repsubstr(str,size ,"ов")							
 						elseif SubSize(str, size -2)=="уса" then
-							str=repsubstr(str,size ,"")							
+							str=str:utf8sub(1, -2)							
 						elseif SubSize(str, size -2)=="нец" then
 							str=repsubstr(str,size -2,"нец")							
 						elseif SubSize(str, size -2)=="ало" then
-							str=repsubstr(str,size ,"")							
+							str=str:utf8sub(1, -2)							
 						elseif SubSize(str, size -2)=="ота" then
-							str=repsubstr(str,size ,"")							
+							str=str:utf8sub(1, -2)							
 						elseif SubSize(str, size -2)=="ий" then
 							str=repsubstr(str,size -2,"ого")							
 						elseif SubSize(str, size -1)=="зд" then
-							str=repsubstr(str,size ,"")							
+							str=str:utf8sub(1, -2)							
 						elseif SubSize(str, size -1)=="ьё" then
 							str=repsubstr(str,size -1,"ья")							
 						elseif SubSize(str, size -1)=="на" then
@@ -741,7 +742,7 @@ local function rebuildname(str1, action, objectname)
 						elseif SubSize(str, size -1)=="ая" then
 							str=repsubstr(str,size -1,"ой")							
 						elseif SubSize(str, size -1)=="ля" then
-							str=repsubstr(str,size ,"")							
+							str=str:utf8sub(1, -2)							
 						elseif SubSize(str, size -1)=="ло" then
 							str=repsubstr(str,size -1,"ла")							
 						elseif SubSize(str, size -1)=="ол" then
@@ -851,6 +852,7 @@ local function rebuildname(str1, action, objectname)
 		end
 	end
 	resstr=resstr:utf8sub(1,resstr:utf8len()-1)
+	subbed = nil
 	return resstr
 end
 t.rebuildname = rebuildname
