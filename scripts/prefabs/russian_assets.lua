@@ -4,11 +4,10 @@ local t = mods.RussianLanguagePack
 --Это подгружаем всегда
 local assets =
 {
-    Asset( "ATLAS", "images/rus_button_icon.xml" ),
-    Asset( "ATLAS", "images/frontscreen.xml" ),
-
     Asset("ANIM", "anim/text_sparkle.zip"),
     Asset("ANIM", "anim/mods_button.zip"),
+	
+    Asset("ATLAS", "images/rus_button_icon.xml" ),
 	
     Asset("ATLAS", "images/rusif_icon.xml"),
 	
@@ -31,8 +30,6 @@ if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё ост�
 	local ass = {
 		Asset("ATLAS","images/gradient.xml"), --Градиент на слишком длинных строках лога в настройках перевода
 		Asset("ATLAS","images/rus_mapgen.xml"), --Русифицированные пиктограммы в окне генерирования нового мира
-		Asset("ATLAS","images/tradescreen_overflow.xml"), --Экран обмена
-		Asset("ATLAS","images/tradescreen.xml"), --Экран обмена
 		--Персонажи
 		Asset("ATLAS","images/rus_locked.xml"), 
 		Asset("ATLAS","images/rus_wickerbottom.xml"), 
@@ -81,6 +78,11 @@ if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё ост�
 		Asset("ATLAS","images/rus_names_gold_wormwood.xml"),
 		Asset("ATLAS","images/rus_names_gold_warly.xml"),
 		Asset("ATLAS","images/rus_names_gold_wurt.xml"),
+		
+		
+		Asset("ATLAS", "images/frontscreen_ru.xml" ),
+		Asset("ATLAS", "images/tradescreen_overflow_ru.xml" ),
+		Asset("ATLAS", "images/tradescreen_ru.xml" ),		
 	}
 
 	for _, v in ipairs(ass) do

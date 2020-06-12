@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Atlas>
+	<Texture filename="tradescreen_ru.tex" />
+	<Elements>
+		<Element name="banner0_small.tex" u1="0.001" u2="0.87790625" v2="0.999" v1="0.0244375" variant="" />
+	</Elements>
+</Atlas>

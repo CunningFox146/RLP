@@ -231,14 +231,6 @@ Sim.UnregisterAllPrefabs = function(self, ...)
 end
 Sim.ShouldWarnModsLoaded = function() return false end
 
-local UpdateChecker = require("widgets/update_checker")
---А теперь виджет и принты
-env.AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self, ...)
-	self.update_checker = self.fixed_root:AddChild(UpdateChecker())
-	self.update_checker:SetScale(.7)
-	self.update_checker:SetPosition(500, -100)
-end)
-
 --Вставляем функцию, подключающую русские шрифты
 local _RegisterPrefabs = ModManager.RegisterPrefabs --Подменяем функцию,в которой нужно подгрузить шрифты и исправить глобальные шрифтовые константы
 local function NewRegisterPrefabs(self)
@@ -3463,6 +3455,27 @@ if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняе
 		inst.components.talker.donetalkingfn = OnTalk
 	end)
 	
+	env.AddClassPostConstruct("screens/redux/mainscreen", function(self)
+		self.presents_image:SetTexture("images/frontscreen_ru.xml", "kleipresents.tex")
+		self.legalese_image:SetTexture("images/frontscreen_ru.xml", "legalese.tex")
+	end)
+	
+	-- В картинке более красиво
+	env.AddClassPostConstruct("widgets/itemselector", function(self)
+		self.banner:SetTexture("images/tradescreen_ru.xml", "banner0_small.tex")
+		self.title:Hide()
+	end)
+
+	local function PatchTradeOverflowImg(file, override)
+		env.AddClassPostConstruct(file, function(self)
+			local name = override or "title"
+			self[name]:SetTexture("images/tradescreen_overflow_ru.xml", "TradeInnSign.tex")
+		end)
+	end
+	
+	PatchTradeOverflowImg("screens/tradescreen")
+	PatchTradeOverflowImg("screens/crowgamescreen")
+	PatchTradeOverflowImg("screens/snowbirdgamescreen")
 	
 	local Text = require "widgets/text"
 	local function AddUpdtStr(parent)

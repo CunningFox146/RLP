@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Atlas>
+	<Texture filename="tradescreen_overflow_ru.tex" />
+	<Elements>
+		<Element name="TradeInnSign.tex" u1="0.001" u2="0.532203125" v2="0.999" v1="0.329125" variant="" />
+	</Elements>
+</Atlas>

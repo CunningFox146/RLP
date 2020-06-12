@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Atlas>
+	<Texture filename="frontscreen_ru.tex" />
+	<Elements>
+		<Element name="kleipresents.tex" u1="0.001" u2="0.1874765625" v2="0.999" v1="0.6494375" variant="" />
+		<Element name="legalese.tex" u1="0.1894765625" u2="0.696265625" v2="0.999" v1="0.485375" variant="" />
+	</Elements>
+</Atlas>

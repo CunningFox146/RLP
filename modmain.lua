@@ -15,9 +15,8 @@ local SteamID = "1240565842"
 
 mods.RussianLanguagePack = {
 	modinfo = modinfo,
-	--Путь, по которому будут сохраняться рабочие версии po файла и лога обновлений.
-	--Он нужен потому, что сейчас при синхронизации стим затирает все файлы в папке мода на версии из стима.
-	StorePath = MODROOT,--"scripts/languages/"
+	
+	StorePath = MODROOT,
 	
 	mod_phrases = {},
 	mod_announce = {},
