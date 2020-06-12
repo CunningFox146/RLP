@@ -1,6 +1,9 @@
 local env = env
 local t = mods.RussianLanguagePack
 local AddPrefabPostInit = AddPrefabPostInit
+local AddClassPostConstruct = env.AddClassPostConstruct
+local modname = env.modname
+local MODROOT = env.MODROOT
 
 GLOBAL.setfenv(1, GLOBAL)
 
@@ -46,34 +49,38 @@ local FontNames = {
 	TALKINGFONT_WORMWOOD = TALKINGFONT_WORMWOOD,
 	TALKINGFONT_HERMIT = TALKINGFONT_HERMIT,
 	
-	NEWFONT = rawget(_G, "NEWFONT"),
-	NEWFONT_SMALL = rawget(_G, "NEWFONT_SMALL"),
-	NEWFONT_OUTLINE = rawget(_G, "NEWFONT_OUTLINE"),
-	NEWFONT_OUTLINE_SMALL = rawget(_G, "NEWFONT_OUTLINE_SMALL")
+	NEWFONT = NEWFONT,
+	NEWFONT_SMALL = NEWFONT_SMALL,
+	NEWFONT_OUTLINE = NEWFONT_OUTLINE,
+	NEWFONT_OUTLINE_SMALL = NEWFONT_OUTLINE_SMALL,
+}
+
+--Имена шрифтов, которые нужно загрузить.
+local LocalizedFontList = {
+	["talkingfont"] = true,
+	["stint-ucr50"] = true,
+	["stint-ucr20"] = true,
+	["opensans50"] = true,
+	["belisaplumilla50"] = true,
+	["belisaplumilla100"] = true,
+	["buttonfont"] = true,
+	["hammerhead50"] = true,
+	["bellefair50"] = true,
+	["bellefair_outline50"] = true,
+
+	["talkingfont_wormwood"] = true,
+	["talkingfont_hermit"] = true,
+
+	["spirequal"] = true,
+	["spirequal_small"] = true,
+	["spirequal_outline"] = true,
+	["spirequal_outline_small"] = true,
 }
 
 --В этой функции происходит загрузка, подключение и применение русских шрифтов
 local function ApplyLocalizedFonts()
-	--Имена шрифтов, которые нужно загрузить.
-	local LocalizedFontList = {["talkingfont"] = true,
-							   ["stint-ucr50"] = true,
-							   ["stint-ucr20"] = true,
-							   ["opensans50"] = true,
-							   ["belisaplumilla50"] = true,
-							   ["belisaplumilla100"] = true,
-							   ["buttonfont"] = true,
-							   ["hammerhead50"] = true,
-							   ["bellefair50"] = true,
-							   ["bellefair_outline50"] = true,
-							   
-							   ["talkingfont_wormwood"] = true,
-							   ["talkingfont_hermit"] = true,
-							   
-							   ["spirequal"] = rawget(_G,"NEWFONT") and true or nil,
-							   ["spirequal_small"] = rawget(_G,"NEWFONT_SMALL") and true or nil,
-							   ["spirequal_outline"] = rawget(_G,"NEWFONT_OUTLINE") and true or nil,
-							   ["spirequal_outline_small"] = rawget(_G,"NEWFONT_OUTLINE_SMALL") and true or nil}
-
+	t.print("ApplyLocalizedFonts", CalledFrom())
+	
 	--ЭТАП ВЫГРУЗКИ: Вначале выгружаем шрифты, если они были загружены
 	--Восстанавливаем оригинальные переменные шрифтов
 	DEFAULTFONT = FontNames.DEFAULTFONT
@@ -92,30 +99,20 @@ local function ApplyLocalizedFonts()
 	TALKINGFONT_WORMWOOD = FontNames.TALKINGFONT_WORMWOOD
 	TALKINGFONT_HERMIT = FontNames.TALKINGFONT_HERMIT
 	
-	if rawget(_G,"NEWFONT") then
-		NEWFONT = FontNames.NEWFONT
-	end
-	if rawget(_G,"NEWFONT_SMALL") then
-		NEWFONT_SMALL = FontNames.NEWFONT_SMALL
-	end
-	if rawget(_G,"NEWFONT_OUTLINE") then
-		NEWFONT_OUTLINE = FontNames.NEWFONT_OUTLINE
-	end
-	if rawget(_G,"NEWFONT_OUTLINE_SMALL") then
-		NEWFONT_OUTLINE_SMALL = FontNames.NEWFONT_OUTLINE_SMALL
-	end
+	NEWFONT = FontNames.NEWFONT
+	NEWFONT_SMALL = FontNames.NEWFONT_SMALL
+	NEWFONT_OUTLINE = FontNames.NEWFONT_OUTLINE
+	NEWFONT_OUTLINE_SMALL = FontNames.NEWFONT_OUTLINE_SMALL
 	
-	local modname = env.modname
-	local MODROOT = env.MODROOT
 	--Выгружаем локализированные шрифты, если они были до этого загружены
+	t.print("Unloading RLP fonts")
 	for FontName in pairs(LocalizedFontList) do
 		TheSim:UnloadFont(t.SelectedLanguage.."_"..FontName)
 	end
-	TheSim:UnloadPrefabs({t.SelectedLanguage.."_fonts_"..modname}) --выгружаем общий префаб локализированных шрифтов
-
+	TheSim:UnloadPrefabs({"RLP_fonts"}) --выгружаем общий префаб локализированных шрифтов
 
 	--ЭТАП ЗАГРУЗКИ: Загружаем шрифты по новой
-
+	t.print("Loading RLP fonts")
 	--Формируем список ассетов
 	local LocalizedFontAssets = {}
 	for FontName in pairs(LocalizedFontList) do 
@@ -123,9 +120,9 @@ local function ApplyLocalizedFonts()
 	end
 
 	--Создаём префаб, регистрируем его и загружаем
-	local LocalizedFontsPrefab = Prefab("common/"..t.SelectedLanguage.."_fonts_"..modname, nil, LocalizedFontAssets)
+	local LocalizedFontsPrefab = Prefab("RLP_fonts", function() return CreateEntity() end, LocalizedFontAssets)
 	RegisterPrefabs(LocalizedFontsPrefab)
-	TheSim:LoadPrefabs({t.SelectedLanguage.."_fonts_"..modname})
+	TheSim:LoadPrefabs({"RLP_fonts"})
 
 	--Формируем список связанных с файлами алиасов
 	for FontName in pairs(LocalizedFontList) do
@@ -137,7 +134,7 @@ local function ApplyLocalizedFonts()
 	for _, v in pairs(FONTS) do
 		local FontName = v.filename:sub(7, -5)
 		if LocalizedFontList[FontName] then
-			fallbacks[FontName] = {v.alias, unpack(type(v.fallback) == "table" and v.fallback or {})}
+			fallbacks[FontName] = {v.alias, unpack(v.fallback)}
 		end
 	end
 	--Привязываем к новым английским шрифтам локализированные символы
@@ -162,18 +159,26 @@ local function ApplyLocalizedFonts()
 	TALKINGFONT_WORMWOOD = t.SelectedLanguage.."_talkingfont_wormwood"
 	TALKINGFONT_HERMIT = t.SelectedLanguage.."_talkingfont_hermit"
 	
-	if rawget(_G,"NEWFONT") then
-		NEWFONT = t.SelectedLanguage.."_spirequal"
-	end
-	if rawget(_G,"NEWFONT_SMALL") then
-		NEWFONT_SMALL = t.SelectedLanguage.."_spirequal_small"
-	end
-	if rawget(_G,"NEWFONT_OUTLINE") then
-		NEWFONT_OUTLINE = t.SelectedLanguage.."_spirequal_outline"
-	end
-	if rawget(_G,"NEWFONT_OUTLINE_SMALL") then
-		NEWFONT_OUTLINE_SMALL = t.SelectedLanguage.."_spirequal_outline_small"
-	end
+	NEWFONT = t.SelectedLanguage.."_spirequal"
+	NEWFONT_SMALL = t.SelectedLanguage.."_spirequal_small"
+	NEWFONT_OUTLINE = t.SelectedLanguage.."_spirequal_outline"
+	NEWFONT_OUTLINE_SMALL = t.SelectedLanguage.."_spirequal_outline_small"
+end
+
+-- Удаляем уведомление о модах
+Sim.ShouldWarnModsLoaded = function() return false end
+
+local _UnregisterAllPrefabs = Sim.UnregisterAllPrefabs
+Sim.UnregisterAllPrefabs = function(self, ...)
+	_UnregisterAllPrefabs(self, ...)
+	ApplyLocalizedFonts()
+end
+
+--Вставляем функцию, подключающую русские шрифты
+local _RegisterPrefabs = ModManager.RegisterPrefabs --Подменяем функцию,в которой нужно подгрузить шрифты и исправить глобальные шрифтовые константы
+ModManager.RegisterPrefabs = function(self, ...)
+	_RegisterPrefabs(self, ...)
+	ApplyLocalizedFonts()
 end
 
 --Для тех, кто пользуется ps4 или NACL должна быть возможность сохранять не в ини файле, а в облаке.
@@ -224,23 +229,6 @@ function t.escapeR(str) --Удаляет \r из конца строки. Нуж
 	if string.sub(str, #str)=="\r" then return string.sub(str, 1, #str-1) else return str end
 end
 
-local _UnregisterAllPrefabs = Sim.UnregisterAllPrefabs
-Sim.UnregisterAllPrefabs = function(self, ...)
-	_UnregisterAllPrefabs(self, ...)
-	ApplyLocalizedFonts()
-end
-Sim.ShouldWarnModsLoaded = function() return false end
-
---Вставляем функцию, подключающую русские шрифты
-local _RegisterPrefabs = ModManager.RegisterPrefabs --Подменяем функцию,в которой нужно подгрузить шрифты и исправить глобальные шрифтовые константы
-local function NewRegisterPrefabs(self)
-	_RegisterPrefabs(self)
-	ApplyLocalizedFonts()
-	TheFrontEnd.consoletext:SetFont(BODYTEXTFONT) --Нужно, чтобы шрифт в консоли не слетал
-	TheFrontEnd.consoletext:SetRegionSize(900, 404) --Чуть-чуть увеличил по вертикали, чтобы не обрезало буквы в нижней строке
-end
-ModManager.RegisterPrefabs=NewRegisterPrefabs
-
 --Узнаём тип локализации, и меняем содержимое таблицы с переводом PO, если нужно
 --	t.CurrentTranslationType=Profile:GetLocalizaitonValue("translation_type")
 t.CurrentTranslationType = TheSim:GetSetting("translation", "translation_type")
@@ -259,15 +247,6 @@ if not t.IsModTranslEnabled then --Если нет записи о типе, т�
 end
 
 require("RLP_support")
-
-local _AddClassPostConstruct = env.AddClassPostConstruct
-local function AddClassPostConstruct(path, ...)
-	if not kleifileexists("scripts/"..path..".lua") then
-		t.print("RLP ERROR AddClassPostConstruct: file \""..path..".lua\" is not found. Skipping.")
-		return
-	end
-	return _AddClassPostConstruct(path, ...)
-end
 
 --!!! Временное исправление нерабочего русского языка в чате на выделенных серверах
 -- Fox: Временное исправление висит тут уже 5 лет
@@ -305,70 +284,11 @@ AddClassPostConstruct("widgets/spinner", function(self, options, width, height, 
 	self.text:SetFont(BUTTONFONT)
 end)
 
-
---Функция проверяет файл language.lua на наличие подключения po файла и старых версий русификации
-local function language_lua_has_rusification(filename)
-	if not kleifileexists(filename) then return false end --Нет файла? Нет проблем
-
-	local f = assert(io.open(filename,"r")) --Читаем весь файл в буфер
-	local content =""
-	for line in f:lines() do
-		content=content..line
-	end
-	f:close()
-
-	content=string.gsub(content,"\r","")--Удаляем все возвраты каретки, на случай, если это юникс
-	content=string.gsub(content,"%-%-%[%[.-%]%]","")--Удаляем многострочные комментарии
-	if string.sub(content,#content)~="\n" then content=content.."\n" end --добавляем перенос строки в самом конце, если нужно
-	local tocomment={}
-	for str in string.gmatch(content,"([^\n]*)\n") do --Обходим все строки
-		if not str then str="" end
-		str=string.gsub(str,"%-%-.*$","")--Удаляем все однострочные комментарии
-		--Запоминаем строки, которые нужно отключить
-		if string.find(str,"LanguageTranslator:LoadPOFile(",1,true) then table.insert(tocomment,str) end --загрузка po
-		if string.find(str,"russian_fix",1,true) then table.insert(tocomment,str) end --загрузка моей ранней версии русификации
-	end
-	if #tocomment==0 then return false end --Если не нашлось строк, которые нужно закомментировать, то выходим
-
-	content={}
-	local f=assert(io.open(filename,"r"))
-	for line in f:lines() do --Снова считываем все строки, параллельно проверяя
-		for _,str in ipairs(tocomment) do --обходим все строки, которые нужно закомментировать
-			local a,b=string.find(line,str,1,true)
-			if a then --если есть совпадение то...
-				line=string.sub(line,1,a-1).."--"..str..string.sub(line,b+1)
-				break --комментируем и прерываем цикл
-			end
-		end
-		table.insert(content,line)
-	end
-	f:close()
-	f = assert(io.open(filename,"w")) --Формируем новый language.lua с отключёнными строками
-	for _,str in ipairs(content) do
-		f:write(str.."\n")
-	end
-	f:close()
-	return true
-end
-
-local languageluapath = "scripts/languages/language.lua"
-
 local _Start = Start
 function Start(...) 
 	ApplyLocalizedFonts()
-	_Start(...)
 	
-	if language_lua_has_rusification(languageluapath) then --Если в language.lua подключается русификация
-		local a,b="/","\\"
-		if PLATFORM == "NACL" or PLATFORM == "PS4" or PLATFORM == "LINUX_STEAM" or PLATFORM == "OSX_STEAM" then
-			a,b=b,a
-		end
-		local text="В файле "..string.gsub("data/"..languageluapath,a,b).."\nнайдено подключение другой локализации.\nЭто подключение было деактивировано."
-		local PopupDialogScreen = require "screens/popupdialog"
-			TheFrontEnd:PushScreen(PopupDialogScreen("Обнаружена посторонняя локализация", text,
-			
-			{{text="Понятно", cb = function() TheFrontEnd:PopScreen() SimReset() end}},nil,nil,"dark"))
-	end
+	_Start(...)
 	
 	if InGamePlay() or not TheFrontEnd then
 		return
@@ -1429,13 +1349,13 @@ if NetworkProxy.GetClientTable then
 	local _GetClientTable = NetworkProxy.GetClientTable
 	NetworkProxy.GetClientTable = function(self, ...)
 		local res = _GetClientTable(self, ...)
-		if res and type(res)=="table" then for i,v in pairs(res) do
+		if res then for i,v in pairs(res) do
 			if v.name and v.prefab then
 				-- Грязная подмена
 				if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly and v.name=="[Host]" then
 					v.name="[Хост]"
 				end
-				AllPlayersList[v.name]=v.prefab or nil
+				AllPlayersList[v.name] = v.prefab or nil
 			end
 		end end
 		return res
@@ -1597,12 +1517,6 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 	end end
 end) -- для AddClassPostConstruct "widgets/eventannouncer"
 
--- Добавляет переменную в окружение модов.
-local function AddToModEnv(name, val)
-	env[name] = val
-	env.env[name] = val
-end
-
 --Подбирает сообщение из хеш-таблиц по указанному персонажу и сообщению на английском.
 --Если персонаж не указан, используется уилсон.
 --Возвращает переведённое сообщение и вторым параметром таблицу всех замен %s, если таковые были.
@@ -1704,7 +1618,9 @@ end
 --message - сообщение на английском
 --entity - ссылка на говорящего это сообщение персонажа
 
-DumpModPhrases = function() printwrap("t.mod_phrases", t.mod_phrases) end
+if DEBUG_ENABLED then
+	DumpModPhrases = function() printwrap("t.mod_phrases", t.mod_phrases) end
+end
 
 function t.TranslateToRussian(message, entity)
 	t.print("t.TranslateToRussian", message, entity.prefab)
@@ -2727,792 +2643,794 @@ local function FixPrefix(prefix, act, item)
 end
 
 
-if t.CurrentTranslationType~=t.TranslationTypes.ChatOnly then --Выполняем, если не только чат
-	if t.CurrentTranslationType~=t.TranslationTypes.InterfaceChat then
-		--Ниже идут функции непосредственного склонения предметов и формирования названий
-		-- выполняем если не "только чат" и не "интерфейс/чат" (т.е. если перевод полный)
+if t.CurrentTranslationType == t.TranslationTypes.ChatOnly then --Выполняем, если не только чат
+	return
+end
 
 
-		--Подменяем имена персонажей, создаваемых с консоли в игре.
-		local OldSetPrefabName = EntityScript.SetPrefabName
-		function EntityScript:SetPrefabName(name,...)
-			OldSetPrefabName(self,name,...)
-			if not self.entity:HasTag("player") then return end
-			self.name=t.SpeechHashTbl.NAMES.Rus2Eng[self.name] or self.name
+
+--Дядька, продающий скины должен склонять слова под названия вещей
+AddClassPostConstruct("widgets/skincollector", function(self)
+	if not self.Say then return end
+	if self.text then
+		self.text:SetSize(self.text.size-5)
+	end
+	local OldSay = self.Say
+	function self:Say(text, rarity, name, number, ...)
+		if type(text) == "table" then 
+			text = GetRandomItem(text)
 		end
-
-
-
-		local GetAdjectiveOld = EntityScript["GetAdjective"]
-		--Новая версия функции, выдающей качество предмета
-		function GetAdjectiveNew(self)
-			local str=GetAdjectiveOld(self)
-			if str and self.prefab then
-				local player=ThePlayer
-				local act=player.components.playercontroller:GetLeftMouseAction() --Получаем текущее действие
-				if act then act=act.action.id or "NOACTION" else act="NOACTION" end
-				str=FixPrefix(str,act,self.prefab) --склоняем окончание префикса
-				if act~="NOACTION" then --если есть действие, то нужно сделать с маленькой буквы
-					str=firsttolower(str)
+		if text then
+			local gender = "he"
+			if name then --если есть название предмета, ищем его пол
+				local key = table.reverselookup(STRINGS.SKIN_NAMES, name)
+				if key then
+					for gen, tbl in pairs(t.NamesGender) do
+						if tbl[key:lower()] then gender = gen break end
+					end
+					name = russianlower(name)
 				end
+--				text = string.gsub(text, "<item>", name)
 			end
-			return str
+			if rarity then
+				rarity = russianlower(rarity)
+				text = string.gsub(text, "<rarity>", rarity) --заменим, чтобы парсились склонения (ниже)
+			end
+			--парсим теги
+			if name or rarity then
+				text = t.ParseTranslationTags(text, nil, nil, gender)
+			end
 		end
-		EntityScript["GetAdjective"]=GetAdjectiveNew --подменяем функцию, выводящую качества продуктов
+		return OldSay(self, text, rarity, name, number, ...)
+	end
+end)
 
+--Увеличиваем область заголовка, чтобы не съедало буквы
+local function postintentionpicker(self)
+	if self.headertext then
+		local w,h = self.headertext:GetRegionSize()
+		self.headertext:SetRegionSize(w,h+10)
+	end
+	--Не переводится. Значит переводим насильно
+	local intention_options={{text='Дружеский'},{text='Командный'},{text='Агрессивный'},{text='Безумие'},}
+	for i, v in ipairs(intention_options) do
+		self.buttons[i]:SetText(intention_options[i].text)
+	end
+end
+AddClassPostConstruct("widgets/intentionpicker", postintentionpicker)
+AddClassPostConstruct("widgets/redux/intentionpicker", postintentionpicker)
 
-
-		--Фикс для hoverer, передающий в GetDisplayName действие, если оно есть
-		AddClassPostConstruct("widgets/hoverer", function(self)
-			if not self.OnUpdate then return end
-			local OldOnUpdate=self.OnUpdate
-			function self:OnUpdate(...)
-				local changed = false
-				local OldlmbtargetGetDisplayName
-				local lmb = self.owner and self.owner.components and self.owner.components.playercontroller and self.owner.components.playercontroller:GetLeftMouseAction()
-				if lmb and lmb.target and lmb.target.GetDisplayName then
-					changed = true
-					OldlmbtargetGetDisplayName = lmb.target.GetDisplayName
-					lmb.target.GetDisplayName = function(self)
-						return OldlmbtargetGetDisplayName(self, lmb)
-					end
-				end
-				OldOnUpdate(self, ...)
-				if changed then
-					lmb.target.GetDisplayName = OldlmbtargetGetDisplayName
-				end
-			end
-		end)
-
-
-
-		local GetDisplayNameOld=EntityScript.GetDisplayName --сохраняем старую функцию, выводящую название предмета
-		function GetDisplayNameNew(self, act) --Подмена функции, выводящей название предмета. В ней реализовано склонение в зависимости от действия (переменная аct)
-
-			local name = GetDisplayNameOld(self)
-			local player = ThePlayer
-			
-		--	if not player then return name end --Если не удалось получить instance игрока, то возвращаем имя на англ. и выходим
-			
-		--	local act=player.components.playercontroller:GetLeftMouseAction() --Получаем текущее действие
-
-			if self:HasTag("player") then
-				if STRINGS.NAMES[self.prefab:upper()] then
-					--Пытаемся перевести имя на русский, если это кукла, а не игрок
-					if not(self.userid and (type(self.userid)=="string") and #self.userid>0)
-						and name==t.SpeechHashTbl.NAMES.Rus2Eng[STRINGS.NAMES[self.prefab:upper()] ] then
-						name=STRINGS.NAMES[t.SpeechHashTbl.NAMES.Eng2Key[name] ]
-						act=act and act.action.id or "DEFAULT"
-						name=(t.RussianNames[name] and (t.RussianNames[name][act] or t.RussianNames[name]["DEFAULTACTION"] or t.RussianNames[name]["DEFAULT"])) or rebuildname(name,act,self.prefab) or name
-					end
-				end
-				return name
-			end
-
-			local itisblueprint=false
-			if name:sub(-10)==" Blueprint" then --Особое исключительное написание для чертежей
-				name=name:sub(1,-11)
-				name=t.SpeechHashTbl.NAMES.Eng2Key[name] and STRINGS.NAMES[t.SpeechHashTbl.NAMES.Eng2Key[name]] or name
-				itisblueprint=true
-			end
-			--Проверим, есть ли префикс мокрости, засушенности или дымления
-			local Prefix=nil
-			if STRINGS.WET_PREFIX then
-				for i,v in pairs(STRINGS.WET_PREFIX) do
-					if type(v)=="string" and v~="" and string.sub(name,1,#v)==v then Prefix=v break end
-				end 
-				if string.sub(name,1,#STRINGS.WITHEREDITEM)==STRINGS.WITHEREDITEM then Prefix=STRINGS.WITHEREDITEM 
-				elseif string.sub(name,1,#STRINGS.SMOLDERINGITEM)==STRINGS.SMOLDERINGITEM then Prefix=STRINGS.SMOLDERINGITEM 
-				end
-				--Солим блюда правильно
-				local puresalt = STRINGS.NAMES.QUAGMIRE_SALTED_FOOD_FMT:utf8sub(1,7)
-				if string.sub(name,1,#puresalt)==puresalt then Prefix=puresalt end
-
-				if Prefix then --Нашли префикс. Меняем его и удаляем из имени для его дальнейшей корректной обработки
-					name=string.sub(name,#Prefix+2)--Убираем префикс из имени
-					if act then
-						Prefix=FixPrefix(Prefix,act.action and act.action.id or "NOACTION",self.prefab)
-						--Если есть действие, значит нужно сделать с маленькой буквы
-						Prefix=firsttolower(Prefix)
-					else 
-						Prefix=FixPrefix(Prefix,"NOACTION",self.prefab)
-						if self:GetAdjective() then
-							Prefix=firsttolower(Prefix)
-						end				
-					end
-				end
-			end
-			if name and self.prefab then --Для ДСТ нужно перевести имя свина или кролика на русский
-				if self.prefab=="pigman" then 
-					name=t.SpeechHashTbl.PIGNAMES.Eng2Rus[name] or name
-				elseif self.prefab=="pigguard" then 
-					name=t.SpeechHashTbl.PIGNAMES.Eng2Rus[name] or name
-				elseif self.prefab=="bunnyman" then 
-					name=t.SpeechHashTbl.BUNNYMANNAMES.Eng2Rus[name] or name
-				elseif self.prefab=="quagmire_swampig" then 
-					name=t.SpeechHashTbl.SWAMPIGNAMES.Eng2Rus[name] or name
-				end
-			end
-			if act then --Если есть действие
-				act=act.action.id
-
-				if not itisblueprint then
-					if t.RussianNames[name] then
-						name=t.RussianNames[name][act] or t.RussianNames[name]["DEFAULTACTION"] or t.RussianNames[name]["DEFAULT"] or rebuildname(name,act,self.prefab) or "NAME"
-					else
-						name=rebuildname(name,act,self.prefab)
-					end
-					if (not self.prefab or self.prefab~="pigman" and self.prefab~="pigguard" and self.prefab~="bunnyman" and self.prefab~="quagmire_trader_merm" and self.prefab~="quagmire_trader_merm2"  and self.prefab~="quagmire_swampigelder"  and self.prefab~="quagmire_goatmum" and self.prefab~="quagmire_goatkid" and self.prefab~="quagmire_swampig")
-					 and not t.ShouldBeCapped[self.prefab] and name and type(name)=="string" and #name>0 then
-						--меняем первый символ названия предмета в нижний регистр
-						name=firsttolower(name)
-					end
-				else name="чертёж предмета \""..name.."\"" end
-
-			else	--Если нет действия
-					if itisblueprint then name="Чертёж предмета \""..name.."\"" end
-				if not t.ShouldBeCapped[self.prefab] and (self:GetAdjective() or Prefix) then
-					name=firsttolower(name)
-				end
-			end
-			if Prefix then
-				name=Prefix.." "..name
-			end
-			if act and act=="SLEEPIN" and name then name="в "..name end --Особый случай для "спать в палатке" и "спать в навесе для сиесты"
-			return name
-		end
-		EntityScript.GetDisplayName=GetDisplayNameNew --подменяем на новую
-
-
-		AddClassPostConstruct("components/playercontroller", function(self)
-			--Переопределяем функцию, выводящую "Создать ...", когда устанавливается на землю крафт-предмет типа палатки.
-			--В старой функции у Klei ошибка. Нужно заменить self.player_recipe на self.placer_recipe
-			local OldGetHoverTextOverride = self.GetHoverTextOverride
-			if OldGetHoverTextOverride then
-				function self:GetHoverTextOverride(...)
-					if self.placer_recipe then
-						local name = STRINGS.NAMES[string.upper(self.placer_recipe.name)]
-						local act = "BUILD"
-						if name then
-							if t.RussianNames[name] then
-								name = t.RussianNames[name][act] or t.RussianNames[name]["DEFAULTACTION"] or t.RussianNames[name]["DEFAULT"] or rebuildname(name,act) or STRINGS.UI.HUD.HERE
-							else
-								name = rebuildname(name,act) or STRINGS.UI.HUD.HERE
-							end
-						else
-							name = STRINGS.UI.HUD.HERE
-						end
-						if not t.ShouldBeCapped[self.placer_recipe.name] and name and type(name)=="string" and #name>0 then
-							--меняем первый символ названия предмета в нижний регистр
-							name = firsttolower(name)
-						end
-						return STRINGS.UI.HUD.BUILD.. " " .. name
-		--				local res = OldGetHoverTextOverride(self, ...) 	
-		--				return res
-					end
-				end
-			end
-		end)
-	end 
-
-	--Дальше идут функции, отлкючённые только в режиме ChatOnly
-
-	--Дядька, продающий скины должен склонять слова под названия вещей
-	AddClassPostConstruct("widgets/skincollector", function(self)
-		if not self.Say then return end
-		if self.text then
-			self.text:SetSize(self.text.size-5)
-		end
-		local OldSay = self.Say
-		function self:Say(text, rarity, name, number, ...)
-			if type(text) == "table" then 
-				text = GetRandomItem(text)
-			end
-			if text then
-				local gender = "he"
-				if name then --если есть название предмета, ищем его пол
-					local key = table.reverselookup(STRINGS.SKIN_NAMES, name)
-					if key then
-						for gen, tbl in pairs(t.NamesGender) do
-							if tbl[key:lower()] then gender = gen break end
-						end
-						name = russianlower(name)
-					end
-	--				text = string.gsub(text, "<item>", name)
-				end
-				if rarity then
-					rarity = russianlower(rarity)
-					text = string.gsub(text, "<rarity>", rarity) --заменим, чтобы парсились склонения (ниже)
-				end
-				--парсим теги
-				if name or rarity then
-					text = t.ParseTranslationTags(text, nil, nil, gender)
-				end
-			end
-			return OldSay(self, text, rarity, name, number, ...)
-		end
-	end)
-
-
-	--Увеличиваем область заголовка, чтобы не съедало буквы
-	local function postintentionpicker(self)
-		if self.headertext then
-			local w,h = self.headertext:GetRegionSize()
-			self.headertext:SetRegionSize(w,h+10)
-		end
-		--Не переводится. Значит переводим насильно
-		local intention_options={{text='Дружеский'},{text='Командный'},{text='Агрессивный'},{text='Безумие'},}
-		for i, v in ipairs(intention_options) do
-			self.buttons[i]:SetText(intention_options[i].text)
+--Исправляем жёстко зашитые надписи на кнопках в казане и телепорте.
+AddClassPostConstruct("widgets/containerwidget", function(self)
+	self.oldOpen=self.Open
+	local function newOpen(self, container, doer)
+		self:oldOpen(container, doer)
+		if self.button then
+			if self.button:GetText()=="Cook" then self.button:SetText("Готовить") end
+			if self.button:GetText()=="Activate" then self.button:SetText("Запустить") end
 		end
 	end
-	AddClassPostConstruct("widgets/intentionpicker", postintentionpicker)
-	AddClassPostConstruct("widgets/redux/intentionpicker", postintentionpicker)
+	self.Open=newOpen
+end)
 
+AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем шрифт описания рецепта в попапе рецептов
+	if self.name and self.Refresh and not self.horizontal then --Перехватываем вывод названия, проверяем, вмещается ли оно, и если нужно, меняем его размер
 
-	--Исправляем жёстко зашитые надписи на кнопках в казане и телепорте.
-	AddClassPostConstruct("widgets/containerwidget", function(self)
-		self.oldOpen=self.Open
-		local function newOpen(self, container, doer)
-			self:oldOpen(container, doer)
-			if self.button then
-				if self.button:GetText()=="Cook" then self.button:SetText("Готовить") end
-				if self.button:GetText()=="Activate" then self.button:SetText("Запустить") end
-			end
-		end
-		self.Open=newOpen
-	end)
-
-	AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем шрифт описания рецепта в попапе рецептов
-		if self.name and self.Refresh and not self.horizontal then --Перехватываем вывод названия, проверяем, вмещается ли оно, и если нужно, меняем его размер
-
-			if not self.OldRefresh then
-				self.OldRefresh=self.Refresh
-				function self.Refresh(self,...)
-					self:OldRefresh(...)
-					if not self.name then return end
-					if self.button and self.button.image then
-						self.button.image:SetScale(.60, .7)
-					end
-					if self.bg and self.bg.light_box then
-						self.bg.light_box:SetPosition(30, -42)
-					end
-					
-					
-					if (self.skins_options ~= nil and #self.skins_options == 1) or not self.skins_options then
-						self.contents:SetPosition(-75,-20,0)
-						self.name:SetPosition(320, 157, 0)
-						self.button:SetPosition(320, -95, 0)
-						self.teaser:SetPosition(320, -90, 0)
-				    else
-				    	self.name:SetPosition(320, 182, 0)
-				    end
-				    if not self.name.OldSetTruncatedString then
-						self.name.OldSetTruncatedString = self.name.SetTruncatedString
-						if self.name.OldSetTruncatedString then
-							local function NewSetTruncatedString (self1,str, maxwidth, maxcharsperline, ellipses)
-								maxcharsperline = 17
-								maxwidth = maxwidth + 30
-								local maxlines = 2
-								self.name.SetTruncatedString=self.name.OldSetTruncatedString
-								self.name:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
-								self.name.SetTruncatedString=NewSetTruncatedString
-							end
+		if not self.OldRefresh then
+			self.OldRefresh=self.Refresh
+			function self.Refresh(self,...)
+				self:OldRefresh(...)
+				if not self.name then return end
+				if self.button and self.button.image then
+					self.button.image:SetScale(.60, .7)
+				end
+				if self.bg and self.bg.light_box then
+					self.bg.light_box:SetPosition(30, -42)
+				end
+				
+				
+				if (self.skins_options ~= nil and #self.skins_options == 1) or not self.skins_options then
+					self.contents:SetPosition(-75,-20,0)
+					self.name:SetPosition(320, 157, 0)
+					self.button:SetPosition(320, -95, 0)
+					self.teaser:SetPosition(320, -90, 0)
+				else
+					self.name:SetPosition(320, 182, 0)
+				end
+				if not self.name.OldSetTruncatedString then
+					self.name.OldSetTruncatedString = self.name.SetTruncatedString
+					if self.name.OldSetTruncatedString then
+						local function NewSetTruncatedString (self1,str, maxwidth, maxcharsperline, ellipses)
+							maxcharsperline = 17
+							maxwidth = maxwidth + 30
+							local maxlines = 2
+							self.name.SetTruncatedString=self.name.OldSetTruncatedString
+							self.name:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
 							self.name.SetTruncatedString=NewSetTruncatedString
 						end
+						self.name.SetTruncatedString=NewSetTruncatedString
 					end
-					if self.desc then
-						self.desc:SetSize(28)
-						self.desc:SetRegionSize(64*3+30,130)
-						if not self.desc.OldSetMultilineTruncatedString then
-							self.desc.OldSetMultilineTruncatedString = self.desc.SetMultilineTruncatedString
-							if self.desc.OldSetMultilineTruncatedString then
-								self.desc.SetMultilineTruncatedString=function(self1,str, maxlines, maxwidth, maxcharsperline, ellipses)
-									maxcharsperline = 24
-									maxlines = 3
-									self.desc.OldSetMultilineTruncatedString(self1,str, maxlines, maxwidth, maxcharsperline, ellipses)
-								end
+				end
+				if self.desc then
+					self.desc:SetSize(28)
+					self.desc:SetRegionSize(64*3+30,130)
+					if not self.desc.OldSetMultilineTruncatedString then
+						self.desc.OldSetMultilineTruncatedString = self.desc.SetMultilineTruncatedString
+						if self.desc.OldSetMultilineTruncatedString then
+							self.desc.SetMultilineTruncatedString=function(self1,str, maxlines, maxwidth, maxcharsperline, ellipses)
+								maxcharsperline = 24
+								maxlines = 3
+								self.desc.OldSetMultilineTruncatedString(self1,str, maxlines, maxwidth, maxcharsperline, ellipses)
 							end
 						end
 					end
-
 				end
+
 			end
 		end
-	end)
+	end
+end)
+
+AddClassPostConstruct("widgets/quagmire_recipepopup", function(self) --Для горга то же самое
+	local _Refresh = self.Refresh or function(...) end
 	
-	AddClassPostConstruct("widgets/quagmire_recipepopup", function(self) --Для горга то же самое
-		local _Refresh = self.Refresh or function(...) end
+	function self:Refresh(...)
+		_Refresh(self, ...)
 		
-		function self:Refresh(...)
-			_Refresh(self, ...)
-			
-			if self.desc then
-				self.desc:SetSize(28)
-				--Перезаписмываем строку
-				self.desc:SetString("")
-				self.desc:SetMultilineTruncatedString(STRINGS.RECIPE_DESC[string.upper(self.recipe.product) or "ERROR!"], 2, 320, nil, true)
-			end
+		if self.desc then
+			self.desc:SetSize(28)
+			--Перезаписмываем строку
+			self.desc:SetString("")
+			self.desc:SetMultilineTruncatedString(STRINGS.RECIPE_DESC[string.upper(self.recipe.product) or "ERROR!"], 2, 320, nil, true)
 		end
-	end)
+	end
+end)
 
-	--Зашифрованные строки загружаются после модов, поэтому сделал такой вот хак
-	--[[
-	AddClassPostConstruct("widgets/redux/quagmire_recipebook", function(self)
-		for i,v in pairs(STRINGS.NAMES) do
-			if type(i)=="string" and string.find(i, "QUAGMIRE_FOOD_") then
-				local key=i
-				local val=v
-				local fullkey = "STRINGS.NAMES."..key
-				if t.PO[fullkey] then
-					t.PO[fullkey] = ExtractMeta(t.PO[fullkey], key)
-				end
-				t.SpeechHashTbl.NAMES.Eng2Key[val] = key
-				t.SpeechHashTbl.NAMES.Rus2Eng[t.PO[fullkey] or val] = val
-
-				STRINGS.NAMES[i]=t.PO["STRINGS.NAMES."..i]
-			end
-		end
-	end)
-	AddPrefabPostInitAny(function(inst)
-		if string.find(inst.prefab,'quagmire_food_') then
-			local key=string.upper(inst.prefab)
-			local val=STRINGS.NAMES[string.upper(inst.prefab)]
+--Зашифрованные строки загружаются после модов, поэтому сделал такой вот хак
+--[[
+AddClassPostConstruct("widgets/redux/quagmire_recipebook", function(self)
+	for i,v in pairs(STRINGS.NAMES) do
+		if type(i)=="string" and string.find(i, "QUAGMIRE_FOOD_") then
+			local key=i
+			local val=v
 			local fullkey = "STRINGS.NAMES."..key
 			if t.PO[fullkey] then
 				t.PO[fullkey] = ExtractMeta(t.PO[fullkey], key)
 			end
-			if val and key and t.SpeechHashTbl.NAMES.Eng2Key then
-				t.SpeechHashTbl.NAMES.Eng2Key[val] = key
-				t.SpeechHashTbl.NAMES.Rus2Eng[t.PO[fullkey] or val] = val
-			
-			
-				STRINGS.NAMES[string.upper(inst.prefab)]=t.PO["STRINGS.NAMES."..string.upper(inst.prefab)]
-				inst.name = STRINGS.NAMES[string.upper(inst.prefab)]
+			t.SpeechHashTbl.NAMES.Eng2Key[val] = key
+			t.SpeechHashTbl.NAMES.Rus2Eng[t.PO[fullkey] or val] = val
+
+			STRINGS.NAMES[i]=t.PO["STRINGS.NAMES."..i]
+		end
+	end
+end)
+AddPrefabPostInitAny(function(inst)
+	if string.find(inst.prefab,'quagmire_food_') then
+		local key=string.upper(inst.prefab)
+		local val=STRINGS.NAMES[string.upper(inst.prefab)]
+		local fullkey = "STRINGS.NAMES."..key
+		if t.PO[fullkey] then
+			t.PO[fullkey] = ExtractMeta(t.PO[fullkey], key)
+		end
+		if val and key and t.SpeechHashTbl.NAMES.Eng2Key then
+			t.SpeechHashTbl.NAMES.Eng2Key[val] = key
+			t.SpeechHashTbl.NAMES.Rus2Eng[t.PO[fullkey] or val] = val
+		
+		
+			STRINGS.NAMES[string.upper(inst.prefab)]=t.PO["STRINGS.NAMES."..string.upper(inst.prefab)]
+			inst.name = STRINGS.NAMES[string.upper(inst.prefab)]
+		end
+	end
+end)]]
+
+--Перевод настроек приватности при создании сервера
+AddClassPostConstruct("screens/redux/cloudserversettingspopup", function(self)
+	PRIVACY_TYPE =
+	{
+		PUBLIC = 0,
+		FRIENDS = 1,
+		LOCAL = 2,
+		CLAN = 3,
+	}
+	local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
+	function self:RefreshPrivacyButtons()
+		oldRefreshPrivacyButtons(self)
+		for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
+			v.button.text:SetFont(NEWFONT)
+			v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
+		end  
+	end
+	if self.privacy_type and self.privacy_type.buttons and self.privacy_type.buttons.buttonwidgets then
+		for _,option in pairs(self.privacy_type.buttons.options) do
+			if option.data==PRIVACY_TYPE.PUBLIC then
+				option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.PUBLIC
+			end
+			if option.data==PRIVACY_TYPE.CLAN then
+				option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.CLAN
+			end
+		end 
+		for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
+			v.button.text:SetFont(NEWFONT)
+			v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
+		end   
+	end
+	self.privacy_type.buttons:UpdateButtons()
+end)
+
+AddClassPostConstruct("widgets/writeablewidget", function(self)
+	if self.menu and self.menu.items then
+		local translations={["Cancel"]="Отмена",["Random"]="Случайно",["Write it!"]="Написать!"}
+		for i,v in pairs(self.menu.items) do
+			if v.text and translations[v.text:GetString()] then
+				v.text:SetString(translations[v.text:GetString()])
 			end
 		end
-	end)]]
+	end
+end)
 
-	--Перевод настроек приватности при создании сервера
-	AddClassPostConstruct("screens/redux/cloudserversettingspopup", function(self)
-		PRIVACY_TYPE =
-		{
-		    PUBLIC = 0,
-		    FRIENDS = 1,
-		    LOCAL = 2,
-		    CLAN = 3,
-		}
-		local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
-		function self:RefreshPrivacyButtons()
-			oldRefreshPrivacyButtons(self)
-			for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
-				v.button.text:SetFont(NEWFONT)
-				v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
-			end  
-		end
-		if self.privacy_type and self.privacy_type.buttons and self.privacy_type.buttons.buttonwidgets then
-			for _,option in pairs(self.privacy_type.buttons.options) do
-				if option.data==PRIVACY_TYPE.PUBLIC then
-					option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.PUBLIC
-				end
-				if option.data==PRIVACY_TYPE.CLAN then
-					option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.CLAN
-				end
-			end 
-			for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
-				v.button.text:SetFont(NEWFONT)
-				v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
-			end   
-		end
-		self.privacy_type.buttons:UpdateButtons()
-	end)
-
-	AddClassPostConstruct("widgets/writeablewidget", function(self)
-		if self.menu and self.menu.items then
-			local translations={["Cancel"]="Отмена",["Random"]="Случайно",["Write it!"]="Написать!"}
-			for i,v in pairs(self.menu.items) do
-				if v.text and translations[v.text:GetString()] then
-					v.text:SetString(translations[v.text:GetString()])
+--сочетаем слово "День" с количеством дней
+AddClassPostConstruct("widgets/truescrolllist", function(self) 
+	local oldupdate_fn=self.update_fn
+	self.update_fn=function(context, widget, data, index)
+		oldupdate_fn(context, widget, data, index)
+		if widget.opt_spinner and widget.opt_spinner.spinner.options then
+			if data and data.option and data.option.image then
+				local list={["day.tex"]=1,
+					["season.tex"]=1,
+					["season_start.tex"]=1,
+					["world_size.tex"]=1,
+					["world_branching.tex"]=1,
+					["world_loop.tex"]=1,
+					["world_map.tex"]=1,
+					["world_start.tex"]=1,
+					["starting_variety.tex"]=1,
+					["winter.tex"]=1,
+					["summer.tex"]=1,
+					["autumn.tex"]=1,
+					["spring.tex"]=1}
+				if list[data.option.image] then
+					widget.opt_spinner.image:SetTexture("images/rus_mapgen.xml", "rus_"..data.option.image)
+					widget.opt_spinner.image:SetSize(70,70)
 				end
 			end
 		end
-	end)
-
-	--сочетаем слово "День" с количеством дней
-	AddClassPostConstruct("widgets/truescrolllist", function(self) 
-		local oldupdate_fn=self.update_fn
-		self.update_fn=function(context, widget, data, index)
-			oldupdate_fn(context, widget, data, index)
-			if widget.opt_spinner and widget.opt_spinner.spinner.options then
-				if data and data.option and data.option.image then
-					local list={["day.tex"]=1,
-						["season.tex"]=1,
-						["season_start.tex"]=1,
-						["world_size.tex"]=1,
-						["world_branching.tex"]=1,
-						["world_loop.tex"]=1,
-						["world_map.tex"]=1,
-						["world_start.tex"]=1,
-						["starting_variety.tex"]=1,
-						["winter.tex"]=1,
-						["summer.tex"]=1,
-						["autumn.tex"]=1,
-						["spring.tex"]=1}
-					if list[data.option.image] then
-						widget.opt_spinner.image:SetTexture("images/rus_mapgen.xml", "rus_"..data.option.image)
-						widget.opt_spinner.image:SetSize(70,70)
+		if data and data.item_type and widget.text then
+			local x, y = widget.text:GetRegionSize()
+			widget.text:SetRegionSize(x+30, y+20)
+		end
+		if data and data.days_survived and widget.DAYS_LIVED then
+			local Text = require "widgets/text"
+			widget.DAYS_LIVED:SetTruncatedString((data.days_survived or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(data.days_survived), widget.DAYS_LIVED._align.maxwidth, widget.DAYS_LIVED._align.maxchars, true)
+		end
+		if data and data.playerage and widget.PLAYER_AGE then
+			local Text = require "widgets/text"
+			local age_str = (data.playerage or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(tonumber(data.playerage))
+			widget.PLAYER_AGE:SetTruncatedString(age_str, widget.PLAYER_AGE._align.maxwidth, widget.PLAYER_AGE._align.maxchars, true)
+			if widget.SEEN_DATE and not widget.SEEN_DATE.RLPFixed then
+				local OldSetString = widget.SEEN_DATE.SetString
+				if OldSetString then
+					local months = {Jan="Янв.",Feb="Февр.",Mar="Март",Apr="Апр.",May="Мая",Jun="Июня",Jul="Июля",Aug="Авг.",Sept="Сент.",Oct="Окт.",Nov="Нояб.",Dec="Дек."}
+					function widget.SEEN_DATE:SetString(s, ...)
+						s = s:gsub("(.-) (%d-), (%d-)",function(m, d, y)
+							if not months[m] then return end
+							return d.." "..months[m].." "..y
+						end) or s
+						local res = OldSetString(self, s, ...)
+						return res
 					end
-				end
-			end
-			if data and data.item_type and widget.text then
-				local x, y = widget.text:GetRegionSize()
-				widget.text:SetRegionSize(x+30, y+20)
-			end
-			if data and data.days_survived and widget.DAYS_LIVED then
-				local Text = require "widgets/text"
-				widget.DAYS_LIVED:SetTruncatedString((data.days_survived or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(data.days_survived), widget.DAYS_LIVED._align.maxwidth, widget.DAYS_LIVED._align.maxchars, true)
-			end
-			if data and data.playerage and widget.PLAYER_AGE then
-				local Text = require "widgets/text"
-				local age_str = (data.playerage or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(tonumber(data.playerage))
-				widget.PLAYER_AGE:SetTruncatedString(age_str, widget.PLAYER_AGE._align.maxwidth, widget.PLAYER_AGE._align.maxchars, true)
-				if widget.SEEN_DATE and not widget.SEEN_DATE.RLPFixed then
-					local OldSetString = widget.SEEN_DATE.SetString
-					if OldSetString then
-						local months = {Jan="Янв.",Feb="Февр.",Mar="Март",Apr="Апр.",May="Мая",Jun="Июня",Jul="Июля",Aug="Авг.",Sept="Сент.",Oct="Окт.",Nov="Нояб.",Dec="Дек."}
-						function widget.SEEN_DATE:SetString(s, ...)
-							s = s:gsub("(.-) (%d-), (%d-)",function(m, d, y)
-								if not months[m] then return end
-								return d.." "..months[m].." "..y
-							end) or s
-							local res = OldSetString(self, s, ...)
-							return res
-						end
-						widget.SEEN_DATE.RLPFixed = true
-						widget.SEEN_DATE:SetString(widget.SEEN_DATE:GetString())
-					end
+					widget.SEEN_DATE.RLPFixed = true
+					widget.SEEN_DATE:SetString(widget.SEEN_DATE:GetString())
 				end
 			end
 		end
-	end)
-
-	--Комплекс из двух подмен для того, чобы названия серверов слева в окне создания сервера были поменьше
-	--Грязный хак, подменяем то, что, как нам кажется, будет только в ServerCreationScreen:MakeSaveSlotButton
-	--Это нужно, чтобы строка оканчивалась тремя точками попозже, ведь шрифт будет поменьше
-	if FrontEnd and FrontEnd.GetTruncatedString then
-		local OldGetTruncatedString = FrontEnd.GetTruncatedString
-		function FrontEnd:GetTruncatedString(str, font, size, maxwidth, maxchars, suffix, ...)
-			if font==NEWFONT and size==35 and maxwidth==140 and not maxchars and suffix then
-				size = 28 --Надеюсь, это произойдёт только в ServerCreationScreen:MakeSaveSlotButton
-			end
-			local res = OldGetTruncatedString(self, str, font, size, maxwidth, maxchars, suffix, ...)
-			return res
-		end
 	end
-	
-	--Меняем меню создания сервера, чтоб текст не вылазил за кнопку
-	local function ServerCreationScreenPost(self)
-		local oldSetString=self.day_title and self.day_title.SetString
-		if oldSetString then
-			function self.day_title:SetString(str)
-				if str:find("Лето")~=nil then
-					if str:find("Ранняя")~=nil then
-						str=str:gsub("Ранняя","Раннее")
-					elseif str:find("Поздняя")~=nil then
-						str=str:gsub("Поздняя","Позднее")
-					end
+end)
+
+--Комплекс из двух подмен для того, чобы названия серверов слева в окне создания сервера были поменьше
+--Грязный хак, подменяем то, что, как нам кажется, будет только в ServerCreationScreen:MakeSaveSlotButton
+--Это нужно, чтобы строка оканчивалась тремя точками попозже, ведь шрифт будет поменьше
+if FrontEnd and FrontEnd.GetTruncatedString then
+	local OldGetTruncatedString = FrontEnd.GetTruncatedString
+	function FrontEnd:GetTruncatedString(str, font, size, maxwidth, maxchars, suffix, ...)
+		if font==NEWFONT and size==35 and maxwidth==140 and not maxchars and suffix then
+			size = 28 --Надеюсь, это произойдёт только в ServerCreationScreen:MakeSaveSlotButton
+		end
+		local res = OldGetTruncatedString(self, str, font, size, maxwidth, maxchars, suffix, ...)
+		return res
+	end
+end
+
+--Меняем меню создания сервера, чтоб текст не вылазил за кнопку
+local function ServerCreationScreenPost(self)
+	local oldSetString=self.day_title and self.day_title.SetString
+	if oldSetString then
+		function self.day_title:SetString(str)
+			if str:find("Лето")~=nil then
+				if str:find("Ранняя")~=nil then
+					str=str:gsub("Ранняя","Раннее")
+				elseif str:find("Поздняя")~=nil then
+					str=str:gsub("Поздняя","Позднее")
 				end
-				oldSetString(self,str)
 			end
-		end
-		
-		if self.day_title then
-			self.day_title:SetString(self.day_title:GetString())
-		end
-		
-		local _OnUpdate_Old = self.OnUpdate or (function() return end)
-		function self:OnUpdate(...)
-			_OnUpdate_Old(self, ...)
-			
-			if self.create_button.text then
-				self.create_button.text:SetSize(35)
-			end
+			oldSetString(self,str)
 		end
 	end
 	
-	--AddClassPostConstruct("screens/servercreationscreen", ServerCreationScreenPost)
-	AddClassPostConstruct("screens/redux/servercreationscreen", ServerCreationScreenPost)
-
-	--Слетали шрифты у кнопок выбора в первом слоте
-	local function serversettingstabpost(self)
-		for i,wgt in ipairs(self.privacy_type.buttons.buttonwidgets) do 
-			wgt.button:SetFont(NEWFONT)
-		end
-	end
-	AddClassPostConstruct("widgets/serversettingstab", serversettingstabpost)
-	--Клей отрубили подгрузку шрифтов, поэтому подменяем шрифты в попапах
-	local function PopUpdialogPost(self)
-		if self.title then
-			self.title:SetFont(HEADERFONT)
-		end
-		
-		if self.text then
-			self.text:SetFont(CHATFONT)
-		end
-
-		if self.title and self.title.string==STRINGS.UI.MODSSCREEN.UPDATEALL_TITLE then
-			self:SetTitleTextSize(27)
-		end
-
-		if self.title and self.title.string==STRINGS.UI.MODSSCREEN.CLEANALL_TITLE then
-			self:SetTitleTextSize(27)
-		end
+	if self.day_title then
+		self.day_title:SetString(self.day_title:GetString())
 	end
 	
-	AddClassPostConstruct("screens/popupdialog", PopUpdialogPost)
-	AddClassPostConstruct("screens/redux/popupdialog", PopUpdialogPost)
-	
-	--Тут не переводилось, так что фиксим
-	AddClassPostConstruct("screens/redux/optionsscreen", function(self)
-		local SPINNERS = {
-			"fullscreenSpinner",
-			"displaySpinner",
-			"refreshRateSpinner",
-			"netbookModeSpinner",
-			"smallTexturesSpinner",
-			"bloomSpinner",
-			"distortionSpinner",
-			"screenshakeSpinner",
-			"vibrationSpinner",
-			"passwordSpinner",
-			"wathgrithrfontSpinner",
-			"automodsSpinner",
-		}
+	local _OnUpdate_Old = self.OnUpdate or (function() return end)
+	function self:OnUpdate(...)
+		_OnUpdate_Old(self, ...)
 		
-		for _,v in pairs(SPINNERS) do
-			--Небольшая проверка. Мы же не хотим крашей
-			if not self[v] then
-				return
-			end
-			
-			local text = self[v]:GetSelectedText()
-			if text == nil or type(text) ~= "string" then
-				t.print("ERROR! text == nil or type(text) ~= \"string\"")
-				return
-			end
-			
-			if text == "Disabled" then
-				self[v].text:SetString("Выключено")
-			elseif text == "Enabled" then
-				self[v].text:SetString("Включено")
-			end
-			
-			local enableDisableOptions = { { text = "Выключено", data = false }, { text = "Включено", data = true } }
-			self[v].options = enableDisableOptions
+		if self.create_button.text then
+			self.create_button.text:SetSize(35)
 		end
-		--Та же картина
-		if self.title ~= nil then
-			self.title.big:SetString("Настройки игры")
-		end
-	end)
+	end
+end
+
+--AddClassPostConstruct("screens/servercreationscreen", ServerCreationScreenPost)
+AddClassPostConstruct("screens/redux/servercreationscreen", ServerCreationScreenPost)
+
+--Слетали шрифты у кнопок выбора в первом слоте
+local function serversettingstabpost(self)
+	for i,wgt in ipairs(self.privacy_type.buttons.buttonwidgets) do 
+		wgt.button:SetFont(NEWFONT)
+	end
+end
+AddClassPostConstruct("widgets/serversettingstab", serversettingstabpost)
+--Клей отрубили подгрузку шрифтов, поэтому подменяем шрифты в попапах
+local function PopUpdialogPost(self)
+	if self.title then
+		self.title:SetFont(HEADERFONT)
+	end
 	
-	--Не переводится т.к. таблица создаётся до загрузки модов.
-	AddClassPostConstruct("screens/redux/hostcloudserverpopup", function(self)
-		local phases =
-		{
-			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_GETTINGREGIONS"],         -- eRequestingPingServers,
-			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_DETERMININGREGION"],      -- eWaitingForPingEndpoints,
-			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_DETERMININGREGION"],      -- eReadyToPing,
-			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_REQUESTINGSERVER"],       -- eWaitingForPingResults,
-			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_REQUESTINGSERVER"],       -- eReadyToRequestServer,
-			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_WAITINGFORWORLD"],        -- eWaitingForServer,
-			t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_CONNECTINGTOSERVER"],     -- eServerReady,
-		}
-		
-		local _OnUpdate = self.OnUpdate or function(...) end
-		function self:OnUpdate(dt)
-			_OnUpdate(self, dt)
-			
-			local cloudServerRequestState = TheNet:GetCloudServerRequestState() or 0
-			
-			if cloudServerRequestState >= 8 then return end
-			
-			self.status_msg:SetString("")
-			self.status_msg:SetString(phases[cloudServerRequestState] or "")
-		end
-	end)
+	if self.text then
+		self.text:SetFont(CHATFONT)
+	end
+
+	if self.title and self.title.string==STRINGS.UI.MODSSCREEN.UPDATEALL_TITLE then
+		self:SetTitleTextSize(27)
+	end
+
+	if self.title and self.title.string==STRINGS.UI.MODSSCREEN.CLEANALL_TITLE then
+		self:SetTitleTextSize(27)
+	end
+end
+
+AddClassPostConstruct("screens/popupdialog", PopUpdialogPost)
+AddClassPostConstruct("screens/redux/popupdialog", PopUpdialogPost)
+
+--Тут не переводилось, так что фиксим
+AddClassPostConstruct("screens/redux/optionsscreen", function(self)
+	local SPINNERS = {
+		"fullscreenSpinner",
+		"displaySpinner",
+		"refreshRateSpinner",
+		"netbookModeSpinner",
+		"smallTexturesSpinner",
+		"bloomSpinner",
+		"distortionSpinner",
+		"screenshakeSpinner",
+		"vibrationSpinner",
+		"passwordSpinner",
+		"wathgrithrfontSpinner",
+		"automodsSpinner",
+	}
 	
-	--"Достать печь"
-	--ACTIONS
-	
-	--No warning about mods in events
-	AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self)
-		if mods.disabled_event_warning then
+	for _,v in pairs(SPINNERS) do
+		--Небольшая проверка. Мы же не хотим крашей
+		if not self[v] then
 			return
 		end
 		
-		local TheFrontEnd = TheFrontEnd
-		local PopupDialogScreen = require "screens/redux/popupdialog"
-		
-		--I don't know how to get it from here, so just replacing it
-		function self:OnFestivalEventButton()
-			if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
-				TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_TITLE, STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_BODY[WORLD_FESTIVAL_EVENT], 
-					{
-						{text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
-								SimReset()
-							end},
-						{text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_BACK, cb=function() TheFrontEnd:PopScreen() end },
-					}))
-			else
-				self:_GoToFestfivalEventScreen()
-			end
+		local text = self[v]:GetSelectedText()
+		if text == nil or type(text) ~= "string" then
+			t.print("ERROR! text == nil or type(text) ~= \"string\"")
+			return
 		end
 		
-		mods.disabled_event_warning = true
-	end)
-	
-	local pugna_sayings = {
-		["Ha!"] = "Ха!",
-		["You are unworthy."] = "Вы недостойны.",
-		["You never stood a chance."] = "У вас не было и шанса.",
-		["Ha ha!"] = "Ха ха!",
-		["Weak."] = "Слабаки.",
-		["We are stronger."] = "Мы сильнее.",
-		["Well struck!"] = "Хороший удар!",
-		["At last, our realm returns to glory!"] = "Наконец, наше царство обретёт славу!",
-		["Warriors, rekindle the Gateway..."] = "Воины, пробудите Врата...",
-		["Today we take the Throne!"] = "Сегодня мы захватим Трон!",
-		["It's good to have a challenge once again!"] = "Хорошо принять вызов снова!",
-		["This should be fun."] = "Это должно быть весело.",
-		["More pigs! Overwhelm them!"] = "Больше! Сокрушите их!",
-		["More pigs!"] = "Больше свиней!",
-		["What have we here?"] = "Что у нас здесь?",
-		["Gatekeepers? Ha! Have you come to return us to the Throne?"] = "Хранители Врат? Ха! Вы пришли, чтобы вернуть нас к Трону?",
-		["I am Battlemaster Pugna, and I protect what is mine."] = "Я - Военачальник Пугна, и я защищаю то, что принадлежит мне.",
-		["Warriors. Release the pigs!"] = "Воины. Выпускайте свиней!",
-		["For the Forge!"] = "За Кузню!",
-		["Give the Gatekeepers no quarter!"] = "Не дайте Хранителям Врат и четвертака!",
-		["Fly your banners proudly, warriors!"] = "Пусть ваши знамёна реют гордо, воины!",
-		["Impressive. You handled our foot soldiers with ease."] = "Впечатляет. Вы легко справились с нашими пехотинцами.",
-		["But our battalions are trained to work together."] = "Но наши батальоны натренированы работать вместе.",
-		["Can you do the same? Crocommanders, to the ring!"] = "Сможете ли вы сделать то же самое? Крокомандиры, на ринг!",
-		["We've endured more here than you know."] = "Мы вынесли здесь больше, чем вы можете представить.",
-		["And as forging fires temper steel,"] = "И как огонь горна закаляет сталь,",
-		["Hardship has only made us stronger."] = "Так и трудности только сделали нас сильнее.",
-		["Now, Snortoises. Attack!"] = "А теперь, Бронепахи. Атакуйте!",
-		["End this now my warriors!"] = "Покончите с этим сейчас же, мои воины!",
-		["We... cannot lose the Forge..."] = "Мы... не можем потерять Кузню...",
-		["No! How can this be?!"] = "Нет! Как такое может быть?!",
-		["You have defeated the mighty Boarilla!"] = "Вы победили могучую Бориллу!",
-		["You may have won the battle, Gatekeepers... but not the war!"] = "Возможно вы выиграли битву, Хранители Врат... но не войну!",
-		["...Do you understand the forces you serve?"] = "...Вы понимаете силы, которым вы служите?",
-		["They destroy all They touch..."] = "Они уничтожают всё, к чему прикасаются...",
-		["We were severed from the Throne, trapped in a realm of stone and fire!"] = "Мы были отделены от Трона, захваченного царством камня и огня!",
-		["That is why we cannot let you win."] = "Поэтому мы не можем позволить вам победить.",
-		["Send in the Boarilla."] = "Послать Бориллу.",
-		["Grand Forge Boarrior!"] = "Великий Боров-воин Кузни!",
-		["The ring is yours! Destroy them, my champion!"] = "Ринг твой! Уничтожь их, мой чемпион!",
-		["The Gatekeepers must not take the Forge!"] = "Хранители Врат не должны захватить Кузню!",
-		["Drive the interlopers back!"] = "Верните нарушителей обратно!",
-		["Do not hold back! Kill them!"] = "Не отступать! Убейте их!",
-		["Why are the Gatekeepers still not dead?!"] = "Почему Хранители Врат все ещё живы?!",
-		["Destroy them!!"] = "Уничтожьте их!!",
-		["We will not live in the Throne's shadow!"] = "Мы не будем жить в тени Трона!",
-		["What?! My champion!?!"] = "Что?! Мой чемпион!?!",
-		["I see. You've demonstrated your might."] = "Я вижу. Вы показали своё могущество.",
-		["...But we will live to fight again!!"] = "...Но мы будем жить, чтобы снова сражаться!!",
-		["Know this, Gatekeepers:"] = "Запомните вот что, Хранители Врат:",
-		["Once you are dead, we will activate the Gateway."] = "Как только вы умрёте, мы активируем Врата.",
-		["We'll return to the hub and destroy the Throne."] = "Мы вернёмся и уничтожим Трон.",
-		["We will end this, once and for all."] = "Мы покончим с этим раз и навсегда.",
-		["You have won the battle,"] = "Вы выиграли битву,",
-		["But the war rages on eternally."] = "Но война продолжается вечно.",
-		["We are not ready to give up yet."] = "Мы ещё не готовы сдаться.",
-		["We do not fear you."] = "Мы не боимся вас.",
-		["But you will fear us!"] = "Но вы будете бояться нас!",
-		["Fear my new champions! Fear the Rhinocebros!"] = "На колени перед моими новыми чемпионами! Бойтесь Нособуров!",
-		["No! My Forge, felled by the Throne's lapdogs!"] = "Нет! Моя кузня пала от лап шавок Трона!",
-		["Please. No more, Gatekeepers. We surrender."] = "Прошу. Довольно, Хранители Врат. Мы сдаёмся.",
-		["The day is yours, as is the Gateway."] = "День ваш, как и Врата.",
-		["You have had many victories, Gatekeepers..."] = "У вас было много побед, Хранители Врат...",
-		["...but from our dungeons comes our most brutal warrior."] = "...но из подземелий выходит наш самый жестокий воин.",
-		["Behold: The Infernal Swineclops!"] = "Бойтесь! Инфернальный Свиноклоп!",
+		if text == "Disabled" then
+			self[v].text:SetString("Выключено")
+		elseif text == "Enabled" then
+			self[v].text:SetString("Включено")
+		end
+		
+		local enableDisableOptions = { { text = "Выключено", data = false }, { text = "Включено", data = true } }
+		self[v].options = enableDisableOptions
+	end
+	--Та же картина
+	if self.title ~= nil then
+		self.title.big:SetString("Настройки игры")
+	end
+end)
+
+--Не переводится т.к. таблица создаётся до загрузки модов.
+AddClassPostConstruct("screens/redux/hostcloudserverpopup", function(self)
+	local phases =
+	{
+		t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_GETTINGREGIONS"],         -- eRequestingPingServers,
+		t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_DETERMININGREGION"],      -- eWaitingForPingEndpoints,
+		t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_DETERMININGREGION"],      -- eReadyToPing,
+		t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_REQUESTINGSERVER"],       -- eWaitingForPingResults,
+		t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_REQUESTINGSERVER"],       -- eReadyToRequestServer,
+		t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_WAITINGFORWORLD"],        -- eWaitingForServer,
+		t.PO["STRINGS.UI.FESTIVALEVENTSCREEN.HOST_CONNECTINGTOSERVER"],     -- eServerReady,
 	}
 	
-	AddPrefabPostInit("lavaarena_boarlord", function(inst)
-		local _ontalkfn = inst.components.talker.ontalkfn
-		local function OnTalk(inst, data)
-			_ontalkfn(inst, data)
-			if data ~= nil and data.message ~= nil and inst.speechroot then
-				if pugna_sayings[data.message] then
-					inst.speechroot.SetBoarloadSpeechString(pugna_sayings[data.message])
-				end
+	local _OnUpdate = self.OnUpdate or function(...) end
+	function self:OnUpdate(dt)
+		_OnUpdate(self, dt)
+		
+		local cloudServerRequestState = TheNet:GetCloudServerRequestState() or 0
+		
+		if cloudServerRequestState >= 8 then return end
+		
+		self.status_msg:SetString("")
+		self.status_msg:SetString(phases[cloudServerRequestState] or "")
+	end
+end)
+
+--"Достать печь"
+--ACTIONS
+
+--No warning about mods in events
+AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self)
+	if mods.disabled_event_warning then
+		return
+	end
+	
+	local TheFrontEnd = TheFrontEnd
+	local PopupDialogScreen = require "screens/redux/popupdialog"
+	
+	--I don't know how to get it from here, so just replacing it
+	function self:OnFestivalEventButton()
+		if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
+			TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_TITLE, STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_BODY[WORLD_FESTIVAL_EVENT], 
+				{
+					{text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
+							SimReset()
+						end},
+					{text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_BACK, cb=function() TheFrontEnd:PopScreen() end },
+				}))
+		else
+			self:_GoToFestfivalEventScreen()
+		end
+	end
+	
+	mods.disabled_event_warning = true
+end)
+
+local pugna_sayings = {
+	["Ha!"] = "Ха!",
+	["You are unworthy."] = "Вы недостойны.",
+	["You never stood a chance."] = "У вас не было и шанса.",
+	["Ha ha!"] = "Ха ха!",
+	["Weak."] = "Слабаки.",
+	["We are stronger."] = "Мы сильнее.",
+	["Well struck!"] = "Хороший удар!",
+	["At last, our realm returns to glory!"] = "Наконец, наше царство обретёт славу!",
+	["Warriors, rekindle the Gateway..."] = "Воины, пробудите Врата...",
+	["Today we take the Throne!"] = "Сегодня мы захватим Трон!",
+	["It's good to have a challenge once again!"] = "Хорошо принять вызов снова!",
+	["This should be fun."] = "Это должно быть весело.",
+	["More pigs! Overwhelm them!"] = "Больше! Сокрушите их!",
+	["More pigs!"] = "Больше свиней!",
+	["What have we here?"] = "Что у нас здесь?",
+	["Gatekeepers? Ha! Have you come to return us to the Throne?"] = "Хранители Врат? Ха! Вы пришли, чтобы вернуть нас к Трону?",
+	["I am Battlemaster Pugna, and I protect what is mine."] = "Я - Военачальник Пугна, и я защищаю то, что принадлежит мне.",
+	["Warriors. Release the pigs!"] = "Воины. Выпускайте свиней!",
+	["For the Forge!"] = "За Кузню!",
+	["Give the Gatekeepers no quarter!"] = "Не дайте Хранителям Врат и четвертака!",
+	["Fly your banners proudly, warriors!"] = "Пусть ваши знамёна реют гордо, воины!",
+	["Impressive. You handled our foot soldiers with ease."] = "Впечатляет. Вы легко справились с нашими пехотинцами.",
+	["But our battalions are trained to work together."] = "Но наши батальоны натренированы работать вместе.",
+	["Can you do the same? Crocommanders, to the ring!"] = "Сможете ли вы сделать то же самое? Крокомандиры, на ринг!",
+	["We've endured more here than you know."] = "Мы вынесли здесь больше, чем вы можете представить.",
+	["And as forging fires temper steel,"] = "И как огонь горна закаляет сталь,",
+	["Hardship has only made us stronger."] = "Так и трудности только сделали нас сильнее.",
+	["Now, Snortoises. Attack!"] = "А теперь, Бронепахи. Атакуйте!",
+	["End this now my warriors!"] = "Покончите с этим сейчас же, мои воины!",
+	["We... cannot lose the Forge..."] = "Мы... не можем потерять Кузню...",
+	["No! How can this be?!"] = "Нет! Как такое может быть?!",
+	["You have defeated the mighty Boarilla!"] = "Вы победили могучую Бориллу!",
+	["You may have won the battle, Gatekeepers... but not the war!"] = "Возможно вы выиграли битву, Хранители Врат... но не войну!",
+	["...Do you understand the forces you serve?"] = "...Вы понимаете силы, которым вы служите?",
+	["They destroy all They touch..."] = "Они уничтожают всё, к чему прикасаются...",
+	["We were severed from the Throne, trapped in a realm of stone and fire!"] = "Мы были отделены от Трона, захваченного царством камня и огня!",
+	["That is why we cannot let you win."] = "Поэтому мы не можем позволить вам победить.",
+	["Send in the Boarilla."] = "Послать Бориллу.",
+	["Grand Forge Boarrior!"] = "Великий Боров-воин Кузни!",
+	["The ring is yours! Destroy them, my champion!"] = "Ринг твой! Уничтожь их, мой чемпион!",
+	["The Gatekeepers must not take the Forge!"] = "Хранители Врат не должны захватить Кузню!",
+	["Drive the interlopers back!"] = "Верните нарушителей обратно!",
+	["Do not hold back! Kill them!"] = "Не отступать! Убейте их!",
+	["Why are the Gatekeepers still not dead?!"] = "Почему Хранители Врат все ещё живы?!",
+	["Destroy them!!"] = "Уничтожьте их!!",
+	["We will not live in the Throne's shadow!"] = "Мы не будем жить в тени Трона!",
+	["What?! My champion!?!"] = "Что?! Мой чемпион!?!",
+	["I see. You've demonstrated your might."] = "Я вижу. Вы показали своё могущество.",
+	["...But we will live to fight again!!"] = "...Но мы будем жить, чтобы снова сражаться!!",
+	["Know this, Gatekeepers:"] = "Запомните вот что, Хранители Врат:",
+	["Once you are dead, we will activate the Gateway."] = "Как только вы умрёте, мы активируем Врата.",
+	["We'll return to the hub and destroy the Throne."] = "Мы вернёмся и уничтожим Трон.",
+	["We will end this, once and for all."] = "Мы покончим с этим раз и навсегда.",
+	["You have won the battle,"] = "Вы выиграли битву,",
+	["But the war rages on eternally."] = "Но война продолжается вечно.",
+	["We are not ready to give up yet."] = "Мы ещё не готовы сдаться.",
+	["We do not fear you."] = "Мы не боимся вас.",
+	["But you will fear us!"] = "Но вы будете бояться нас!",
+	["Fear my new champions! Fear the Rhinocebros!"] = "На колени перед моими новыми чемпионами! Бойтесь Нособуров!",
+	["No! My Forge, felled by the Throne's lapdogs!"] = "Нет! Моя кузня пала от лап шавок Трона!",
+	["Please. No more, Gatekeepers. We surrender."] = "Прошу. Довольно, Хранители Врат. Мы сдаёмся.",
+	["The day is yours, as is the Gateway."] = "День ваш, как и Врата.",
+	["You have had many victories, Gatekeepers..."] = "У вас было много побед, Хранители Врат...",
+	["...but from our dungeons comes our most brutal warrior."] = "...но из подземелий выходит наш самый жестокий воин.",
+	["Behold: The Infernal Swineclops!"] = "Бойтесь! Инфернальный Свиноклоп!",
+}
+
+AddPrefabPostInit("lavaarena_boarlord", function(inst)
+	local _ontalkfn = inst.components.talker.ontalkfn
+	local function OnTalk(inst, data)
+		_ontalkfn(inst, data)
+		if data ~= nil and data.message ~= nil and inst.speechroot then
+			if pugna_sayings[data.message] then
+				inst.speechroot.SetBoarloadSpeechString(pugna_sayings[data.message])
 			end
 		end
-		
-		inst.components.talker.ontalkfn = OnTalk
-		inst.components.talker.donetalkingfn = OnTalk
-	end)
-	
-	env.AddClassPostConstruct("screens/redux/mainscreen", function(self)
-		self.presents_image:SetTexture("images/frontscreen_ru.xml", "kleipresents.tex")
-		self.legalese_image:SetTexture("images/frontscreen_ru.xml", "legalese.tex")
-	end)
-	
-	-- В картинке более красиво
-	env.AddClassPostConstruct("widgets/itemselector", function(self)
-		self.banner:SetTexture("images/tradescreen_ru.xml", "banner0_small.tex")
-		self.title:Hide()
-	end)
-
-	local function PatchTradeOverflowImg(file, override)
-		env.AddClassPostConstruct(file, function(self)
-			local name = override or "title"
-			self[name]:SetTexture("images/tradescreen_overflow_ru.xml", "TradeInnSign.tex")
-		end)
 	end
 	
-	PatchTradeOverflowImg("screens/tradescreen")
-	PatchTradeOverflowImg("screens/crowgamescreen")
-	PatchTradeOverflowImg("screens/snowbirdgamescreen")
-	
-	local Text = require "widgets/text"
-	local function AddUpdtStr(parent)
-		local self = Text(DEFAULTFONT, 20, nil, UICOLOURS.WHITE)
-		sel:SetClickable(false)
+	inst.components.talker.ontalkfn = OnTalk
+	inst.components.talker.donetalkingfn = OnTalk
+end)
 
-		parent:AddChild(self)
-		self:MoveToFront()
+env.AddClassPostConstruct("screens/redux/mainscreen", function(self)
+	self.presents_image:SetTexture("images/frontscreen_ru.xml", "kleipresents.tex")
+	self.legalese_image:SetTexture("images/frontscreen_ru.xml", "legalese.tex")
+end)
 
-		self:SetVAnchor(ANCHOR_TOP)
-		self:SetHAnchor(ANCHOR_RIGHT)
-		self:SetHAlign(ANCHOR_RIGHT)
+-- В картинке более красиво
+env.AddClassPostConstruct("widgets/itemselector", function(self)
+	self.banner:SetTexture("images/tradescreen_ru.xml", "banner0_small.tex")
+	self.title:Hide()
+end)
 
-		local SetString_Old = self.SetString or (function() end)
-
-		self.SetString = function (self, ...)
-			SetString_Old(self, ...)
-			local w, h = self:GetRegionSize()
-			self:SetPosition(-w / 2 - 5, -h / 2 - 5)
-		end
-
-		return self
-	end
-	
-	env.AddGamePostInit(function(test)
-		if not TheFrontEnd.updt_strt and not InGamePlay() and not TheRLPUpdater.disabled then
-			TheFrontEnd.updt_str = AddUpdtStr(TheFrontEnd.overlayroot)
-			TheRLPUpdater:StartUpdating(true)
-			TheFrontEnd.updt_str:SetString("Обновление перевода...")
-			TheGlobalInstance:ListenForEvent("rlp_updated", function(_, data)
-				TheFrontEnd.updt_str:SetString(data and"Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
-				TheGlobalInstance:DoTaskInTime(1, function() 
-					TheFrontEnd.updt_str:SetString("")
-				end)
-			end)
-		end
+local function PatchTradeOverflowImg(file, override)
+	env.AddClassPostConstruct(file, function(self)
+		local name = override or "title"
+		self[name]:SetTexture("images/tradescreen_overflow_ru.xml", "TradeInnSign.tex")
 	end)
 end
 
+PatchTradeOverflowImg("screens/tradescreen")
+PatchTradeOverflowImg("screens/crowgamescreen")
+PatchTradeOverflowImg("screens/snowbirdgamescreen")
+
+local Text = require "widgets/text"
+local function AddUpdtStr(parent)
+	local self = Text(DEFAULTFONT, 20, nil, UICOLOURS.WHITE)
+	sel:SetClickable(false)
+
+	parent:AddChild(self)
+	self:MoveToFront()
+
+	self:SetVAnchor(ANCHOR_TOP)
+	self:SetHAnchor(ANCHOR_RIGHT)
+	self:SetHAlign(ANCHOR_RIGHT)
+
+	local SetString_Old = self.SetString or (function() end)
+
+	self.SetString = function (self, ...)
+		SetString_Old(self, ...)
+		local w, h = self:GetRegionSize()
+		self:SetPosition(-w / 2 - 5, -h / 2 - 5)
+	end
+
+	return self
+end
+
+env.AddGamePostInit(function(test)		
+	TheFrontEnd.consoletext:SetFont(BODYTEXTFONT) --Нужно, чтобы шрифт в консоли не слетал
+	TheFrontEnd.consoletext:SetRegionSize(900, 404) --Чуть-чуть увеличил по вертикали, чтобы не обрезало буквы в нижней строке
+	if not TheFrontEnd.updt_strt and not InGamePlay() and not TheRLPUpdater.disabled then
+		TheFrontEnd.updt_str = AddUpdtStr(TheFrontEnd.overlayroot)
+		TheRLPUpdater:StartUpdating(true)
+		TheFrontEnd.updt_str:SetString("Обновление перевода...")
+		TheGlobalInstance:ListenForEvent("rlp_updated", function(_, data)
+			TheFrontEnd.updt_str:SetString(data and"Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
+			TheGlobalInstance:DoTaskInTime(1, function() 
+				TheFrontEnd.updt_str:SetString("")
+			end)
+		end)
+	end
+end)
+
 env.modimport("scripts/mod_translator.lua")
+
+--Ниже идут функции непосредственного склонения предметов и формирования названий
+-- выполняем если не "только чат" и не "интерфейс/чат" (т.е. если перевод полный)
+if t.CurrentTranslationType == t.TranslationTypes.InterfaceChat then
+	return
+end
+
+--Подменяем имена персонажей, создаваемых с консоли в игре.
+local OldSetPrefabName = EntityScript.SetPrefabName
+function EntityScript:SetPrefabName(name,...)
+	OldSetPrefabName(self,name,...)
+	if not self.entity:HasTag("player") then return end
+	self.name=t.SpeechHashTbl.NAMES.Rus2Eng[self.name] or self.name
+end
+
+
+
+local GetAdjectiveOld = EntityScript["GetAdjective"]
+--Новая версия функции, выдающей качество предмета
+function GetAdjectiveNew(self)
+	local str=GetAdjectiveOld(self)
+	if str and self.prefab then
+		local player=ThePlayer
+		local act=player.components.playercontroller:GetLeftMouseAction() --Получаем текущее действие
+		if act then act=act.action.id or "NOACTION" else act="NOACTION" end
+		str=FixPrefix(str,act,self.prefab) --склоняем окончание префикса
+		if act~="NOACTION" then --если есть действие, то нужно сделать с маленькой буквы
+			str=firsttolower(str)
+		end
+	end
+	return str
+end
+EntityScript["GetAdjective"]=GetAdjectiveNew --подменяем функцию, выводящую качества продуктов
+
+
+
+--Фикс для hoverer, передающий в GetDisplayName действие, если оно есть
+AddClassPostConstruct("widgets/hoverer", function(self)
+	if not self.OnUpdate then return end
+	local OldOnUpdate=self.OnUpdate
+	function self:OnUpdate(...)
+		local changed = false
+		local OldlmbtargetGetDisplayName
+		local lmb = self.owner and self.owner.components and self.owner.components.playercontroller and self.owner.components.playercontroller:GetLeftMouseAction()
+		if lmb and lmb.target and lmb.target.GetDisplayName then
+			changed = true
+			OldlmbtargetGetDisplayName = lmb.target.GetDisplayName
+			lmb.target.GetDisplayName = function(self)
+				return OldlmbtargetGetDisplayName(self, lmb)
+			end
+		end
+		OldOnUpdate(self, ...)
+		if changed then
+			lmb.target.GetDisplayName = OldlmbtargetGetDisplayName
+		end
+	end
+end)
+
+
+
+local GetDisplayNameOld=EntityScript.GetDisplayName --сохраняем старую функцию, выводящую название предмета
+function GetDisplayNameNew(self, act) --Подмена функции, выводящей название предмета. В ней реализовано склонение в зависимости от действия (переменная аct)
+
+	local name = GetDisplayNameOld(self)
+	local player = ThePlayer
+	
+--	if not player then return name end --Если не удалось получить instance игрока, то возвращаем имя на англ. и выходим
+	
+--	local act=player.components.playercontroller:GetLeftMouseAction() --Получаем текущее действие
+
+	if self:HasTag("player") then
+		if STRINGS.NAMES[self.prefab:upper()] then
+			--Пытаемся перевести имя на русский, если это кукла, а не игрок
+			if not(self.userid and (type(self.userid)=="string") and #self.userid>0)
+				and name==t.SpeechHashTbl.NAMES.Rus2Eng[STRINGS.NAMES[self.prefab:upper()] ] then
+				name=STRINGS.NAMES[t.SpeechHashTbl.NAMES.Eng2Key[name] ]
+				act=act and act.action.id or "DEFAULT"
+				name=(t.RussianNames[name] and (t.RussianNames[name][act] or t.RussianNames[name]["DEFAULTACTION"] or t.RussianNames[name]["DEFAULT"])) or rebuildname(name,act,self.prefab) or name
+			end
+		end
+		return name
+	end
+
+	local itisblueprint=false
+	if name:sub(-10)==" Blueprint" then --Особое исключительное написание для чертежей
+		name=name:sub(1,-11)
+		name=t.SpeechHashTbl.NAMES.Eng2Key[name] and STRINGS.NAMES[t.SpeechHashTbl.NAMES.Eng2Key[name]] or name
+		itisblueprint=true
+	end
+	--Проверим, есть ли префикс мокрости, засушенности или дымления
+	local Prefix=nil
+	if STRINGS.WET_PREFIX then
+		for i,v in pairs(STRINGS.WET_PREFIX) do
+			if type(v)=="string" and v~="" and string.sub(name,1,#v)==v then Prefix=v break end
+		end 
+		if string.sub(name,1,#STRINGS.WITHEREDITEM)==STRINGS.WITHEREDITEM then Prefix=STRINGS.WITHEREDITEM 
+		elseif string.sub(name,1,#STRINGS.SMOLDERINGITEM)==STRINGS.SMOLDERINGITEM then Prefix=STRINGS.SMOLDERINGITEM 
+		end
+		--Солим блюда правильно
+		local puresalt = STRINGS.NAMES.QUAGMIRE_SALTED_FOOD_FMT:utf8sub(1,7)
+		if string.sub(name,1,#puresalt)==puresalt then Prefix=puresalt end
+
+		if Prefix then --Нашли префикс. Меняем его и удаляем из имени для его дальнейшей корректной обработки
+			name=string.sub(name,#Prefix+2)--Убираем префикс из имени
+			if act then
+				Prefix=FixPrefix(Prefix,act.action and act.action.id or "NOACTION",self.prefab)
+				--Если есть действие, значит нужно сделать с маленькой буквы
+				Prefix=firsttolower(Prefix)
+			else 
+				Prefix=FixPrefix(Prefix,"NOACTION",self.prefab)
+				if self:GetAdjective() then
+					Prefix=firsttolower(Prefix)
+				end				
+			end
+		end
+	end
+	if name and self.prefab then --Для ДСТ нужно перевести имя свина или кролика на русский
+		if self.prefab=="pigman" then 
+			name=t.SpeechHashTbl.PIGNAMES.Eng2Rus[name] or name
+		elseif self.prefab=="pigguard" then 
+			name=t.SpeechHashTbl.PIGNAMES.Eng2Rus[name] or name
+		elseif self.prefab=="bunnyman" then 
+			name=t.SpeechHashTbl.BUNNYMANNAMES.Eng2Rus[name] or name
+		elseif self.prefab=="quagmire_swampig" then 
+			name=t.SpeechHashTbl.SWAMPIGNAMES.Eng2Rus[name] or name
+		end
+	end
+	if act then --Если есть действие
+		act=act.action.id
+
+		if not itisblueprint then
+			if t.RussianNames[name] then
+				name=t.RussianNames[name][act] or t.RussianNames[name]["DEFAULTACTION"] or t.RussianNames[name]["DEFAULT"] or rebuildname(name,act,self.prefab) or "NAME"
+			else
+				name=rebuildname(name,act,self.prefab)
+			end
+			if (not self.prefab or self.prefab~="pigman" and self.prefab~="pigguard" and self.prefab~="bunnyman" and self.prefab~="quagmire_trader_merm" and self.prefab~="quagmire_trader_merm2"  and self.prefab~="quagmire_swampigelder"  and self.prefab~="quagmire_goatmum" and self.prefab~="quagmire_goatkid" and self.prefab~="quagmire_swampig")
+			 and not t.ShouldBeCapped[self.prefab] and name and type(name)=="string" and #name>0 then
+				--меняем первый символ названия предмета в нижний регистр
+				name=firsttolower(name)
+			end
+		else name="чертёж предмета \""..name.."\"" end
+
+	else	--Если нет действия
+			if itisblueprint then name="Чертёж предмета \""..name.."\"" end
+		if not t.ShouldBeCapped[self.prefab] and (self:GetAdjective() or Prefix) then
+			name=firsttolower(name)
+		end
+	end
+	if Prefix then
+		name=Prefix.." "..name
+	end
+	if act and act=="SLEEPIN" and name then name="в "..name end --Особый случай для "спать в палатке" и "спать в навесе для сиесты"
+	return name
+end
+EntityScript.GetDisplayName=GetDisplayNameNew --подменяем на новую
+
+
+AddClassPostConstruct("components/playercontroller", function(self)
+	--Переопределяем функцию, выводящую "Создать ...", когда устанавливается на землю крафт-предмет типа палатки.
+	--В старой функции у Klei ошибка. Нужно заменить self.player_recipe на self.placer_recipe
+	local OldGetHoverTextOverride = self.GetHoverTextOverride
+	if OldGetHoverTextOverride then
+		function self:GetHoverTextOverride(...)
+			if self.placer_recipe then
+				local name = STRINGS.NAMES[string.upper(self.placer_recipe.name)]
+				local act = "BUILD"
+				if name then
+					if t.RussianNames[name] then
+						name = t.RussianNames[name][act] or t.RussianNames[name]["DEFAULTACTION"] or t.RussianNames[name]["DEFAULT"] or rebuildname(name,act) or STRINGS.UI.HUD.HERE
+					else
+						name = rebuildname(name,act) or STRINGS.UI.HUD.HERE
+					end
+				else
+					name = STRINGS.UI.HUD.HERE
+				end
+				if not t.ShouldBeCapped[self.placer_recipe.name] and name and type(name)=="string" and #name>0 then
+					--меняем первый символ названия предмета в нижний регистр
+					name = firsttolower(name)
+				end
+				return STRINGS.UI.HUD.BUILD.. " " .. name
+--				local res = OldGetHoverTextOverride(self, ...) 	
+--				return res
+			end
+		end
+	end
+end)
