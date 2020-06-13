@@ -7,9 +7,9 @@ local MODROOT = env.MODROOT
 
 GLOBAL.setfenv(1, GLOBAL)
 
--- local VerChecker = require "ver_checker"
--- t.VerChecker = VerChecker
--- VerChecker:GetData()
+local VerChecker = require "ver_checker"
+t.VerChecker = VerChecker
+VerChecker:LoadVersion()
 
 POUpdater = require "po_updater"
 
@@ -255,13 +255,14 @@ AddClassPostConstruct("screens/chatinputscreen", function(self)
 	end
 end)
 
---Кнопка настойки в главном меню
 do
 	local TEMPLATES = require "widgets/redux/templates"
 	local LanguageOptions = require "screens/LanguageOptions"
+	local UpdateChecker = require "widgets/update_checker"
 
 	AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self, ...)
-		if self.rlp_settings == nil then
+		--Кнопка настойки в главном меню
+		if not self.rlp_settings then
 			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/rus_button_icon.xml", "rus_button_icon.tex", "RLP", false, true, function() 
 				TheFrontEnd:GetSound():KillSound("FEMusic")
 				TheFrontEnd:GetSound():KillSound("FEPortalSFX")
@@ -273,6 +274,11 @@ do
 			local _pos = self.submenu:GetPosition()
 			self.submenu:SetPosition(_pos.x - 50, _pos.y)
 		end
+		
+		-- Проверка версии
+		self.rlp_update_checker = self.fixed_root:AddChild(UpdateChecker())
+		self.rlp_update_checker:SetScale(.7)
+		self.rlp_update_checker:SetPosition(500, -100)
 	end)
 end
 

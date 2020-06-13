@@ -12,7 +12,7 @@ function VerChecker:LoadVersion(fn)
 		end
 		
 		local anim = (result:match("version = [%S]+"))
-		self.data = anim and (anim:gsub("version = ", ""))
+		self.data = anim and (anim:gsub("version = ", "")):sub(2, -2)
 		
 		if fn then
 			fn(self.data)
