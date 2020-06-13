@@ -1936,126 +1936,47 @@ if t.CurrentTranslationType ~= mods.RussianLanguagePack.TranslationTypes.ChatOnl
 			end
 		end
 	end
-
-	local function HookUpImage(img, DefaultAtlasPath, NewAtlasPath, ListToChange)
-		if not img then return end
-		local OldSetTexture = img.SetTexture
-		function img.SetTexture(self, atlas, tex, default_tex, ...)
---			print("img.SetTexture")
-			if atlas and tex then
-				if atlas:sub(1,#DefaultAtlasPath)==DefaultAtlasPath then
-					local name1 = atlas:sub(#DefaultAtlasPath+1,-5)
-					local name2 = tex:sub(1,-5)
-					if ListToChange[name1] and ListToChange[name1]==name2 then
---						print("atlas",atlas)
---						print("tex",tex)
---						print("name1",name1)
---						print("name2",name2)
-						atlas = NewAtlasPath..name1..".xml"
-						tex = "rus_"..tex
-						default_tex = default_tex and tex --Не совсем корректно, зато точно не упадёт
-					end
-				end
-			end
-			local res = OldSetTexture(self, atlas, tex, default_tex, ...)
-			return res
-		end
-		if img.atlas and img.texture then img:SetTexture(img.atlas, img.texture) end
-	end
-
-	--Подменяем портреты
-	AddClassPostConstruct("widgets/characterselect", function(self)
-		local charlist = {wortox=1,warly=1,wurt=1,winona=1,wickerbottom=1,waxwell=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1,wormwood=1}
-		local texnames = {locked="locked",random="random"}
-		for name in pairs(charlist) do texnames[name] = name.."_none" end
-		if self.heroportrait then HookUpImage(self.heroportrait, "bigportraits/", "images/rus_", texnames) end
-		if self.leftsmallportrait then HookUpImage(self.leftsmallportrait.image, "bigportraits/", "images/rus_", texnames) end
-		if self.leftportrait then HookUpImage(self.leftportrait.image, "bigportraits/", "images/rus_", texnames) end
-		if self.rightportrait then HookUpImage(self.rightportrait.image, "bigportraits/", "images/rus_", texnames) end
-		if self.rightsmallportrait then HookUpImage(self.rightsmallportrait.image, "bigportraits/", "images/rus_", texnames) end
-	end)
-
-	local function ChangeNamesTex(module)
-		AddClassPostConstruct(module, function(self)
-			local charlist = {winona=1,wx78=1,waxwell=1,wickerbottom=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,webber=1,wormwood=1,wortox=1,warly=1,wurt=1,random=1}
-			local texnames = {}
-			for name in pairs(charlist) do texnames["names_gold_"..name] = name end
-			if self.heroname then HookUpImage(self.heroname, "images/", "images/rus_", texnames) end
-		end)
-	end
-	ChangeNamesTex("widgets/redux/ovalportrait")
-	ChangeNamesTex("widgets/redux/loadoutselect")
-	ChangeNamesTex("screens/redux/wardrobescreen")
-
-	--Двигаем портрет в гардеробе
-	AddClassPostConstruct("screens/redux/wardrobescreen", function(self)
-		if self.heroportrait then
-			self.heroportrait:Nudge({x=-80,y=50,z=0})
-		end
-	end)
 	
-	AddClassPostConstruct("screens/redux/setpopupdialog", function(self)
-		if self.dialog then
-			self.dialog:SetSize(550,450)
+	--Подменяем портреты
+	local TRANSLATED_LIST = {
+		wortox = true,
+		warly = true,
+		wurt = true,
+		winona = true,
+		wickerbottom = true,
+		waxwell = true,
+		willow = true,
+		wilson = true,
+		woodie = true,
+		wes = true,
+		wolfgang = true,
+		wendy = true,
+		wathgrithr = true,
+		webber = true,
+		wormwood = true,
+	}
+	
+	require("characterutil")
+	
+	local _SetHeroNameTexture_Grey = SetHeroNameTexture_Grey
+	local _SetHeroNameTexture_Gold = SetHeroNameTexture_Gold
+	
+	function SetHeroNameTexture_Grey(w, hero, ...)
+		if TRANSLATED_LIST[hero] then
+			w:SetTexture("images/rus_names_"..hero..".xml", "rus_"..hero..".tex")
+			return true
 		end
-		for i = 1,self.max_num_items do
-			self.input_item_imagetext[i]:Nudge({x=-50,y=0,z=0})
-			self.input_item_imagetext[i].text:SetFont(NEWFONT)
-			local w,h = self.input_item_imagetext[i].text:GetRegionSize()
-			self.input_item_imagetext[i].text:SetRegionSize(w+70, h)
-			self.input_item_imagetext[i].text:Nudge({x=20,y=0,z=0})
-			i = i + 1
-	    end
-	    self.reward.text:Nudge({x=20,y=0,z=0})
-	    local w,h = self.reward.text:GetRegionSize()
-	    self.reward.text:SetRegionSize(w+70, h)
-
-	    self.reward.text:SetFont(NEWFONT)
-	end)
-
-	--Фиксим менюшку обзора игрока
-	AddClassPostConstruct("screens/redux/playersummaryscreen", function(self)
-		if self.new_items and self.new_items.items and self.new_items.items.text and self.new_items.items.text.SetRegionSize then
-			self.new_items.items.text:SetRegionSize(200, 80)
-			self.new_items.items.text:Nudge({x=-50,y=0,z=0})
-			-- local old = self.new_items.UpdateItems
-			-- self.new_items.UpdateItems = function()
-			-- 	old()
-			-- 	self.new_items.items.text:SetString("Декоративный столик \"Драконья муха\"")
-			-- end
+		return _SetHeroNameTexture_Grey(w, hero, ...)
+	end
+	
+	function SetHeroNameTexture_Gold(w, hero, ...)
+		if TRANSLATED_LIST[hero] then
+			w:SetTexture("images/rus_names_gold_"..hero..".xml", "rus_"..hero..".tex")
+			return true
 		end
-		if self.most_friend and self.most_friend.name and self.most_friend.name.SetRegionSize then 
-			if self.most_friend.name.GetRegionSize then
-				local w,h = self.most_friend.name:GetRegionSize()
-				self.most_friend.name:SetRegionSize(w+100,h+50)
-			else
-				self.most_friend.name:SetRegionSize(400,100)
-			end
-		end
-		if self.most_died and self.most_died.name and self.most_died.name.SetRegionSize then 
-			if self.most_died.name.GetRegionSize then
-				local w,h = self.most_died.name:GetRegionSize()
-				self.most_died.name:SetRegionSize(w+100,h+50)
-			else
-				self.most_died.name:SetRegionSize(400,100)
-			end
-		end
-	end)
-
-	--Подменяем русские имена в виджете внешнего вида персонажа
-	AddClassPostConstruct("widgets/playeravatarpopup", function(self)
-		local charlist = {winona=1,wx78=1,waxwell=1,wickerbottom=1,willow=1,wilson=1,woodie=1,wes=1,wolfgang=1,wendy=1,wathgrithr=1,wormwood=1,webber=1,wortox=1,warly=1,wurt=1,random=1}
-		local texnames = {}
-		for name in pairs(charlist) do texnames["names_"..name] = name end
-		if self.character_name then HookUpImage(self.character_name, "images/", "images/rus_", texnames) end
-	end)
-	--[[
-	AddClassPostConstruct("screens/skinsscreen", function(self)
-		if self.title and self.title:GetString():sub(-#STRINGS.UI.SKINSSCREEN.TITLE)==STRINGS.UI.SKINSSCREEN.TITLE then
-			self.title:SetString(STRINGS.UI.SKINSSCREEN.TITLE..self.title:GetString():sub(1,-#STRINGS.UI.SKINSSCREEN.TITLE-1))
-		end
-	end)]]
-
+		return _SetHeroNameTexture_Gold(w, hero, ...)
+	end
+	
 	AddClassPostConstruct("screens/playerstatusscreen", function(self)
 		if self.OnBecomeActive then
 			local OldOnBecomeActive = self.OnBecomeActive
