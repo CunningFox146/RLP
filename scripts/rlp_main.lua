@@ -7,12 +7,9 @@ local MODROOT = env.MODROOT
 
 GLOBAL.setfenv(1, GLOBAL)
 
-local VerChecker = require "ver_checker"
-t.VerChecker = VerChecker
-VerChecker:GetData()
-
-local TheRLPUpdater = require "rlp_updater"
-rawset(_G, "TheRLPUpdater", TheRLPUpdater)
+-- local VerChecker = require "ver_checker"
+-- t.VerChecker = VerChecker
+-- VerChecker:GetData()
 
 local DEBUG_ENABLED = false
 local DEBUG_ENABLE_ID = {
@@ -3209,41 +3206,43 @@ PatchTradeOverflowImg("screens/snowbirdgamescreen")
 
 local Text = require "widgets/text"
 local function AddUpdtStr(parent)
-	local self = Text(DEFAULTFONT, 20, nil, UICOLOURS.WHITE)
-	sel:SetClickable(false)
-
-	parent:AddChild(self)
+	local self = parent:AddChild(Text(NEWFONT_OUTLINE, 25, nil, UICOLOURS.WHITE))
+	self:SetClickable(false)
 	self:MoveToFront()
+	self:SetClickable(false)
 
 	self:SetVAnchor(ANCHOR_TOP)
-	self:SetHAnchor(ANCHOR_RIGHT)
-	self:SetHAlign(ANCHOR_RIGHT)
+	self:SetHAnchor(ANCHOR_LEFT)
 
-	local SetString_Old = self.SetString or (function() end)
-
+	local _SetString = self.SetString or (function() end)
 	self.SetString = function (self, ...)
-		SetString_Old(self, ...)
+		_SetString(self, ...)
 		local w, h = self:GetRegionSize()
-		self:SetPosition(-w / 2 - 5, -h / 2 - 5)
+		w, h = w * 0.5, h * 0.5
+		self:SetPosition(w + 5, -h - 5)
 	end
 
 	return self
 end
 
+local TheRLPUpdater = require "rlp_updater"
 env.AddGamePostInit(function(test)		
 	TheFrontEnd.consoletext:SetFont(BODYTEXTFONT) --Нужно, чтобы шрифт в консоли не слетал
 	TheFrontEnd.consoletext:SetRegionSize(900, 404) --Чуть-чуть увеличил по вертикали, чтобы не обрезало буквы в нижней строке
-	if not TheFrontEnd.updt_strt and not InGamePlay() and not TheRLPUpdater.disabled then
-		TheFrontEnd.updt_str = AddUpdtStr(TheFrontEnd.overlayroot)
-		TheRLPUpdater:StartUpdating(true)
-		TheFrontEnd.updt_str:SetString("Обновление перевода...")
-		TheGlobalInstance:ListenForEvent("rlp_updated", function(_, data)
-			TheFrontEnd.updt_str:SetString(data and"Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
-			TheGlobalInstance:DoTaskInTime(1, function() 
-				TheFrontEnd.updt_str:SetString("")
-			end)
-		end)
-	end
+	
+	TheFrontEnd.updt_str = AddUpdtStr(TheFrontEnd.overlayroot)
+	TheFrontEnd.updt_str:SetString("Обновление перевода...")
+	-- if not TheFrontEnd.updt_strt and not InGamePlay() and not TheRLPUpdater.disabled then
+		-- TheFrontEnd.updt_str = AddUpdtStr(TheFrontEnd.overlayroot)
+		-- TheRLPUpdater:StartUpdating(true)
+		-- TheFrontEnd.updt_str:SetString("Обновление перевода...")
+		-- TheGlobalInstance:ListenForEvent("rlp_updated", function(_, data)
+			-- TheFrontEnd.updt_str:SetString(data and"Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
+			-- TheGlobalInstance:DoTaskInTime(1, function() 
+				-- TheFrontEnd.updt_str:SetString("")
+			-- end)
+		-- end)
+	-- end
 end)
 
 env.modimport("scripts/mod_translator.lua")
@@ -3261,8 +3260,6 @@ function EntityScript:SetPrefabName(name,...)
 	if not self.entity:HasTag("player") then return end
 	self.name=t.SpeechHashTbl.NAMES.Rus2Eng[self.name] or self.name
 end
-
-
 
 local GetAdjectiveOld = EntityScript["GetAdjective"]
 --Новая версия функции, выдающей качество предмета

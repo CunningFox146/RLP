@@ -1,19 +1,33 @@
 local VerChecker = {
-	URL = "https://cunningfox146.github.io/RLP.htm",
+	URL = "https://raw.githubusercontent.com/CunningFox146/RLP/master/modinfo.lua",
 }
 
-function VerChecker:GetData(fn)
-	if VerChecker.data then
-		fn(VerChecker.data)
-	end
-	-- Но всё равно обновляем
-	TheSim:QueryServer(VerChecker.URL, function (result, isSuccessful, resultCode)
+-- local VerChecker = require("ver_checker") VerChecker:GetVersion(function(data) print(data) end)
+function VerChecker:LoadVersion(fn)
+	print("[RLP VerChecker] Downloading mod version")
+	TheSim:QueryServer(self.URL, function (result, isSuccessful, resultCode)
 		if resultCode ~= 200 or not isSuccessful or #result < 1 then
-			print("[VerChecker]: Server Error.")
+			print("[RLP VerChecker]: Server Error", resultCode, isSuccessful)
 			return
 		end
-		VerChecker.data = json.decode(result)
+		
+		local anim = (result:match("version = [%S]+"))
+		self.data = anim and (anim:gsub("version = ", ""))
+		
+		if fn then
+			fn(self.data)
+		end
+		print("[RLP VerChecker] Done!")
 	end, "GET")
+end
+
+function VerChecker:GetVersion(fn)
+	if self.data then
+		fn(self.data)
+	end
+	
+	-- Продолжаем проверку. Вдруг мы обновились за это время?
+	self:LoadVersion(not self.data and fn)
 end
 
 return VerChecker
