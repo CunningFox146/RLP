@@ -3237,17 +3237,22 @@ env.AddGamePostInit(function(test)
 			if val then
 				TheFrontEnd.updt_str:SetString("Обновление перевода...")
 				
-				TheGlobalInstance:ListenForEvent("rlp_updated", function(_, data)
+				local function OnUpdateDone(_, data)
+					TheFrontEnd.updt_str.inst:RemoveEventCallback("rlp_updated", OnUpdateDone, TheGlobalInstance)
+					
 					TheFrontEnd.updt_str:SetString(data and "Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
 					TheFrontEnd.updt_str.inst:DoTaskInTime(1, function()
 						TheFrontEnd.updt_str:Kill()
 					end)
-				end)
+				end
+				
+				TheFrontEnd.updt_str.inst:ListenForEvent("rlp_updated", OnUpdateDone, TheGlobalInstance)
 				POUpdater:StartUpdating(true)
 			else
 				TheFrontEnd.updt_str:SetString("Перевод последней версии.")
 				TheFrontEnd.updt_str.inst:DoTaskInTime(1, function()
 					TheFrontEnd.updt_str:Kill()
+					TheFrontEnd.updt_str = nil
 				end)
 			end
 		end)
