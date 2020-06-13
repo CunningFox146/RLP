@@ -135,7 +135,6 @@ local LanguageOptions = Class(Screen, function(self)
     self.updateoptionstitle.modicon.version.text:SetString("Версия: "..t.modinfo.version)
     self.updateoptionstitle.modicon.version.text:SetPosition(0, -2)
 	
-	
 	--Красивая шту4ка
 	self.updateoptionstitle:MoveTo(Vector3(0, 350, 1), Vector3(0, 295, 1), .5, function()
 		self.updateoptionstitle.modicon:Show()

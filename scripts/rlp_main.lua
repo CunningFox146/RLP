@@ -11,6 +11,8 @@ GLOBAL.setfenv(1, GLOBAL)
 -- t.VerChecker = VerChecker
 -- VerChecker:GetData()
 
+POUpdater = require "po_updater"
+
 local DEBUG_ENABLED = false
 local DEBUG_ENABLE_ID = {
 	["KU_YhiKhjfu"] = true,
@@ -1757,7 +1759,7 @@ end
 local _Networking_Talk = Networking_Talk
 function Networking_Talk(guid, message, ...)
 	local entity = Ents[guid]
-	message = t.TranslateToRussian(message,entity) or message --Переводим на русский
+	message = t.TranslateToRussian(message, entity) or message --Переводим на русский
 	return _Networking_Talk(guid, message, ...)
 end
 
@@ -2190,7 +2192,6 @@ if t.CurrentTranslationType ~= mods.RussianLanguagePack.TranslationTypes.ChatOnl
 		end
 		return list
 	end
-
 
 	--Окно просмотра серверов, двигаем контролсы, исправляем надписи
 	local function ServerListingScreenPost1(self)
@@ -2644,8 +2645,6 @@ if t.CurrentTranslationType == t.TranslationTypes.ChatOnly then --Выполня
 	return
 end
 
-
-
 --Дядька, продающий скины должен склонять слова под названия вещей
 AddClassPostConstruct("widgets/skincollector", function(self)
 	if not self.Say then return end
@@ -2737,7 +2736,7 @@ AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем
 				if not self.name.OldSetTruncatedString then
 					self.name.OldSetTruncatedString = self.name.SetTruncatedString
 					if self.name.OldSetTruncatedString then
-						local function NewSetTruncatedString (self1,str, maxwidth, maxcharsperline, ellipses)
+						local function NewSetTruncatedString(self1,str, maxwidth, maxcharsperline, ellipses)
 							maxcharsperline = 17
 							maxwidth = maxwidth + 30
 							local maxlines = 2
@@ -3225,24 +3224,34 @@ local function AddUpdtStr(parent)
 	return self
 end
 
-local TheRLPUpdater = require "rlp_updater"
 env.AddGamePostInit(function(test)		
 	TheFrontEnd.consoletext:SetFont(BODYTEXTFONT) --Нужно, чтобы шрифт в консоли не слетал
 	TheFrontEnd.consoletext:SetRegionSize(900, 404) --Чуть-чуть увеличил по вертикали, чтобы не обрезало буквы в нижней строке
 	
-	TheFrontEnd.updt_str = AddUpdtStr(TheFrontEnd.overlayroot)
-	TheFrontEnd.updt_str:SetString("Обновление перевода...")
-	-- if not TheFrontEnd.updt_strt and not InGamePlay() and not TheRLPUpdater.disabled then
-		-- TheFrontEnd.updt_str = AddUpdtStr(TheFrontEnd.overlayroot)
-		-- TheRLPUpdater:StartUpdating(true)
-		-- TheFrontEnd.updt_str:SetString("Обновление перевода...")
-		-- TheGlobalInstance:ListenForEvent("rlp_updated", function(_, data)
-			-- TheFrontEnd.updt_str:SetString(data and"Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
-			-- TheGlobalInstance:DoTaskInTime(1, function() 
-				-- TheFrontEnd.updt_str:SetString("")
-			-- end)
-		-- end)
-	-- end
+	if not POUpdater:IsDisabled() and not InGamePlay() then
+		if not TheFrontEnd.updt_str then
+			TheFrontEnd.updt_str = AddUpdtStr(TheFrontEnd.overlayroot)
+		end
+		TheFrontEnd.updt_str:SetString("Проверка версии перевода...")
+		POUpdater:ShouldUpdate(function(val)
+			if val then
+				TheFrontEnd.updt_str:SetString("Обновление перевода...")
+				
+				TheGlobalInstance:ListenForEvent("rlp_updated", function(_, data)
+					TheFrontEnd.updt_str:SetString(data and "Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
+					TheFrontEnd.updt_str.inst:DoTaskInTime(1, function()
+						TheFrontEnd.updt_str:Kill()
+					end)
+				end)
+				POUpdater:StartUpdating(true)
+			else
+				TheFrontEnd.updt_str:SetString("Перевод последней версии.")
+				TheFrontEnd.updt_str.inst:DoTaskInTime(1, function()
+					TheFrontEnd.updt_str:Kill()
+				end)
+			end
+		end)
+	end
 end)
 
 env.modimport("scripts/mod_translator.lua")
@@ -3261,24 +3270,21 @@ function EntityScript:SetPrefabName(name,...)
 	self.name=t.SpeechHashTbl.NAMES.Rus2Eng[self.name] or self.name
 end
 
-local GetAdjectiveOld = EntityScript["GetAdjective"]
 --Новая версия функции, выдающей качество предмета
-function GetAdjectiveNew(self)
-	local str=GetAdjectiveOld(self)
-	if str and self.prefab then
-		local player=ThePlayer
-		local act=player.components.playercontroller:GetLeftMouseAction() --Получаем текущее действие
-		if act then act=act.action.id or "NOACTION" else act="NOACTION" end
-		str=FixPrefix(str,act,self.prefab) --склоняем окончание префикса
-		if act~="NOACTION" then --если есть действие, то нужно сделать с маленькой буквы
-			str=firsttolower(str)
+local _GetAdjective = EntityScript.GetAdjective
+function EntityScript:GetAdjective()
+	local str = _GetAdjective(self)
+	if str and self.prefab and ThePlayer then
+		local player = ThePlayer
+		local act = player.components.playercontroller:GetLeftMouseAction() --Получаем текущее действие
+		if act then act = act.action.id or "NOACTION" else act = "NOACTION" end
+		str = FixPrefix(str,act,self.prefab) --склоняем окончание префикса
+		if act ~= "NOACTION" then --если есть действие, то нужно сделать с маленькой буквы
+			str = firsttolower(str)
 		end
 	end
 	return str
 end
-EntityScript["GetAdjective"]=GetAdjectiveNew --подменяем функцию, выводящую качества продуктов
-
-
 
 --Фикс для hoverer, передающий в GetDisplayName действие, если оно есть
 AddClassPostConstruct("widgets/hoverer", function(self)
@@ -3302,12 +3308,10 @@ AddClassPostConstruct("widgets/hoverer", function(self)
 	end
 end)
 
-
-
-local GetDisplayNameOld=EntityScript.GetDisplayName --сохраняем старую функцию, выводящую название предмета
-function GetDisplayNameNew(self, act) --Подмена функции, выводящей название предмета. В ней реализовано склонение в зависимости от действия (переменная аct)
-
-	local name = GetDisplayNameOld(self)
+local _GetDisplayName = EntityScript.GetDisplayName --сохраняем старую функцию, выводящую название предмета
+function EntityScript:GetDisplayName(act, ...) --Подмена функции, выводящей название предмета. В ней реализовано склонение в зависимости от действия (переменная аct)
+	-- Fox: В старой верссии act не передавался. Баг?
+	local name = _GetDisplayName(self, act, ...)
 	local player = ThePlayer
 	
 --	if not player then return name end --Если не удалось получить instance игрока, то возвращаем имя на англ. и выходим
@@ -3399,8 +3403,6 @@ function GetDisplayNameNew(self, act) --Подмена функции, выво�
 	if act and act=="SLEEPIN" and name then name="в "..name end --Особый случай для "спать в палатке" и "спать в навесе для сиесты"
 	return name
 end
-EntityScript.GetDisplayName=GetDisplayNameNew --подменяем на новую
-
 
 AddClassPostConstruct("components/playercontroller", function(self)
 	--Переопределяем функцию, выводящую "Создать ...", когда устанавливается на землю крафт-предмет типа палатки.

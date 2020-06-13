@@ -18,12 +18,12 @@ local UpdateScreen = Class(GenericWaitingPopup, function(self)
 			}
 		))
 	end, TheGlobalInstance)
-	TheRLPUpdater:StartUpdating()
+	POUpdater:StartUpdating()
 end)
 
 function UpdateScreen:OnCancel()
     self:Disable()
-	TheRLPUpdater:CancelDownloading()
+	POUpdater:CancelDownloading()
     TheFrontEnd:PopScreen()
 end
 
