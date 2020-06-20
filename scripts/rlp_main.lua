@@ -1954,6 +1954,7 @@ if t.CurrentTranslationType ~= mods.RussianLanguagePack.TranslationTypes.ChatOnl
 		wathgrithr = true,
 		webber = true,
 		wormwood = true,
+		walter = true,
 	}
 	
 	require("characterutil")
