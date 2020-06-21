@@ -17,7 +17,11 @@ local VKButton = require "widgets/vk_button"
 local RLPModButton = require "widgets/mod_settings_button"
 --local Puppet = require "widgets/skinspuppet"
 
-local TranslationTypeSave = nil
+local TranslationTypeSave
+
+local function escapeR(str)
+	if string.sub(str, #str)=="\r" then return string.sub(str, 1, #str-1) else return str end
+end
 
 local LanguageOptions = Class(Screen, function(self)
     Screen._ctor(self, "LanguageOptions")
@@ -802,7 +806,7 @@ function LanguageOptions:LoadHistory()
 	local lines=0
 	local f=io.open(t.StorePath.."scripts/history.txt","r")
 	if f then for line in f:lines() do 
-		line=t.escapeR(line) --избавляемся от \r для юникс систем
+		line=escapeR(line) --избавляемся от \r для юникс систем
 		if line:utf8sub(1,6)=="Версия" then --Найдено описание новой версии
 			if lines~=0 then --до этого шло описание другой версии
 				if self.logtextlines<lines then self.logtextlines=lines end
