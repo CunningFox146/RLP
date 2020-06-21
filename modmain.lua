@@ -21,9 +21,8 @@ mods.RussianLanguagePack = {
 	mod_phrases = {},
 	mod_announce = {},
 	
-	-- Для дебага
-	debug = true,
-	print = function(...) if mods.RussianLanguagePack.debug then print("[RLP_DEBUG] " .. (...))  end end,
+	debug = nil,
+	print = function(...) if mods.RussianLanguagePack.debug then print("[RLP_DEBUG]", ...)  end end,
 	
 	UpdateLogFileName = "updatelog.txt",
 	MainPOfilename = "DST.po",
