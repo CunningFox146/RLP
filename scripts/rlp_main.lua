@@ -144,7 +144,7 @@ do
 		for FontName in pairs(LocalizedFontList) do
 			TheSim:SetupFontFallbacks(t.SelectedLanguage.."_"..FontName, fallbacks[FontName])
 		end
-
+		
 		--Вписываем в глобальные переменные шрифтов наши алиасы
 		DEFAULTFONT = t.SelectedLanguage.."_opensans50"
 		DIALOGFONT = t.SelectedLanguage.."_opensans50"
@@ -166,6 +166,9 @@ do
 		NEWFONT_SMALL = t.SelectedLanguage.."_spirequal_small"
 		NEWFONT_OUTLINE = t.SelectedLanguage.."_spirequal_outline"
 		NEWFONT_OUTLINE_SMALL = t.SelectedLanguage.."_spirequal_outline_small"
+		
+		-- Сжимаем немного новый шрифт
+		TheSim:AdjustFontAdvance(CHATFONT, -2.5)
 	end
 end
 
