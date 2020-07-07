@@ -9,13 +9,8 @@ local ImageButton = require "widgets/imagebutton"
 local RLPModButton = Class(Widget, function(self)
     Widget._ctor(self, "RLPModButton")
 	
-	local transtype = Profile:GetLocalizaitonValue("mod_translation_type")
+	local transtype = Profile:GetModTranslationEnabled()
 	
-	--Если нет записи о типе, то делаем по умолчанию полный перевод
-	if not transtype then
-		transtype = t.ModTranslationTypes.enabled
-		Profile:SetLocalizaitonValue("mod_translation_type",transtype)
-	end
 	--Добавим инфу о модах
 	self.info = self:AddChild(ImageButton("images/ui.xml", "button_small.tex", "button_small.tex", "button_small.tex", "button_small.tex", "button_small.tex", {1,1}, {0,0}))
 	self.info:SetPosition(-74,0,1)
@@ -32,14 +27,18 @@ local RLPModButton = Class(Widget, function(self)
 	self.info.highlight:SetClickable(false)
 	self.info.highlight:Hide()
 	
-	self.status = transtype or "enabled" --сохраняем то значение, которое у нас при входе в это окно
+	self.status = transtype == t.ModTranslationTypes.enabled and "enabled" or "disabled" --сохраняем то значение, которое у нас при входе в это окно
 	
 	self.btn = self:AddChild(UIAnimButton("mods_button", "mods_button", nil, nil, nil, nil, nil))--bank, build, idle_anim, focus_anim, disabled_anim, down_anim, selected_anim
 	
-	--Название говорит само за себя
 	local function AntiSpam(time)
+		if self.task then
+			self.task:Cancel()
+			self.task = nil
+		end
+	
 		self.btn:SetClickable(false)
-		self.inst:DoTaskInTime(time, function() self.btn:SetClickable(true) end)
+		self.task = self.inst:DoTaskInTime(time, function() self.btn:SetClickable(true) end)
 	end
 	
 	self.btn:SetScale(.9, .9, 1)
@@ -117,11 +116,7 @@ local RLPModButton = Class(Widget, function(self)
 end)
 
 function RLPModButton:UpdateText()
-	if self.status == "enabled" then
-		self.btn:SetText("Перевод модов\nвключён")
-	else
-		self.btn:SetText("Перевод модов\nвыключён")
-	end
+	self.btn:SetText(self.status == "enabled" and "Перевод модов\nвключён" or "Перевод модов\nвыключён")
 end
 
 return RLPModButton
