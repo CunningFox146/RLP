@@ -32,97 +32,7 @@ end
 Sim.ShouldWarnModsLoaded = function() return false end
 
 modimport("scripts/rlp_fonts.lua")
-
---Для тех, кто пользуется ps4 или NACL должна быть возможность сохранять не в ини файле, а в облаке.
---Для этого дорабатываем функционал стандартного класса PlayerProfile
-
-do 
-	local USE_SETTINGS_FILE = PLATFORM ~= "PS4" and PLATFORM ~= "NACL"
-	
-	local function SetLocalizaitonValue(self, name, value) --Метод, сохраняющий опцию с именем name и значением value
-		if USE_SETTINGS_FILE then
-			TheSim:SetSetting("translation", tostring(name), tostring(value))
-		else
-			self:SetValue(tostring(name), tostring(value))
-			self.dirty = true
-			self:Save() --Сохраняем сразу, поскольку у нас нет кнопки "применить"
-		end
-	end
-	
-	local function GetLocalizaitonValue(self,name) --Метод, возвращающий значение опции name
-		local USE_SETTINGS_FILE = PLATFORM ~= "PS4" and PLATFORM ~= "NACL"
-		if USE_SETTINGS_FILE then
-			return TheSim:GetSetting("translation", tostring(name))
-		else
-			return self:GetValue(tostring(name))
-		end
-	end
-
-	--Так же делаем для маленьких текстур
-	local function SetShowSTWarning(self, value)
-		self:SetValue("show_st_warning", value)
-		self.dirty = true
-		self:Save() --Сохраняем сразу, поскольку у нас нет кнопки "применить"
-	end
-
-	local function GetShowSTWarning(self)
-		return self:GetValue("show_st_warning")
-	end
-
-	--Расширяем функционал PlayerProfile дополнительной инициализацией двух методов и заданием дефолтных значений опций нашего перевода.
-	--После обновления ни один из этих способов не работает, поэтому делаем тупо через require.
-	local self = require "playerprofile"
-	
-	self.SetLocalizaitonValue = SetLocalizaitonValue --метод задачи значения опции
-	self.GetLocalizaitonValue = GetLocalizaitonValue --метод получения значения опции
-	
-	self.SetShowSTWarning = SetShowSTWarning
-	self.GetShowSTWarning = GetShowSTWarning
-end
-
---Узнаём тип локализации, и меняем содержимое таблицы с переводом PO, если нужно
---	t.CurrentTranslationType=Profile:GetLocalizaitonValue("translation_type")
-t.CurrentTranslationType = TheSim:GetSetting("translation", "translation_type")
-
-if not t.CurrentTranslationType then --Если нет записи о типе, то делаем по умолчанию полный перевод
-	t.CurrentTranslationType = t.TranslationTypes.Full
-	TheSim:SetSetting("translation", "translation_type", t.CurrentTranslationType)
-end
-
---То же для модов.
-t.IsModTranslEnabled = TheSim:GetSetting("translation", "mod_translation_type")
-
-if not t.IsModTranslEnabled then --Если нет записи о типе, то делаем по умолчанию полный перевод
-	t.IsModTranslEnabled = t.ModTranslationTypes.enabled
-	TheSim:SetSetting("translation", "mod_translation_type", t.IsModTranslEnabled)
-end
-
-do
-	local TEMPLATES = require "widgets/redux/templates"
-	local LanguageOptions = require "screens/LanguageOptions"
-	local UpdateChecker = require "widgets/update_checker"
-
-	AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self, ...)
-		--Кнопка настойки в главном меню
-		if not self.rlp_settings then
-			self.rlp_settings = self:AddChild(TEMPLATES.IconButton("images/rus_button_icon.xml", "rus_button_icon.tex", "RLP", false, true, function() 
-				TheFrontEnd:GetSound():KillSound("FEMusic")
-				TheFrontEnd:GetSound():KillSound("FEPortalSFX")
-				TheFrontEnd:GetSound():PlaySound("dontstarve/music/gramaphone_ragtime", "rlp_ragtime") 
-				
-				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return LanguageOptions() end, nil, "swipe")
-			end, {font=NEWFONT_OUTLINE}))
-			self.submenu:AddCustomItem(self.rlp_settings)
-			local _pos = self.submenu:GetPosition()
-			self.submenu:SetPosition(_pos.x - 50, _pos.y)
-		end
-		
-		-- Проверка версии
-		self.rlp_update_checker = self.fixed_root:AddChild(UpdateChecker())
-		self.rlp_update_checker:SetScale(.7)
-		self.rlp_update_checker:SetPosition(500, -100)
-	end)
-end
+modimport("scripts/rlp_settings.lua")
 
 --Исправление бага с шрифтом в спиннерах
 --Выполняем подмену шрифта в спиннере из-за глупой ошибки разрабов в этом виджете
@@ -137,7 +47,6 @@ env.AddGamePostInit(function()
 	end
 	
 	local PopupDialogScreen = require "screens/redux/popupdialog"
-	local ErrorPopup = require "screens/ErrorPopup"
 	
 	if KnownModIndex:IsModEnabled("workshop-55043536") then
 		TheFrontEnd:PushScreen(PopupDialogScreen(
@@ -175,22 +84,19 @@ env.AddGamePostInit(function()
 				end
 			}
 		}))
-	elseif Profile and TheFrontEnd:GetGraphicsOptions():IsSmallTexturesMode() and Profile.GetShowSTWarning and not Profile:GetShowSTWarning() then
-		TheFrontEnd:PushScreen(ErrorPopup(
-		{{text="Ok", cb = function() 
-			TheFrontEnd:PopScreen() 
-		end}}))
 	end
 end)
 
-env.modimport("scripts/ver_checker.lua")
-
-if t.CurrentTranslationType == t.TranslationTypes.ChatOnly then
-	t.print("[RLP] Загрузка ChatOnly версии завершена.")
+if t.CurrentTranslationType == t.TranslationTypes.FontsOnly then
+	t.print("[RLP] Загрузка FontsOnly версии завершена.")
 	return
 end
 
---!!!!!!!! ТУТ ПРЕРЫВАЕТСЯ ВЫПОЛНЕНИЕ МОДА, ЕСЛИ ТЕКУЩИЙ РЕЖИМ РУСИФИКАЦИИ - ТОЛЬКО ЧАТ!!!!!!!!!!!!!
+--Загружаем русификацию
+print("Загрузка PO файла")
+env.LoadPOFile(t.StorePath..t.MainPOfilename, t.SelectedLanguage)
+t.PO = LanguageTranslator.languages[t.SelectedLanguage]
+print("PO файл загружен!")
 
 --Возвращает корректную форму слова день (или другого, переданного вторым параметром)
 local function StringTime(n,s)
@@ -891,16 +797,6 @@ function t.ParseTranslationTags(message, char, talker, optionaltags)
 	return message
 end
 
---Делаем бекап названия версии игры
-local UPDATENAME = STRINGS.UI.MAINSCREEN.UPDATENAME
-
---Загружаем русификацию
-env.LoadPOFile(t.StorePath..t.MainPOfilename, t.SelectedLanguage)
-t.PO = LanguageTranslator.languages[t.SelectedLanguage]
-
---Восстанавливаем название версии игры из бекапа
-t.PO["STRINGS.UI.MAINSCREEN.UPDATENAME"] = UPDATENAME
-
 local function ExtractMeta(str, key)
 	if not str:find("{",1, true) then return str end --Для увеличения скорости
 	local gentbl = {male = "he", maleanimated = "he2", female = "she", femaleanimated = "she2",
@@ -1192,25 +1088,6 @@ if rawget(_G, "GAME_MODES") and STRINGS.UI.GAMEMODES then
 	end
 end
 
-local AllPlayersList = {} --Список всех игроков в игре, бывших за сессию. Нужен для случаев, когда игрока уже нет, а сообщение пришло
---Исправляем русские имена персонажей, которые приходят к нам в другой кодировке, и обновляем AllPlayersList
-if NetworkProxy.GetClientTable then
-	local _GetClientTable = NetworkProxy.GetClientTable
-	NetworkProxy.GetClientTable = function(self, ...)
-		local res = _GetClientTable(self, ...)
-		if res then for i,v in pairs(res) do
-			if v.name and v.prefab then
-				-- Грязная подмена
-				if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly and v.name=="[Host]" then
-					v.name="[Хост]"
-				end
-				AllPlayersList[v.name] = v.prefab or nil
-			end
-		end end
-		return res
-	end
-end
-
 --Склоняем названия вещей в пожитках
 function GetSkinUsableOnString(item_type, popup_txt)
 	local skin_data = GetSkinData(item_type)
@@ -1246,125 +1123,44 @@ function GetSkinUsableOnString(item_type, popup_txt)
 	return usable_on_str
 end
 
---Сообщения о событиях в игре
-AddClassPostConstruct("widgets/eventannouncer", function(self)
-	--Переопределяем глобальную функцию, формирующую анонс-сообщение о смерти
-	--Делаем это тут, потому что она объявлена в классе eventannouncer, и не видна до обращения к этому классу.
-	--Тут нам нужно позаботиться об выводе имени убийцы на английском языке.
-	local _GetNewDeathAnnouncementString = GetNewDeathAnnouncementString
-	function GetNewDeathAnnouncementString(theDead, source, pkname)
-		local str = _GetNewDeathAnnouncementString(theDead, source, pkname)
-		if TheWorld and not TheWorld.ismastersim then return str end
-		if string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1,1,true) then
-			--если игрок был убит
-			local capturestring=nil
-			if string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE,1,true) then
-				capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE..")"
-			elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE,1,true) then
-				capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE..")"
-			elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT,1,true) then
-				capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT..")"
-			elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT,1,true) then
-				capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT..")"
-			else 
-				capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)(%.)$"
-			end
-			if capturestring then -- выяснилось, что кто-то убит
-				local a, killername, b=str:match(capturestring)
-				if killername then
-					killername=t.SpeechHashTbl.NAMES.Rus2Eng[killername] or killername--Переводим на английский
-					str=str:gsub(capturestring,"%1"..killername.."%3")
-				end
-			end
-		end	
-		return str
-	end
-	--Сообщение о том, что кто-то был оживлён. Тут нужно подменить на английский источник оживления
-	local _GetNewRezAnnouncementString = GetNewRezAnnouncementString
-	function GetNewRezAnnouncementString(theRezzed, source, ...)
-		source = source and (t.SpeechHashTbl.NAMES.Rus2Eng[source] or source) --Переводим имя на английский
-		return _GetNewRezAnnouncementString(theRezzed, source, ...)
-	end
-
-	--Вывод любых анонсов на экран. Тут подменяем все нестандартные фразы, и не только
-	local _ShowNewAnnouncement = self.ShowNewAnnouncement
-	if _ShowNewAnnouncement then function self:ShowNewAnnouncement(announcement, ...)
-		--Ничего не делаем, если переводится только чат или только чат и интерфейс
-		if t.CurrentTranslationType==t.TranslationTypes.ChatOnly or t.CurrentTranslationType==t.TranslationTypes.InterfaceChat then
-			return _ShowNewAnnouncement(self, announcement, ...)
+require("widgets/eventannouncer")
+--Переопределяем глобальную функцию, формирующую анонс-сообщение о смерти
+--Делаем это тут, потому что она объявлена в классе eventannouncer, и не видна до обращения к этому классу.
+--Тут нам нужно позаботиться об выводе имени убийцы на английском языке.
+local _GetNewDeathAnnouncementString = GetNewDeathAnnouncementString
+function GetNewDeathAnnouncementString(theDead, source, pkname)
+	local str = _GetNewDeathAnnouncementString(theDead, source, pkname)
+	if TheWorld and not TheWorld.ismastersim then return str end
+	if string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1,1,true) then
+		--если игрок был убит
+		local capturestring=nil
+		if string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE,1,true) then
+			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE..")"
+		elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE,1,true) then
+			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE..")"
+		elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT,1,true) then
+			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT..")"
+		elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT,1,true) then
+			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT..")"
+		else 
+			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)(%.)$"
 		end
-
-		local gender, player, RussianMessage, name, name2, killerkey
-
-		local function test(adder1,msg1,rusmsg1,adder2,msg2,rusmsg2,ending)
-			--print("Test:", tostring(adder1), tostring(msg1), tostring(rusmsg1), tostring(adder2), tostring(msg2), tostring(rusmsg2), tostring(ending))
-			if name or name2 then return end
-			msg1=msg1 and msg1:gsub("([.%-?])","%%%1"):gsub("%%s","(.*)") or ""
-			msg2=msg2 and msg2:gsub("([.%-?])","%%%1"):gsub("%%s","(.*)") or ""
-			name, name2=announcement:match((adder1 or "")..msg1..(adder2 or "")..msg2)
-			if name then RussianMessage=rusmsg1 end
-			if adder2 and name and name2 and rusmsg2 then RussianMessage=RussianMessage..rusmsg2 end
-			if ending and RussianMessage then RussianMessage=RussianMessage..ending end
-		end
-		--Проверяем голосования
---			test(nil,STRINGS.VOTING.KICK.START, announcerus.VOTINGKICKSTART)
---			test(nil,STRINGS.VOTING.KICK.SUCCESS, announcerus.VOTINGKICKSUCCESS)
---			test(nil,STRINGS.VOTING.KICK.FAILURE, announcerus.VOTINGKICKFAILURE)
-		--Присоединение/Отсоединение
---		--C 176665 в этих двух изначально есть %s
---		test("(.*) ",STRINGS.UI.NOTIFICATION.JOINEDGAME, announcerus.JOINEDGAME)
---		test("(.*) ",STRINGS.UI.NOTIFICATION.LEFTGAME, announcerus.LEFTGAME)
-		test(nil,STRINGS.UI.NOTIFICATION.JOINEDGAME, announcerus.JOINEDGAME)
-		test(nil,STRINGS.UI.NOTIFICATION.LEFTGAME, announcerus.LEFTGAME)
-		--Кик/Бан
-		test(nil,STRINGS.UI.NOTIFICATION.KICKEDFROMGAME, announcerus.KICKEDFROMGAME)
-		test(nil,STRINGS.UI.NOTIFICATION.BANNEDFROMGAME, announcerus.BANNEDFROMGAME)
-		
-		-- Даем возможность модам переводить аннонсы
-		for eng, rus in pairs(t.mod_announce) do
-			test(nil, eng, rus)
-		end
-		
-		--Новый скин
---		test(nil,STRINGS.UI.NOTIFICATION.NEW_SKIN_ANNOUNCEMENT, announcerus.NEW_SKIN_ANNOUNCEMENT)
-		if not name2 then
-			--Реплики о смерти
-			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
-				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE, announcerus.DEATH_ANNOUNCEMENT_2_MALE)
-			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
-				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE, announcerus.DEATH_ANNOUNCEMENT_2_FEMALE)
-			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
-				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT, announcerus.DEATH_ANNOUNCEMENT_2_ROBOT)
-			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
-				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT, announcerus.DEATH_ANNOUNCEMENT_2_DEFAULT)
-			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1, " (.*)%.$", nil, nil, ".")
-			test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_MALE, announcerus.GHOST_DEATH_ANNOUNCEMENT_MALE)
-			test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_FEMALE, announcerus.GHOST_DEATH_ANNOUNCEMENT_FEMALE)
-			test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_ROBOT, announcerus.GHOST_DEATH_ANNOUNCEMENT_ROBOT)
-			test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_DEFAULT, announcerus.GHOST_DEATH_ANNOUNCEMENT_DEFAULT)
-			--Реплика об оживлении
-			test("(.*) ",STRINGS.UI.HUD.REZ_ANNOUNCEMENT, announcerus.REZ_ANNOUNCEMENT, " (.*)%.$", nil, nil, ".")
-			if name2 then --Было обнаружено второе имя, и это сообщение о смерти/оживлении
-				--Переводим имя на русский, если получится
-				killerkey=t.SpeechHashTbl.NAMES.Eng2Key[name2] --Получаем ключ имени
-				if killerkey then
-					name2=STRINGS.NAMES[killerkey] or STRINGS.NAMES["SHENANIGANS"] --Тут переводим имя на русский
-					name2=t.RussianNames[name2] and t.RussianNames[name2]["KILL"] or rebuildname(name2,"KILL",killerkey) or name2
-					if not t.ShouldBeCapped[killerkey:lower()] and not table.contains(GetActiveCharacterList(), killerkey:lower()) then
-						name2=firsttolower(name2)
-					end
-					killerkey=killerkey:lower()
-					if table.contains(GetActiveCharacterList(), killerkey) then killerkey=nil end
-				end
+		if capturestring then -- выяснилось, что кто-то убит
+			local a, killername, b=str:match(capturestring)
+			if killername then
+				killername=t.SpeechHashTbl.NAMES.Rus2Eng[killername] or killername--Переводим на английский
+				str=str:gsub(capturestring,"%1"..killername.."%3")
 			end
 		end
-		if name and RussianMessage then
-			if TheNet.GetClientTable then TheNet:GetClientTable()	end --обновляем список игроков
-			announcement = string.format((t.ParseTranslationTags(RussianMessage, AllPlayersList[name], "announce", killerkey)), name or "", name2 or "", "" ,"") or announcement
-		end
-		_ShowNewAnnouncement(self, announcement, ...)
-	end end
-end) -- для AddClassPostConstruct "widgets/eventannouncer"
+	end	
+	return str
+end
+--Сообщение о том, что кто-то был оживлён. Тут нужно подменить на английский источник оживления
+local _GetNewRezAnnouncementString = GetNewRezAnnouncementString
+function GetNewRezAnnouncementString(theRezzed, source, ...)
+	source = source and (t.SpeechHashTbl.NAMES.Rus2Eng[source] or source) --Переводим имя на английский
+	return _GetNewRezAnnouncementString(theRezzed, source, ...)
+end
 
 --Подбирает сообщение из хеш-таблиц по указанному персонажу и сообщению на английском.
 --Если персонаж не указан, используется уилсон.
@@ -1627,6 +1423,87 @@ NetworkProxy.Talker = function(self, message, entity, ...)
 	return _Talker(self, message, entity, ...)
 end
 
+--Сообщения о событиях в игре
+AddClassPostConstruct("widgets/eventannouncer", function(self)
+	--Вывод любых анонсов на экран. Тут подменяем все нестандартные фразы, и не только
+	local _ShowNewAnnouncement = self.ShowNewAnnouncement
+	if _ShowNewAnnouncement then function self:ShowNewAnnouncement(announcement, ...)
+		--Ничего не делаем, если переводится только чат или только чат и интерфейс
+		if t.CurrentTranslationType==t.TranslationTypes.ChatOnly or t.CurrentTranslationType==t.TranslationTypes.InterfaceChat then
+			return _ShowNewAnnouncement(self, announcement, ...)
+		end
+
+		local gender, player, RussianMessage, name, name2, killerkey
+
+		local function test(adder1,msg1,rusmsg1,adder2,msg2,rusmsg2,ending)
+			--print("Test:", tostring(adder1), tostring(msg1), tostring(rusmsg1), tostring(adder2), tostring(msg2), tostring(rusmsg2), tostring(ending))
+			if name or name2 then return end
+			msg1=msg1 and msg1:gsub("([.%-?])","%%%1"):gsub("%%s","(.*)") or ""
+			msg2=msg2 and msg2:gsub("([.%-?])","%%%1"):gsub("%%s","(.*)") or ""
+			name, name2=announcement:match((adder1 or "")..msg1..(adder2 or "")..msg2)
+			if name then RussianMessage=rusmsg1 end
+			if adder2 and name and name2 and rusmsg2 then RussianMessage=RussianMessage..rusmsg2 end
+			if ending and RussianMessage then RussianMessage=RussianMessage..ending end
+		end
+		--Проверяем голосования
+--			test(nil,STRINGS.VOTING.KICK.START, announcerus.VOTINGKICKSTART)
+--			test(nil,STRINGS.VOTING.KICK.SUCCESS, announcerus.VOTINGKICKSUCCESS)
+--			test(nil,STRINGS.VOTING.KICK.FAILURE, announcerus.VOTINGKICKFAILURE)
+		--Присоединение/Отсоединение
+--		--C 176665 в этих двух изначально есть %s
+--		test("(.*) ",STRINGS.UI.NOTIFICATION.JOINEDGAME, announcerus.JOINEDGAME)
+--		test("(.*) ",STRINGS.UI.NOTIFICATION.LEFTGAME, announcerus.LEFTGAME)
+		test(nil,STRINGS.UI.NOTIFICATION.JOINEDGAME, announcerus.JOINEDGAME)
+		test(nil,STRINGS.UI.NOTIFICATION.LEFTGAME, announcerus.LEFTGAME)
+		--Кик/Бан
+		test(nil,STRINGS.UI.NOTIFICATION.KICKEDFROMGAME, announcerus.KICKEDFROMGAME)
+		test(nil,STRINGS.UI.NOTIFICATION.BANNEDFROMGAME, announcerus.BANNEDFROMGAME)
+		
+		-- Даем возможность модам переводить аннонсы
+		for eng, rus in pairs(t.mod_announce) do
+			test(nil, eng, rus)
+		end
+		
+		--Новый скин
+--		test(nil,STRINGS.UI.NOTIFICATION.NEW_SKIN_ANNOUNCEMENT, announcerus.NEW_SKIN_ANNOUNCEMENT)
+		if not name2 then
+			--Реплики о смерти
+			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
+				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE, announcerus.DEATH_ANNOUNCEMENT_2_MALE)
+			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
+				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE, announcerus.DEATH_ANNOUNCEMENT_2_FEMALE)
+			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
+				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT, announcerus.DEATH_ANNOUNCEMENT_2_ROBOT)
+			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
+				 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT, announcerus.DEATH_ANNOUNCEMENT_2_DEFAULT)
+			test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1, " (.*)%.$", nil, nil, ".")
+			test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_MALE, announcerus.GHOST_DEATH_ANNOUNCEMENT_MALE)
+			test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_FEMALE, announcerus.GHOST_DEATH_ANNOUNCEMENT_FEMALE)
+			test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_ROBOT, announcerus.GHOST_DEATH_ANNOUNCEMENT_ROBOT)
+			test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_DEFAULT, announcerus.GHOST_DEATH_ANNOUNCEMENT_DEFAULT)
+			--Реплика об оживлении
+			test("(.*) ",STRINGS.UI.HUD.REZ_ANNOUNCEMENT, announcerus.REZ_ANNOUNCEMENT, " (.*)%.$", nil, nil, ".")
+			if name2 then --Было обнаружено второе имя, и это сообщение о смерти/оживлении
+				--Переводим имя на русский, если получится
+				killerkey=t.SpeechHashTbl.NAMES.Eng2Key[name2] --Получаем ключ имени
+				if killerkey then
+					name2=STRINGS.NAMES[killerkey] or STRINGS.NAMES["SHENANIGANS"] --Тут переводим имя на русский
+					name2=t.RussianNames[name2] and t.RussianNames[name2]["KILL"] or rebuildname(name2,"KILL",killerkey) or name2
+					if not t.ShouldBeCapped[killerkey:lower()] and not table.contains(GetActiveCharacterList(), killerkey:lower()) then
+						name2=firsttolower(name2)
+					end
+					killerkey=killerkey:lower()
+					if table.contains(GetActiveCharacterList(), killerkey) then killerkey=nil end
+				end
+			end
+		end
+		if name and RussianMessage then
+			announcement = string.format((t.ParseTranslationTags(RussianMessage, "wilson", "announce", killerkey)), name or "", name2 or "", "" ,"") or announcement
+		end
+		return _ShowNewAnnouncement(self, announcement, ...)
+	end end
+end) -- для AddClassPostConstruct "widgets/eventannouncer"
+
 --Тут мы должны переделать описание скелета, чтобы в него не попал русский
 -- Жуть какая. Столько кода просто для перевода скелета
 AddPrefabPostInit("skeleton_player", function(inst)
@@ -1725,7 +1602,7 @@ AddPrefabPostInit("blueprint", function(inst)
 end)
 
 --Остальное не выполняется, если перевод в режиме только чата
-if t.CurrentTranslationType ~= mods.RussianLanguagePack.TranslationTypes.ChatOnly then
+if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then
 	--Вешает хук на любой метод класса указанного объекта.
 	--Функция fn получает в качестве параметров ссылку на объект и все параметры перехватываемого метода.
 	--DoAfter определяет, выполняется ли хук до, или после метода.
@@ -2377,11 +2254,6 @@ local function FixPrefix(prefix, act, item)
 	return prefix
 end
 
-
-if t.CurrentTranslationType == t.TranslationTypes.ChatOnly then --Выполняем, если не только чат
-	return
-end
-
 --Дядька, продающий скины должен склонять слова под названия вещей
 AddClassPostConstruct("widgets/skincollector", function(self)
 	if not self.Say then return end
@@ -2997,12 +2869,6 @@ env.AddGamePostInit(function(test)
 end)
 
 -- env.modimport("scripts/mod_translator.lua")
-
---Ниже идут функции непосредственного склонения предметов и формирования названий
--- выполняем если не "только чат" и не "интерфейс/чат" (т.е. если перевод полный)
-if t.CurrentTranslationType == t.TranslationTypes.InterfaceChat then
-	return
-end
 
 --Подменяем имена персонажей, создаваемых с консоли в игре.
 local OldSetPrefabName = EntityScript.SetPrefabName
