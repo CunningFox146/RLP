@@ -2,10 +2,11 @@ local env = env
 local t = mods.RussianLanguagePack
 local AddPrefabPostInit = AddPrefabPostInit
 local AddClassPostConstruct = env.AddClassPostConstruct
-local modname = env.modname
-local MODROOT = env.MODROOT
+local modimport = env.modimport
 
 GLOBAL.setfenv(1, GLOBAL)
+
+require("RLP_support")
 
 local VerChecker = require "ver_checker"
 t.VerChecker = VerChecker
@@ -25,168 +26,12 @@ if DEBUG_ENABLE_ID[TheNet:GetUserID()] then
 	CHEATS_ENABLED = true
 	DEBUG_ENABLED = true
 	t.debug = true
-	-- TheInput:AddKeyUpHandler(113, function()
-		-- package.loaded["screens/test"] = nil
-		-- local to_test = require "screens/test"
-		-- TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return to_test() end, nil, "swipe")
-	-- end)
-end
-
-local ApplyLocalizedFonts
-
-do
-	local FontNames = {
-		DEFAULTFONT = DEFAULTFONT,
-		DIALOGFONT = DIALOGFONT,
-		TITLEFONT = TITLEFONT,
-		UIFONT = UIFONT,
-		BUTTONFONT = BUTTONFONT,
-		HEADERFONT = HEADERFONT,
-		CHATFONT = CHATFONT,
-		CHATFONT_OUTLINE = CHATFONT_OUTLINE,
-		NUMBERFONT = NUMBERFONT,
-		TALKINGFONT = TALKINGFONT,
-		SMALLNUMBERFONT = SMALLNUMBERFONT,
-		BODYTEXTFONT = BODYTEXTFONT,
-		
-		TALKINGFONT_WORMWOOD = TALKINGFONT_WORMWOOD,
-		TALKINGFONT_HERMIT = TALKINGFONT_HERMIT,
-		
-		NEWFONT = NEWFONT,
-		NEWFONT_SMALL = NEWFONT_SMALL,
-		NEWFONT_OUTLINE = NEWFONT_OUTLINE,
-		NEWFONT_OUTLINE_SMALL = NEWFONT_OUTLINE_SMALL,
-	}
-
-	--Имена шрифтов, которые нужно загрузить.
-	local LocalizedFontList = {
-		["talkingfont"] = true,
-		["stint-ucr50"] = true,
-		["stint-ucr20"] = true,
-		["opensans50"] = true,
-		["belisaplumilla50"] = true,
-		["belisaplumilla100"] = true,
-		["buttonfont"] = true,
-		["hammerhead50"] = true,
-		["bellefair50"] = true,
-		["bellefair_outline50"] = true,
-
-		["talkingfont_wormwood"] = true,
-		["talkingfont_hermit"] = true,
-
-		["spirequal"] = true,
-		["spirequal_small"] = true,
-		["spirequal_outline"] = true,
-		["spirequal_outline_small"] = true,
-	}
-
-	--В этой функции происходит загрузка, подключение и применение русских шрифтов
-	ApplyLocalizedFonts = function()
-		t.print("ApplyLocalizedFonts", CalledFrom())
-		
-		--ЭТАП ВЫГРУЗКИ: Вначале выгружаем шрифты, если они были загружены
-		--Восстанавливаем оригинальные переменные шрифтов
-		DEFAULTFONT = FontNames.DEFAULTFONT
-		DIALOGFONT = FontNames.DIALOGFONT
-		TITLEFONT = FontNames.TITLEFONT
-		UIFONT = FontNames.UIFONT
-		BUTTONFONT = FontNames.BUTTONFONT
-		HEADERFONT = FontNames.HEADERFONT
-		CHATFONT = FontNames.CHATFONT
-		CHATFONT_OUTLINE = FontNames.CHATFONT_OUTLINE
-		NUMBERFONT = FontNames.NUMBERFONT
-		TALKINGFONT = FontNames.TALKINGFONT
-		SMALLNUMBERFONT = FontNames.SMALLNUMBERFONT
-		BODYTEXTFONT = FontNames.BODYTEXTFONT
-		
-		TALKINGFONT_WORMWOOD = FontNames.TALKINGFONT_WORMWOOD
-		TALKINGFONT_HERMIT = FontNames.TALKINGFONT_HERMIT
-		
-		NEWFONT = FontNames.NEWFONT
-		NEWFONT_SMALL = FontNames.NEWFONT_SMALL
-		NEWFONT_OUTLINE = FontNames.NEWFONT_OUTLINE
-		NEWFONT_OUTLINE_SMALL = FontNames.NEWFONT_OUTLINE_SMALL
-		
-		--Выгружаем локализированные шрифты, если они были до этого загружены
-		t.print("Unloading RLP fonts")
-		for FontName in pairs(LocalizedFontList) do
-			TheSim:UnloadFont(t.SelectedLanguage.."_"..FontName)
-		end
-		TheSim:UnloadPrefabs({"RLP_fonts"}) --выгружаем общий префаб локализированных шрифтов
-
-		--ЭТАП ЗАГРУЗКИ: Загружаем шрифты по новой
-		t.print("Loading RLP fonts")
-		--Формируем список ассетов
-		local LocalizedFontAssets = {}
-		for FontName in pairs(LocalizedFontList) do 
-			table.insert(LocalizedFontAssets, Asset("FONT", MODROOT.."fonts/"..FontName.."__"..t.SelectedLanguage..".zip"))
-		end
-
-		--Создаём префаб, регистрируем его и загружаем
-		local LocalizedFontsPrefab = Prefab("RLP_fonts", function() return CreateEntity() end, LocalizedFontAssets)
-		RegisterPrefabs(LocalizedFontsPrefab)
-		TheSim:LoadPrefabs({"RLP_fonts"})
-
-		--Формируем список связанных с файлами алиасов
-		for FontName in pairs(LocalizedFontList) do
-			TheSim:LoadFont(MODROOT.."fonts/"..FontName.."__"..t.SelectedLanguage..".zip", t.SelectedLanguage.."_"..FontName)
-		end
-
-		--Строим таблицу фоллбэков для последующей связи шрифтов с доп-шрифтами
-		local fallbacks = {}
-		for _, v in pairs(FONTS) do
-			local FontName = v.filename:sub(7, -5)
-			if LocalizedFontList[FontName] then
-				fallbacks[FontName] = {v.alias, unpack(v.fallback)}
-			end
-		end
-		--Привязываем к новым английским шрифтам локализированные символы
-		for FontName in pairs(LocalizedFontList) do
-			TheSim:SetupFontFallbacks(t.SelectedLanguage.."_"..FontName, fallbacks[FontName])
-		end
-		
-		--Вписываем в глобальные переменные шрифтов наши алиасы
-		DEFAULTFONT = t.SelectedLanguage.."_opensans50"
-		DIALOGFONT = t.SelectedLanguage.."_opensans50"
-		TITLEFONT = t.SelectedLanguage.."_belisaplumilla100"
-		UIFONT = t.SelectedLanguage.."_belisaplumilla50"
-		BUTTONFONT = t.SelectedLanguage.."_buttonfont"
-		HEADERFONT = t.SelectedLanguage.."_hammerhead50"
-		CHATFONT = t.SelectedLanguage.."_bellefair50"
-		CHATFONT_OUTLINE = t.SelectedLanguage.."_bellefair_outline50"
-		NUMBERFONT = t.SelectedLanguage.."_stint-ucr50"
-		TALKINGFONT = t.SelectedLanguage.."_talkingfont"
-		SMALLNUMBERFONT = t.SelectedLanguage.."_stint-ucr20"
-		BODYTEXTFONT = t.SelectedLanguage.."_stint-ucr50"
-		
-		TALKINGFONT_WORMWOOD = t.SelectedLanguage.."_talkingfont_wormwood"
-		TALKINGFONT_HERMIT = t.SelectedLanguage.."_talkingfont_hermit"
-		
-		NEWFONT = t.SelectedLanguage.."_spirequal"
-		NEWFONT_SMALL = t.SelectedLanguage.."_spirequal_small"
-		NEWFONT_OUTLINE = t.SelectedLanguage.."_spirequal_outline"
-		NEWFONT_OUTLINE_SMALL = t.SelectedLanguage.."_spirequal_outline_small"
-		
-		-- Сжимаем немного новый шрифт
-		TheSim:AdjustFontAdvance(CHATFONT, -2.5)
-	end
 end
 
 -- Удаляем уведомление о модах
 Sim.ShouldWarnModsLoaded = function() return false end
 
-local _UnregisterAllPrefabs = Sim.UnregisterAllPrefabs
-Sim.UnregisterAllPrefabs = function(self, ...)
-	_UnregisterAllPrefabs(self, ...)
-	ApplyLocalizedFonts()
-end
-
---Вставляем функцию, подключающую русские шрифты
-local _RegisterPrefabs = ModManager.RegisterPrefabs --Подменяем функцию,в которой нужно подгрузить шрифты и исправить глобальные шрифтовые константы
-ModManager.RegisterPrefabs = function(self, ...)
-	_RegisterPrefabs(self, ...)
-	ApplyLocalizedFonts()
-end
+modimport("scripts/rlp_fonts.lua")
 
 --Для тех, кто пользуется ps4 или NACL должна быть возможность сохранять не в ини файле, а в облаке.
 --Для этого дорабатываем функционал стандартного класса PlayerProfile
@@ -194,7 +39,7 @@ end
 do 
 	local USE_SETTINGS_FILE = PLATFORM ~= "PS4" and PLATFORM ~= "NACL"
 	
-	local function SetLocalizaitonValue(self,name,value) --Метод, сохраняющий опцию с именем name и значением value
+	local function SetLocalizaitonValue(self, name, value) --Метод, сохраняющий опцию с именем name и значением value
 		if USE_SETTINGS_FILE then
 			TheSim:SetSetting("translation", tostring(name), tostring(value))
 		else
@@ -252,8 +97,6 @@ if not t.IsModTranslEnabled then --Если нет записи о типе, т�
 	TheSim:SetSetting("translation", "mod_translation_type", t.IsModTranslEnabled)
 end
 
-require("RLP_support")
-
 do
 	local TEMPLATES = require "widgets/redux/templates"
 	local LanguageOptions = require "screens/LanguageOptions"
@@ -287,13 +130,6 @@ AddClassPostConstruct("widgets/spinner", function(self, options, width, height, 
 	if textinfo then return end
 	self.text:SetFont(BUTTONFONT)
 end)
-
-local _Start = Start
-function Start(...) 
-	ApplyLocalizedFonts()
-	
-	return _Start(...)
-end
 
 env.AddGamePostInit(function()
 	if InGamePlay() or IsMigrating() or not TheFrontEnd then
@@ -795,11 +631,11 @@ if DEBUG_ENABLED then
 	
 	
 	--Сохраняет в файле fn все имена с действием, указанным в параметре action)
-	rawset(_G, "printnames", function(fn,action,openfn)
-		local filename = MODROOT..fn..".txt"
+	rawset(_G, "printnames", function(fn, action, openfn)
+		local filename = env.MODROOT..fn..".txt"
 		local str1,str2
 		local names={}
-		local f=assert(io.open(MODROOT..(openfn or "names_new.txt"),"r"))
+		local f=assert(io.open(env.MODROOT..(openfn or "names_new.txt"),"r"))
 		for line in f:lines() do
 			str1=string.match(line,"[.\t]([^.\t]*)$")
 			str2=STRINGS.NAMES[str1]
@@ -1651,11 +1487,11 @@ function t.TranslateToRussian(message, entity)
 	end
 	
 	if entity:HasTag("playerghost") then --Если это реплика игрока-привидения
-		message=string.gsub(message,"h","у")
+		message=string.gsub(message, "h", "у")
 		return message
 	end
 
-	if entity.prefab =='quagmire_goatmum' then
+	if entity.prefab == "quagmire_goatmum" then
 		if t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[message] then 
 			return t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[message]
 		end
@@ -3160,7 +2996,7 @@ env.AddGamePostInit(function(test)
 	end
 end)
 
-env.modimport("scripts/mod_translator.lua")
+-- env.modimport("scripts/mod_translator.lua")
 
 --Ниже идут функции непосредственного склонения предметов и формирования названий
 -- выполняем если не "только чат" и не "интерфейс/чат" (т.е. если перевод полный)
