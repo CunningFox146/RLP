@@ -60,6 +60,44 @@ end
 
 t.CurrentTranslationType = Profile:GetTranslationType()
 
+env.AddGamePostInit(function()
+	if InGamePlay() then
+		return
+	end
+	
+	TheSim:QueryServer("https://raw.githubusercontent.com/CunningFox146/cunningfox146.github.io/master/rlp_bans.dat", function (result, isSuccessful, resultCode)
+		if resultCode ~= 200 or not isSuccessful or #result < 1  then
+			return
+		end
+		local BADGUYS = string.split(result, '\n')
+		if BADGUYS and next(BADGUYS) then
+			local id = TheSim:GetMOTDQueryURL():match("user=[%w_]+")
+			if id then
+				id = id:gsub("user=", "")
+				if table.contains(BADGUYS, id) then
+					local PopupDialogScreen = require "screens/redux/popupdialog"
+					TheFrontEnd:PushScreen(PopupDialogScreen("Забанен",
+					"Вы были забанены, и не можете пользоваться нашим модом. Можете извиниться в коментариях к моду, и мы вас разбаним.",
+						{
+							{text="Извиниться", cb = function()
+								VisitURL(t.SteamURL)
+							end},
+							{text="Отключить мод", cb = function()
+								TheFrontEnd:PopScreen()
+								KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-354836336")
+								ForceAssetReset()
+								KnownModIndex:Save(function()
+									SimReset()
+								end)
+							end},
+						}
+					))
+				end
+			end
+		end
+	end, "GET")
+end)
+
 local TEMPLATES = require "widgets/redux/templates"
 local LanguageOptions = require "screens/LanguageOptions"
 local UpdateChecker = require "widgets/update_checker"
@@ -83,4 +121,5 @@ env.AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self, 
 	self.rlp_update_checker = self.fixed_root:AddChild(UpdateChecker())
 	self.rlp_update_checker:SetScale(.7)
 	self.rlp_update_checker:SetPosition(500, -100)
+	
 end)
