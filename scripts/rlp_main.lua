@@ -6,8 +6,6 @@ local modimport = env.modimport
 
 GLOBAL.setfenv(1, GLOBAL)
 
-require("RLP_support")
-
 local VerChecker = require "ver_checker"
 t.VerChecker = VerChecker
 VerChecker:LoadVersion()

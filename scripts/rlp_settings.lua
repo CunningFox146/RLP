@@ -60,6 +60,8 @@ end
 
 t.CurrentTranslationType = Profile:GetTranslationType()
 
+require("rlp_mod_support")
+
 env.AddGamePostInit(function()
 	if InGamePlay() then
 		return
