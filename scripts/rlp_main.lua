@@ -6,6 +6,8 @@ local modimport = env.modimport
 
 GLOBAL.setfenv(1, GLOBAL)
 
+require("constants")
+
 local VerChecker = require "ver_checker"
 t.VerChecker = VerChecker
 VerChecker:LoadVersion()
@@ -94,6 +96,12 @@ end
 print("Загрузка PO файла")
 env.LoadPOFile(t.StorePath..t.MainPOfilename, t.SelectedLanguage)
 t.PO = LanguageTranslator.languages[t.SelectedLanguage]
+-- TEMP HACK!!!! Убираем все <пусто> из файла
+for k, v in pairs(t.PO) do
+	if v == "<пусто>" then
+		t.PO[k] = nil
+	end
+end
 print("PO файл загружен!")
 
 --Возвращает корректную форму слова день (или другого, переданного вторым параметром)
@@ -984,93 +992,78 @@ for i,v in pairs(STRINGS.SWAMPIGNAMES) do
 end
 
 --Подгружаем в "хэш" фразы Мамси
-t.SpeechHashTbl.GOATMUM_CRAVING_HINTS={Eng2Rus={}}
-for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS) do
-	t.SpeechHashTbl.GOATMUM_CRAVING_HINTS.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_HINTS."..i] or v
-	t.PO["STRINGS.GOATMUM_CRAVING_HINTS."..i]=nil
-end
-for i,v in pairs(STRINGS.GOATMUM_CRAVING_MATCH) do
-	if string.find(t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i],'%%s') then 
-		t.SpeechHashTbl.GOATMUM_CRAVING_HINTS.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i] or v
-		t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i]=nil
+if TheNet:GetServerGameMode() == "quagmire" then
+	t.SpeechHashTbl.GOATMUM_CRAVING_HINTS={Eng2Rus={}}
+	for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS) do
+		t.SpeechHashTbl.GOATMUM_CRAVING_HINTS.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_HINTS."..i] or v
+		t.PO["STRINGS.GOATMUM_CRAVING_HINTS."..i]=nil
 	end
-end
-for i,v in pairs(STRINGS.GOATMUM_CRAVING_MISMATCH) do
-	if string.find(t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i],'%%s') then 
-		t.SpeechHashTbl.GOATMUM_CRAVING_HINTS.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i] or v
-		t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i]=nil
+	for i,v in pairs(STRINGS.GOATMUM_CRAVING_MATCH) do
+		if string.find(t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i],'%%s') then 
+			t.SpeechHashTbl.GOATMUM_CRAVING_HINTS.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i] or v
+			t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i]=nil
+		end
 	end
-end
-
-
-t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2={Eng2Rus={}}
-for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS_PART2) do
-	t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2."..i] or v
-	t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2."..i]=nil
-end
-for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS_PART2_IMPATIENT) do
-	t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2_IMPATIENT."..i] or v
-	t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2_IMPATIENT."..i]=nil
-end
-
-t.SpeechHashTbl.GOATMUM_CRAVING_MAP={Eng2Rus={}}
-for i,v in pairs(STRINGS.GOATMUM_CRAVING_MAP) do
-	t.SpeechHashTbl.GOATMUM_CRAVING_MAP.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MAP."..i] or v
-	t.PO["STRINGS.GOATMUM_CRAVING_MAP."..i]=nil
-end
-
-
-t.SpeechHashTbl.GOATMUM_WELCOME_INTRO={Eng2Rus={}}
-for i,v in pairs(STRINGS.GOATMUM_WELCOME_INTRO) do
-	t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_WELCOME_INTRO."..i] or v
-	t.PO["STRINGS.GOATMUM_WELCOME_INTRO."..i]=nil
-end
-for i,v in pairs(STRINGS.GOATMUM_LOST) do
-	t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_LOST."..i] or v
-	t.PO["STRINGS.GOATMUM_LOST."..i]=nil
-end
-for i,v in pairs(STRINGS.GOATMUM_VICTORY) do
-	t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_VICTORY."..i] or v
-	t.PO["STRINGS.GOATMUM_VICTORY."..i]=nil
-end
-for i,v in pairs(STRINGS.GOATMUM_CRAVING_MATCH) do
-	if t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i] then 
-		t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i] or v
-		t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i]=nil
+	for i,v in pairs(STRINGS.GOATMUM_CRAVING_MISMATCH) do
+		if string.find(t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i],'%%s') then 
+			t.SpeechHashTbl.GOATMUM_CRAVING_HINTS.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i] or v
+			t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i]=nil
+		end
 	end
-end
-for i,v in pairs(STRINGS.GOATMUM_CRAVING_MISMATCH) do
-	if t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i] then 
-		t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i] or v
-		t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i]=nil
+
+
+	t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2={Eng2Rus={}}
+	for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS_PART2) do
+		t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2."..i] or v
+		t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2."..i]=nil
 	end
-end
-
-t.SpeechHashTbl.EPITAPHS={}
-
-if t.CurrentTranslationType ~= t.TranslationTypes.Full and
-(t.CurrentTranslationType == t.TranslationTypes.InterfaceChat or t.CurrentTranslationType == t.TranslationTypes.ChatOnly) then --Интерфейс и чат. Тоже ничего не делаем. Блокировка произойдёт позже.
-	for charname,v in pairs(STRINGS.CHARACTERS) do
-		t.SpeechHashTbl[charname]={}
+	for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS_PART2_IMPATIENT) do
+		t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2_IMPATIENT."..i] or v
+		t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2_IMPATIENT."..i]=nil
 	end
-	
-	t.SpeechHashTbl.EPITAPHS={}
-	t.SpeechHashTbl.NAMES={Eng2Key={},Rus2Eng={}}
-	t.SpeechHashTbl.PIGNAMES={Eng2Rus={}}
-	t.SpeechHashTbl.BUNNYMANNAMES={Eng2Rus={}}
 
-	if t.CurrentTranslationType==t.TranslationTypes.ChatOnly then --Только чат. Убираем перевод всего.
-		local a1=t.PO["STRINGS.LMB"]
-		local a2=t.PO["STRINGS.RMB"]
-		t.PO={} --Да, вот так. Убираем весь перевод.
-		t.PO["STRINGS.LMB"]=a1
-		t.PO["STRINGS.RMB"]=a2
-	else
-		for i,v in pairs(t.PO) do
-			if string.sub(i,8+1,8+3)~="UI." then t.PO[i]=nil end
+	t.SpeechHashTbl.GOATMUM_CRAVING_MAP={Eng2Rus={}}
+	for i,v in pairs(STRINGS.GOATMUM_CRAVING_MAP) do
+		t.SpeechHashTbl.GOATMUM_CRAVING_MAP.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MAP."..i] or v
+		t.PO["STRINGS.GOATMUM_CRAVING_MAP."..i]=nil
+	end
+
+
+	t.SpeechHashTbl.GOATMUM_WELCOME_INTRO={Eng2Rus={}}
+	for i,v in pairs(STRINGS.GOATMUM_WELCOME_INTRO) do
+		t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_WELCOME_INTRO."..i] or v
+		t.PO["STRINGS.GOATMUM_WELCOME_INTRO."..i]=nil
+	end
+	for i,v in pairs(STRINGS.GOATMUM_LOST) do
+		t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_LOST."..i] or v
+		t.PO["STRINGS.GOATMUM_LOST."..i]=nil
+	end
+	for i,v in pairs(STRINGS.GOATMUM_VICTORY) do
+		t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_VICTORY."..i] or v
+		t.PO["STRINGS.GOATMUM_VICTORY."..i]=nil
+	end
+	for i,v in pairs(STRINGS.GOATMUM_CRAVING_MATCH) do
+		if t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i] then 
+			t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i] or v
+			t.PO["STRINGS.GOATMUM_CRAVING_MATCH."..i]=nil
+		end
+	end
+	for i,v in pairs(STRINGS.GOATMUM_CRAVING_MISMATCH) do
+		if t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i] then 
+			t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i] or v
+			t.PO["STRINGS.GOATMUM_CRAVING_MISMATCH."..i]=nil
 		end
 	end
 end
+
+for charname,v in pairs(STRINGS.CHARACTERS) do
+	t.SpeechHashTbl[charname]={}
+end
+
+t.SpeechHashTbl.EPITAPHS={}
+t.SpeechHashTbl.NAMES={Eng2Key={},Rus2Eng={}}
+t.SpeechHashTbl.PIGNAMES={Eng2Rus={}}
+t.SpeechHashTbl.BUNNYMANNAMES={Eng2Rus={}}
 
 --Подменяем названия режимов игры
 if rawget(_G, "GAME_MODES") and STRINGS.UI.GAMEMODES then
@@ -1426,11 +1419,6 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 	--Вывод любых анонсов на экран. Тут подменяем все нестандартные фразы, и не только
 	local _ShowNewAnnouncement = self.ShowNewAnnouncement
 	if _ShowNewAnnouncement then function self:ShowNewAnnouncement(announcement, ...)
-		--Ничего не делаем, если переводится только чат или только чат и интерфейс
-		if t.CurrentTranslationType==t.TranslationTypes.ChatOnly or t.CurrentTranslationType==t.TranslationTypes.InterfaceChat then
-			return _ShowNewAnnouncement(self, announcement, ...)
-		end
-
 		local gender, player, RussianMessage, name, name2, killerkey
 
 		local function test(adder1,msg1,rusmsg1,adder2,msg2,rusmsg2,ending)
@@ -1599,544 +1587,529 @@ AddPrefabPostInit("blueprint", function(inst)
 	reassignfn(inst)
 end)
 
---Остальное не выполняется, если перевод в режиме только чата
-if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then
-	--Вешает хук на любой метод класса указанного объекта.
-	--Функция fn получает в качестве параметров ссылку на объект и все параметры перехватываемого метода.
-	--DoAfter определяет, выполняется ли хук до, или после метода.
-	--Если функция fn выполняется до метода и возвращает результат, то этот результат считается таблицей и распаковывается в качестве параметров оригинального метода.
-	--ExecuteNow пригодится, если нужно выполнить действие сразу в момент установки хука.
-	local function SetHookFunction(obj, method, fn, DoAfter, ExecuteNow, ...)
-		if obj and method and type(method)=="string" and fn and type(fn)=="function" then
-			if ExecuteNow then fn(obj, ...) end
-			if obj[method] then
-				local Old=obj[method]
-				obj[method]=function(obj, ...)
-					local params={...}
-					if not DoAfter then local a={fn(obj, ...)} if #a>0 then params=a end end
-					Old(obj, unpack(params))
-					if DoAfter then fn(obj, ...) end
-				end
+--Вешает хук на любой метод класса указанного объекта.
+--Функция fn получает в качестве параметров ссылку на объект и все параметры перехватываемого метода.
+--DoAfter определяет, выполняется ли хук до, или после метода.
+--Если функция fn выполняется до метода и возвращает результат, то этот результат считается таблицей и распаковывается в качестве параметров оригинального метода.
+--ExecuteNow пригодится, если нужно выполнить действие сразу в момент установки хука.
+local function SetHookFunction(obj, method, fn, DoAfter, ExecuteNow, ...)
+	if obj and method and type(method)=="string" and fn and type(fn)=="function" then
+		if ExecuteNow then fn(obj, ...) end
+		if obj[method] then
+			local Old=obj[method]
+			obj[method]=function(obj, ...)
+				local params={...}
+				if not DoAfter then local a={fn(obj, ...)} if #a>0 then params=a end end
+				Old(obj, unpack(params))
+				if DoAfter then fn(obj, ...) end
 			end
 		end
 	end
-	
-	--Подменяем портреты
-	local TRANSLATED_LIST = {
-		wortox = true,
-		warly = true,
-		wurt = true,
-		winona = true,
-		wickerbottom = true,
-		waxwell = true,
-		willow = true,
-		wilson = true,
-		woodie = true,
-		wes = true,
-		wolfgang = true,
-		wendy = true,
-		wathgrithr = true,
-		webber = true,
-		wormwood = true,
-		walter = true,
-	}
-	
-	require("characterutil")
-	
-	local _SetHeroNameTexture_Grey = SetHeroNameTexture_Grey
-	local _SetHeroNameTexture_Gold = SetHeroNameTexture_Gold
-	
-	function SetHeroNameTexture_Grey(w, hero, ...)
-		if TRANSLATED_LIST[hero] then
-			w:SetTexture("images/rus_names_"..hero..".xml", "rus_"..hero..".tex")
-			return true
-		end
-		return _SetHeroNameTexture_Grey(w, hero, ...)
-	end
-	
-	function SetHeroNameTexture_Gold(w, hero, ...)
-		if TRANSLATED_LIST[hero] then
-			w:SetTexture("images/rus_names_gold_"..hero..".xml", "rus_"..hero..".tex")
-			return true
-		end
-		return _SetHeroNameTexture_Gold(w, hero, ...)
-	end
-	
-	AddClassPostConstruct("screens/playerstatusscreen", function(self)
-		if self.OnBecomeActive then
-			local OldOnBecomeActive = self.OnBecomeActive
-			function self:OnBecomeActive(...)
-				local res = OldOnBecomeActive(self, ...)
-					if self.player_widgets then
-						for _, v in pairs(self.player_widgets) do
-							if v.age and v.age.SetString then
-								local OldSetString = v.age.SetString
-								function v.age:SetString(str, ...)
-									if str then
-										str = str:gsub("(%d+)(.+)", function (days, word)
-											if word~=STRINGS.UI.PLAYERSTATUSSCREEN.AGE_DAY and word~=STRINGS.UI.PLAYERSTATUSSCREEN.AGE_DAYS then return end
-											return days.." "..StringTime(days)
-										end)
-									end
-									local res = OldSetString(self, str, ...)
-									return res
-								end
-								v.age:SetString(v.age:GetString())
-							end
-						end
-					end
-				return res
-			end
-		end
-	end)
-	
-	AddClassPostConstruct("widgets/uiclock", function(self)
-		if self._text and self._text.SetString then
-			local OldSetString = self._text.SetString
-			function self._text:SetString(str, ...)
-				if str then
-					str = str:gsub(STRINGS.UI.HUD.CLOCKSURVIVED.."(.+)(%d+)(%s+)(.+)", function (sep1, days, sep2, word)
-						if word~=STRINGS.UI.HUD.CLOCKDAY and word~=STRINGS.UI.HUD.CLOCKDAYS then return end
-						return StringTime(days, {"Прожит", "Прожито", "Прожиты"})..sep1..days..sep2..StringTime(days)
-					end)
-				end
-				local res = OldSetString(self, str, ...)
-				return res
-			end
-		end
-	end)
-	AddClassPostConstruct("widgets/text", function(self)
-		local function IsWhiteSpace(charcode)
-		    -- 32: space
-		    --  9: \t
-		    return charcode == 32 or charcode == 9
-		end
-
-		local function IsNewLine(charcode)
-		    -- 10: \n
-		    -- 11: \v
-		    -- 12: \f
-		    -- 13: \r
-		    return charcode >= 10 and charcode <= 13
-		end
-		function self:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
-		    if str == nil or #str <= 0 then
-		        self.inst.TextWidget:SetString("")
-		        return
-		    end
-		    local tempmaxwidth = type(maxwidth) == "table" and maxwidth[1] or maxwidth
-		    if maxlines <= 1 then
-		        self:SetTruncatedString(str, tempmaxwidth, maxcharsperline, ellipses)
-		    else
-		        self:SetTruncatedString(str, tempmaxwidth, maxcharsperline, false)
-		        local line = self:GetString()
-		        if #line < #str then
-		            if IsNewLine(str:byte(#line + 1)) then
-		                str = str:sub(#line + 2)
-		            elseif not IsWhiteSpace(str:byte(#line + 1)) then
-		                for i = #line, 1, -1 do
-		                    if IsWhiteSpace(line:byte(i)) then
-		                        line = line:sub(1, i)
-		                        break
-		                    end
-		                end
-		                str = str:sub(#line + 1)
-		            else
-		                str = str:sub(#line + 2)
-		                while #str > 0 and IsWhiteSpace(str:byte(1)) do
-		                    str = str:sub(2)
-		                end
-		            end
-		            if #str > 0 then
-		                if type(maxwidth) == "table" then
-		                    if #maxwidth > 2 then
-		                        tempmaxwidth = {}
-		                        for i = 2, #maxwidth do
-		                            table.insert(tempmaxwidth, maxwidth[i])
-		                        end
-		                    elseif #maxwidth == 2 then
-		                        tempmaxwidth = maxwidth[2]
-		                    end
-		                end
-		                self:SetMultilineTruncatedString(str, maxlines - 1, tempmaxwidth, maxcharsperline, ellipses)
-		                self.inst.TextWidget:SetString(line.."\n"..(self.inst.TextWidget:GetString() or ""))
-		            end
-		        end
-		    end
-		end
-	end)
-	
-	AddClassPostConstruct("widgets/playeravatarpopup", function(self)
-		local _UpdateData = self.UpdateData
-		function self:UpdateData(data)
-			_UpdateData(self, data)
-			if self.age and data.playerage then
-				local newstr=self.age:GetString()
-				newstr = newstr:gsub("Прожито", StringTime(data.playerage, {"Прожит", "Прожито", "Прожиты"}),1)
-				self.age:SetString(newstr:gsub("Дней", StringTime(data.playerage),1))
-			end
-		end
-	end)
-
-	--Переводим названия дней недели
-	local _ListSnapshots = NetworkProxy.ListSnapshots
-	NetworkProxy.ListSnapshots = function(self, ...)
-		local lis t =_ListSnapshots(self, ...) or {}
-		if list and #list>0 and list[1].timestamp then
-			local daysofweek={"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"}
-			local rusdaysofweek={"Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"}
-			local rusdaysofweek3={"Пнд","Втр","Срд","Чтв","Птн","Сбт","Вск"}
-			for _,v in ipairs(list) do
-				for ii,vv in ipairs(daysofweek) do
-					if string.sub(v.timestamp,1,#vv):lower()==vv:lower() then
-						v.timestamp=rusdaysofweek[ii]..string.sub(v.timestamp,#vv+1)
-						break
-					elseif string.sub(v.timestamp,1,3):lower()==string.sub(vv,1,3):lower() then
-						v.timestamp=rusdaysofweek3[ii]..string.sub(v.timestamp,4)
-						break
-					elseif string.sub(v.timestamp,1,2):lower()==string.sub(vv,1,2):lower() then
-						v.timestamp=string.sub(rusdaysofweek3[ii],1,2)..string.sub(v.timestamp,3)
-						break
-					end
-
-				end
-			end
-		end
-		return list
-	end
-
-	--Окно просмотра серверов, двигаем контролсы, исправляем надписи
-	local function ServerListingScreenPost1(self)
-		if self.filters then
-			for i, v in pairs(self.filters) do 
-				if v.label and v.label.SetFont then
-					v.label:SetFont(CHATFONT)
-				end
-				if v.spinner and v.spinner.SetFont then
-					v.spinner:SetFont(CHATFONT)
-				end
-			end
-		end
-		if self.title then
-			local checkstr = STRINGS.UI.SERVERLISTINGSCREEN.SERVER_LIST_TITLE_INTENT:gsub("%%s", "(.+)")
-			local intentions = {}
-			for key, str in pairs(STRINGS.UI.INTENTION) do intentions[str] = key end
-			local OldSetString = self.title.SetString
-			function self.title:SetString(str, ...)
-				if str then
-					local int = str:match(checkstr)
-					if int and intentions[int] then
-						if intentions[int]=="SOCIAL" then
-							str = "Дружеские сервера"
-						elseif intentions[int]=="COOPERATIVE" then
-							str = "Командные сервера"
-						elseif intentions[int]=="COMPETITIVE" then
-							str = "Соревновательные сервера"
-						elseif intentions[int]=="MADNESS" then
-							str = "Сервера типа «Безумие»"
-						elseif intentions[int]=="ANY" then
-							str = "Сервера всех стилей"
-						end
-					end
-				end
-				local res = OldSetString(self, str, ...)
-				return res
-			end
-			self.title:SetString(self.title:GetString())
-		end
-		if self.sorting_spinner and self.sorting_spinner.label then
-			self.sorting_spinner.label:Nudge({x=-40,y=0,z=0})
-			self.sorting_spinner.label:SetRegionSize(150,50)
-		end
-		if self.season_description and self.season_description.text then
-			local OldSetString = self.season_description.text.SetString
-			if OldSetString then
-				function self.season_description.text:SetString(str, ...)
-					if str:find("Лето")~=nil then
-						if str:find("Ранняя")~=nil then
-							str=str:gsub("Ранняя","Раннее")
-						elseif str:find("Поздняя")~=nil then
-							str=str:gsub("Поздняя","Позднее")
-						end
-					end
-					local res = OldSetString(self, str, ...)
-					return res
-				end
-			end
-		end
-	end
-	AddClassPostConstruct("screens/redux/serverlistingscreen", ServerListingScreenPost1)
-
-	AddClassPostConstruct("components/named_replica", function(self)
-		local function OnNameDirtyMoose(inst)
-			inst.name = inst.possiblenames[math.random(#inst.possiblenames)]
-		end
-		if self.inst.prefab == "moose" then
-			self.inst.possiblenames = {STRINGS.NAMES.MOOSE1, STRINGS.NAMES.MOOSE2}
-			self.inst:ListenForEvent("namedirty", OnNameDirtyMoose)
-		end
-	end)
-
-	--Сохраняем непереведённый текст настроек приватности серверов в свойствах мира (см. ниже)
-	local privacy_options = {}
-	for i,v in pairs(STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY) do
-		privacy_options[v] = i
-	end
-
-	--Баг разработчиков, не переводятся радиобаттоны в настройках при создании сервера
-	AddClassPostConstruct("widgets/redux/serversettingstab", function(self)
-		local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
-		function self:RefreshPrivacyButtons()
-			oldRefreshPrivacyButtons(self)
-			for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
-				v.button.text:SetFont(NEWFONT)
-				v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
-			end  
-		end
-		if self.privacy_type and self.privacy_type.buttons and self.privacy_type.buttons.buttonwidgets then
-			for _,option in pairs(self.privacy_type.buttons.options) do
-				if privacy_options[option.text] then
-					option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY[ privacy_options[option.text] ]
-				end
-				
-			end
-			for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
-				v.button.text:SetFont(NEWFONT)
-				v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
-			end   
-		end
-		if self.server_intention then
-			self.server_intention.button.text:SetSize(23)
-			self.server_intention.button.text:Nudge({x=-3,y=0,z=0})
-		end
-	end)
-
-	--Сохраняем непереведённый текст настроек в свойствах мира (см. ниже)
-	local SandboxMenuData = {}
-	for i,v in pairs(STRINGS.UI.SANDBOXMENU) do
-		SandboxMenuData[v] = i
-	end
-
-	--Виджет выбора свойств мира. Исправляем надписи, согласовываем слова
-	AddClassPostConstruct("widgets/redux/worldcustomizationlist", function(self)
-		if self.optionitems then
-			for i,v in pairs(self.optionitems) do
-				if v.heading_text then
-					v.heading_text=v.heading_text:gsub(" World",": настройки мира")
-					v.heading_text=v.heading_text:gsub(" Resources",": настройки ресурсов")
-					v.heading_text=v.heading_text:gsub(" Food",": настройки еды")
-					v.heading_text=v.heading_text:gsub(" Animals",": настройки животных")
-					v.heading_text=v.heading_text:gsub(" Monsters",": настройки монстров")
-				end
-				if v.option and v.option.options then
-					for ii,vv in pairs(v.option.options) do
-						local txt=STRINGS.UI.SANDBOXMENU[t.SpeechHashTbl.SANDBOXMENU.Eng2Key[vv.text]]
-						if txt then
-							vv.text=txt
-						else
-							vv.text=vv.text:gsub("No Day","Без дня")
-							vv.text=vv.text:gsub("No Dusk","Без вечера")
-							vv.text=vv.text:gsub("No Night","Без ночи")
-							vv.text=vv.text:gsub("Long Day","Длинный день")
-							vv.text=vv.text:gsub("Long Dusk","Длинный вечер")
-							vv.text=vv.text:gsub("Long Night","Длинная ночь")
-							vv.text=vv.text:gsub("Only Day","Только день")
-							vv.text=vv.text:gsub("Only Dusk","Только вечер")
-							vv.text=vv.text:gsub("Only Night","Только ночь")
-						end
-					end
-				end
-				if v.GetChildren then
-					for ii,vv in pairs(v:GetChildren()) do
-						if vv.name and vv.name:upper()=="TEXT" then --Заголовки групп настроек
-							local words = vv:GetString():split(" ")
-							local res
-							if #words==2 then
-								local second = SandboxMenuData[ words[2] ]
-								words[2] = STRINGS.UI.SANDBOXMENU[second] or words[2]
-								if second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.FOREST then
-									if second=="CHOICEAMTDAY" then
-										res = words[2].." в лесу"
-									elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
-										res = words[2].." леса"
-									elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
-										res = words[2]..", доступная в лесу"
-									elseif second=="CHOICEMISC" then
-										res = "Лесной "..firsttolower(words[2])
-									end
-								elseif second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.CAVE then
-									if second=="CHOICEAMTDAY" then
-										res = words[2].." в пещерах"
-									elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
-										res = words[2].." пещер"
-									elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
-										res = words[2]..", доступная в пещерах"
-									elseif second=="CHOICEMISC" then
-										res = "Пещерный "..firsttolower(words[2])
-									end
-								elseif second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.UNKNOWN then
-									if second=="CHOICEAMTDAY" then
-										res = words[2].." в каком-то мире"
-									elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
-										res = words[2].." какого-то мира"
-									elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
-										res = words[2]..", доступная в каком-то мире"
-									elseif second=="CHOICEMISC" then
-										res = words[1].." "..firsttolower(words[2])
-									end
-								end
-							end
-							if res then vv:SetString(res) end
-						elseif vv.name and vv.name:upper()=="OPTION" then --Спиннеры, нужно перевести в них текст
-							for iii,vvv in pairs(vv:GetChildren()) do
-								if vvv.name and vvv.name:upper()=="SPINNER" then
-									for _,opt in ipairs(vvv.options) do
-										if SandboxMenuData[opt.text] then
-											opt.text = STRINGS.UI.SANDBOXMENU[ SandboxMenuData[opt.text] ]
-										elseif opt.text then
-											local words = opt.text:split(" ")
-											for idx, txt in ipairs(words) do
-												local p = SandboxMenuData[txt]
-												words[idx] = p and STRINGS.UI.SANDBOXMENU[p] or words[idx]
-											end
-											if words[2]==STRINGS.UI.SANDBOXMENU.DAY then
-												if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","дня"}
-												elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгий" end
-											elseif words[2]==STRINGS.UI.SANDBOXMENU.DUSK then
-												if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","вечера"}
-												elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгий" end
-											elseif words[2]==STRINGS.UI.SANDBOXMENU.NIGHT then
-												if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","ночи"}
-												elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгая" end
-											end
-											opt.text = words[1] or opt.text
-											for idx=2,#words do opt.text = opt.text.." "..firsttolower(words[idx]) end
-										end
-									end
-									vvv:UpdateState()
-								elseif vvv.name and vvv.name:upper()=="IMAGEPARENT" then
-									local list={["day.tex"]=1,
-												["season.tex"]=1,
-												["season_start.tex"]=1,
-												["world_size.tex"]=1,
-												["world_branching.tex"]=1,
-												["world_loop.tex"]=1,
-												["world_map.tex"]=1,
-												["world_start.tex"]=1,
-												["starting_variety.tex"]=1,
-												["winter.tex"]=1,
-												["summer.tex"]=1,
-												["autumn.tex"]=1,
-												["spring.tex"]=1}
-									for iiii,vvvv in pairs(vvv:GetChildren()) do
-										if vvvv.name and vvvv.name:upper()=="IMAGE" then
-											if list[vvvv.texture] then
-												vvvv:SetTexture("images/rus_mapgen.xml", "rus_"..vvvv.texture)
-											end
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-			end
-		end
-	end)
-
-
-	--Сохраняем непереведённый текст пресетов настроек в свойствах мира (см. ниже)
-	local PresetLevels = {}
-	for i,v in pairs(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS) do
-		PresetLevels[v] = i
-	end
-	for i,v in pairs(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC) do
-		PresetLevels[v] = i
-	end
-
-	--Баг разработчиков: Не переведённые пресеты
-	AddClassPostConstruct("widgets/redux/worldcustomizationtab", function(self)
-		local Levels = require "map/levels"
-		local oldGetDataForLevelID=Levels.GetDataForLevelID
-		Levels.GetDataForLevelID=function(id, nolocation)
-			local ret = oldGetDataForLevelID(id, nolocation)
-			if ret and STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[id] then
-				ret.desc=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[id]
-				ret.name=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[id]
-			end
-			return ret
-		end
-		function self:UpdatePresetInfo(level)
-			if level ~= self.currentmultilevel -- this might be called for the "unselected" level, so we don't want to do anything.
-			    or not self:IsLevelEnabled(level) -- invalid so we can't show anything.
-			    then
-			    return
-			end
-
-		    local clean = self:GetNumberOfTweaks(self.currentmultilevel) == 0
-
-		    if not self.allowEdit then
-		    	
-		    	local levelid=self.slotoptions[self.slot][self.currentmultilevel].id
-		    	self.slotoptions[self.slot][self.currentmultilevel].desc=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[levelid]
-		    	self.slotoptions[self.slot][self.currentmultilevel].name=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[levelid]
-		        self.presetdesc:SetString(self.slotoptions[self.slot][self.currentmultilevel].desc)
-		        --print(self.slotoptions[self.slot][self.currentmultilevel].name)
-		        self.presetspinner.spinner:UpdateText(self.slotoptions[self.slot][self.currentmultilevel].name)
-		    elseif clean then
-		        self.presetdesc:SetString(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).desc)
-		        --print(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name)
-		        self.presetspinner.spinner:UpdateText(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name)
-		    elseif self.current_option_settings[self.currentmultilevel].preset == "MOD_MISSING" then
-		        self.presetdesc:SetString(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC.MOD_MISSING)
-		        self.presetspinner.spinner:UpdateText(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS.MOD_MISSING)
-		    else
-		        self.presetdesc:SetString(STRINGS.UI.CUSTOMIZATIONSCREEN.CUSTOMDESC)
-		        self.presetspinner.spinner:UpdateText(string.format(STRINGS.UI.CUSTOMIZATIONSCREEN.CUSTOM, Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name))
-		    end
-
-		    if self.allowEdit then
-		        self.revertbutton:Show()
-		        self.savepresetbutton:Show()
-		    else
-		        self.revertbutton:Hide()
-		        self.savepresetbutton:Hide()
-		    end
-
-		    if not clean and self.allowEdit then
-		        self.revertbutton:Unselect()
-		    else
-		        self.revertbutton:Select()
-		    end
-		end
-	end)
-
-
-	--согласовываем слово "дней" с количеством дней
-	AddClassPostConstruct("widgets/worldresettimer", function(self)
-		if self.countdown_message then self.countdown_message:SetSize(27) end
-		SetHookFunction(self.countdown_message, "SetString", function(self, str)
-			local val=tonumber((str or ""):match(" ([^ ]*)$"))
-			return str..(val and " "..StringTime(val,{"секунду","секунды","секунд"}) or "")
-		end, false, true, self.countdown_message and self.countdown_message:GetString())
-
-		if self.survived_message then self.survived_message:SetSize(27) end
-		self.oldStartTimer=self.StartTimer
-		function self:StartTimer()
-			self:oldStartTimer()
-			if self.survived_message then
-				local age = self.owner.Network:GetPlayerAge()
-				local newmsg=self.survived_message:GetString()
-				self.survived_message:SetString(newmsg:gsub("дней",StringTime(age),1))
-			end
-		end
-		-- SetHookFunction(self.survived_message, "SetString", function(self, str)
-		-- 	local val=tonumber((str or ""):match(" ([^ ]*)$"))
-		-- 	return str..(val and " "..StringTime(val) or "")
-		-- end, false, true, self.survived_message and self.survived_message:GetString())
-	end)
-
 end
+
+--Подменяем портреты
+local TRANSLATED_LIST = {
+	wortox = true,
+	warly = true,
+	wurt = true,
+	winona = true,
+	wickerbottom = true,
+	waxwell = true,
+	willow = true,
+	wilson = true,
+	woodie = true,
+	wes = true,
+	wolfgang = true,
+	wendy = true,
+	wathgrithr = true,
+	webber = true,
+	wormwood = true,
+	walter = true,
+}
+
+require("characterutil")
+
+local _SetHeroNameTexture_Grey = SetHeroNameTexture_Grey
+local _SetHeroNameTexture_Gold = SetHeroNameTexture_Gold
+
+function SetHeroNameTexture_Grey(w, hero, ...)
+	if TRANSLATED_LIST[hero] then
+		w:SetTexture("images/rus_names_"..hero..".xml", "rus_"..hero..".tex")
+		return true
+	end
+	return _SetHeroNameTexture_Grey(w, hero, ...)
+end
+
+function SetHeroNameTexture_Gold(w, hero, ...)
+	if TRANSLATED_LIST[hero] then
+		w:SetTexture("images/rus_names_gold_"..hero..".xml", "rus_"..hero..".tex")
+		return true
+	end
+	return _SetHeroNameTexture_Gold(w, hero, ...)
+end
+
+AddClassPostConstruct("screens/playerstatusscreen", function(self)
+	if self.OnBecomeActive then
+		local OldOnBecomeActive = self.OnBecomeActive
+		function self:OnBecomeActive(...)
+			local res = OldOnBecomeActive(self, ...)
+				if self.player_widgets then
+					for _, v in pairs(self.player_widgets) do
+						if v.age and v.age.SetString then
+							local OldSetString = v.age.SetString
+							function v.age:SetString(str, ...)
+								if str then
+									str = str:gsub("(%d+)(.+)", function (days, word)
+										if word~=STRINGS.UI.PLAYERSTATUSSCREEN.AGE_DAY and word~=STRINGS.UI.PLAYERSTATUSSCREEN.AGE_DAYS then return end
+										return days.." "..StringTime(days)
+									end)
+								end
+								local res = OldSetString(self, str, ...)
+								return res
+							end
+							v.age:SetString(v.age:GetString())
+						end
+					end
+				end
+			return res
+		end
+	end
+end)
+
+AddClassPostConstruct("widgets/uiclock", function(self)
+	if self._text and self._text.SetString then
+		local OldSetString = self._text.SetString
+		function self._text:SetString(str, ...)
+			if str then
+				str = str:gsub(STRINGS.UI.HUD.CLOCKSURVIVED.."(.+)(%d+)(%s+)(.+)", function (sep1, days, sep2, word)
+					if word~=STRINGS.UI.HUD.CLOCKDAY and word~=STRINGS.UI.HUD.CLOCKDAYS then return end
+					return StringTime(days, {"Прожит", "Прожито", "Прожиты"})..sep1..days..sep2..StringTime(days)
+				end)
+			end
+			local res = OldSetString(self, str, ...)
+			return res
+		end
+	end
+end)
+AddClassPostConstruct("widgets/text", function(self)
+	local function IsWhiteSpace(charcode)
+		-- 32: space
+		--  9: \t
+		return charcode == 32 or charcode == 9
+	end
+
+	local function IsNewLine(charcode)
+		-- 10: \n
+		-- 11: \v
+		-- 12: \f
+		-- 13: \r
+		return charcode >= 10 and charcode <= 13
+	end
+	function self:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
+		if str == nil or #str <= 0 then
+			self.inst.TextWidget:SetString("")
+			return
+		end
+		local tempmaxwidth = type(maxwidth) == "table" and maxwidth[1] or maxwidth
+		if maxlines <= 1 then
+			self:SetTruncatedString(str, tempmaxwidth, maxcharsperline, ellipses)
+		else
+			self:SetTruncatedString(str, tempmaxwidth, maxcharsperline, false)
+			local line = self:GetString()
+			if #line < #str then
+				if IsNewLine(str:byte(#line + 1)) then
+					str = str:sub(#line + 2)
+				elseif not IsWhiteSpace(str:byte(#line + 1)) then
+					for i = #line, 1, -1 do
+						if IsWhiteSpace(line:byte(i)) then
+							line = line:sub(1, i)
+							break
+						end
+					end
+					str = str:sub(#line + 1)
+				else
+					str = str:sub(#line + 2)
+					while #str > 0 and IsWhiteSpace(str:byte(1)) do
+						str = str:sub(2)
+					end
+				end
+				if #str > 0 then
+					if type(maxwidth) == "table" then
+						if #maxwidth > 2 then
+							tempmaxwidth = {}
+							for i = 2, #maxwidth do
+								table.insert(tempmaxwidth, maxwidth[i])
+							end
+						elseif #maxwidth == 2 then
+							tempmaxwidth = maxwidth[2]
+						end
+					end
+					self:SetMultilineTruncatedString(str, maxlines - 1, tempmaxwidth, maxcharsperline, ellipses)
+					self.inst.TextWidget:SetString(line.."\n"..(self.inst.TextWidget:GetString() or ""))
+				end
+			end
+		end
+	end
+end)
+
+AddClassPostConstruct("widgets/playeravatarpopup", function(self)
+	local _UpdateData = self.UpdateData
+	function self:UpdateData(data)
+		_UpdateData(self, data)
+		if self.age and data.playerage then
+			local newstr=self.age:GetString()
+			newstr = newstr:gsub("Прожито", StringTime(data.playerage, {"Прожит", "Прожито", "Прожиты"}),1)
+			self.age:SetString(newstr:gsub("Дней", StringTime(data.playerage),1))
+		end
+	end
+end)
+
+--Переводим названия дней недели
+local _ListSnapshots = NetworkProxy.ListSnapshots
+NetworkProxy.ListSnapshots = function(self, ...)
+	local args = {_ListSnapshots(self, ...)}
+	local list = args[1]
+	if list and next(list) and list[1].timestamp then
+		local daysofweek={"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"}
+		local rusdaysofweek={"Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"}
+		local rusdaysofweek3={"Пнд","Втр","Срд","Чтв","Птн","Сбт","Вск"}
+		for _,v in ipairs(list) do
+			for ii,vv in ipairs(daysofweek) do
+				if string.sub(v.timestamp,1,#vv):lower()==vv:lower() then
+					v.timestamp=rusdaysofweek[ii]..string.sub(v.timestamp,#vv+1)
+					break
+				elseif string.sub(v.timestamp,1,3):lower()==string.sub(vv,1,3):lower() then
+					v.timestamp=rusdaysofweek3[ii]..string.sub(v.timestamp,4)
+					break
+				elseif string.sub(v.timestamp,1,2):lower()==string.sub(vv,1,2):lower() then
+					v.timestamp=string.sub(rusdaysofweek3[ii],1,2)..string.sub(v.timestamp,3)
+					break
+				end
+
+			end
+		end
+	end
+	return unpack(args)
+end
+
+--Окно просмотра серверов, двигаем контролсы, исправляем надписи
+AddClassPostConstruct("screens/redux/serverlistingscreen", function(self)
+	if self.title then
+		local checkstr = STRINGS.UI.SERVERLISTINGSCREEN.SERVER_LIST_TITLE_INTENT:gsub("%%s", "(.+)")
+		local intentions = {}
+		for key, str in pairs(STRINGS.UI.INTENTION) do intentions[str] = key end
+		local OldSetString = self.title.SetString
+		function self.title:SetString(str, ...)
+			if str then
+				local int = str:match(checkstr)
+				if int and intentions[int] then
+					if intentions[int]=="SOCIAL" then
+						str = "Дружеские сервера"
+					elseif intentions[int]=="COOPERATIVE" then
+						str = "Командные сервера"
+					elseif intentions[int]=="COMPETITIVE" then
+						str = "Соревновательные сервера"
+					elseif intentions[int]=="MADNESS" then
+						str = "Сервера типа «Безумие»"
+					elseif intentions[int]=="ANY" then
+						str = "Сервера всех стилей"
+					end
+				end
+			end
+			return OldSetString(self, str, ...)
+		end
+		self.title:SetString(self.title:GetString())
+	end
+	
+	if self.sorting_spinner and self.sorting_spinner.label then
+		self.sorting_spinner.label:Nudge({x=-40,y=0,z=0})
+		self.sorting_spinner.label:SetRegionSize(150,50)
+	end
+	
+	if self.season_description and self.season_description.text then
+		local OldSetString = self.season_description.text.SetString
+		if OldSetString then
+			function self.season_description.text:SetString(str, ...)
+				if str:find("Лето")then
+					if str:find("Ранняя") then
+						str=str:gsub("Ранняя","Раннее")
+					elseif str:find("Поздняя") then
+						str=str:gsub("Поздняя","Позднее")
+					end
+				end
+				return OldSetString(self, str, ...)
+			end
+		end
+	end
+end)
+
+AddClassPostConstruct("components/named_replica", function(self)
+	local function OnNameDirtyMoose(inst)
+		inst.name = inst.possiblenames[math.random(#inst.possiblenames)]
+	end
+	if self.inst.prefab == "moose" then
+		self.inst.possiblenames = {STRINGS.NAMES.MOOSE1, STRINGS.NAMES.MOOSE2}
+		self.inst:ListenForEvent("namedirty", OnNameDirtyMoose)
+	end
+end)
+
+--Сохраняем непереведённый текст настроек приватности серверов в свойствах мира (см. ниже)
+local privacy_options = {}
+for i,v in pairs(STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY) do
+	privacy_options[v] = i
+end
+
+--Баг разработчиков, не переводятся радиобаттоны в настройках при создании сервера
+AddClassPostConstruct("widgets/redux/serversettingstab", function(self)
+	local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
+	function self:RefreshPrivacyButtons()
+		oldRefreshPrivacyButtons(self)
+		for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
+			v.button.text:SetFont(NEWFONT)
+			v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
+		end  
+	end
+	if self.privacy_type and self.privacy_type.buttons and self.privacy_type.buttons.buttonwidgets then
+		for _,option in pairs(self.privacy_type.buttons.options) do
+			if privacy_options[option.text] then
+				option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY[ privacy_options[option.text] ]
+			end
+			
+		end
+		for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
+			v.button.text:SetFont(NEWFONT)
+			v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
+		end   
+	end
+	if self.server_intention then
+		self.server_intention.button.text:SetSize(23)
+		self.server_intention.button.text:Nudge({x=-3,y=0,z=0})
+	end
+end)
+
+--Сохраняем непереведённый текст настроек в свойствах мира (см. ниже)
+local SandboxMenuData = {}
+for i,v in pairs(STRINGS.UI.SANDBOXMENU) do
+	SandboxMenuData[v] = i
+end
+
+--Виджет выбора свойств мира. Исправляем надписи, согласовываем слова
+AddClassPostConstruct("widgets/redux/worldcustomizationlist", function(self)
+	if self.optionitems then
+		for i,v in pairs(self.optionitems) do
+			if v.heading_text then
+				v.heading_text=v.heading_text:gsub(" World",": настройки мира")
+				v.heading_text=v.heading_text:gsub(" Resources",": настройки ресурсов")
+				v.heading_text=v.heading_text:gsub(" Food",": настройки еды")
+				v.heading_text=v.heading_text:gsub(" Animals",": настройки животных")
+				v.heading_text=v.heading_text:gsub(" Monsters",": настройки монстров")
+			end
+			if v.option and v.option.options then
+				for ii,vv in pairs(v.option.options) do
+					local txt=STRINGS.UI.SANDBOXMENU[t.SpeechHashTbl.SANDBOXMENU.Eng2Key[vv.text]]
+					if txt then
+						vv.text=txt
+					else
+						vv.text=vv.text:gsub("No Day","Без дня")
+						vv.text=vv.text:gsub("No Dusk","Без вечера")
+						vv.text=vv.text:gsub("No Night","Без ночи")
+						vv.text=vv.text:gsub("Long Day","Длинный день")
+						vv.text=vv.text:gsub("Long Dusk","Длинный вечер")
+						vv.text=vv.text:gsub("Long Night","Длинная ночь")
+						vv.text=vv.text:gsub("Only Day","Только день")
+						vv.text=vv.text:gsub("Only Dusk","Только вечер")
+						vv.text=vv.text:gsub("Only Night","Только ночь")
+					end
+				end
+			end
+			if v.GetChildren then
+				for ii,vv in pairs(v:GetChildren()) do
+					if vv.name and vv.name:upper()=="TEXT" then --Заголовки групп настроек
+						local words = vv:GetString():split(" ")
+						local res
+						if #words==2 then
+							local second = SandboxMenuData[ words[2] ]
+							words[2] = STRINGS.UI.SANDBOXMENU[second] or words[2]
+							if second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.FOREST then
+								if second=="CHOICEAMTDAY" then
+									res = words[2].." в лесу"
+								elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
+									res = words[2].." леса"
+								elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
+									res = words[2]..", доступная в лесу"
+								elseif second=="CHOICEMISC" then
+									res = "Лесной "..firsttolower(words[2])
+								end
+							elseif second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.CAVE then
+								if second=="CHOICEAMTDAY" then
+									res = words[2].." в пещерах"
+								elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
+									res = words[2].." пещер"
+								elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
+									res = words[2]..", доступная в пещерах"
+								elseif second=="CHOICEMISC" then
+									res = "Пещерный "..firsttolower(words[2])
+								end
+							elseif second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.UNKNOWN then
+								if second=="CHOICEAMTDAY" then
+									res = words[2].." в каком-то мире"
+								elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
+									res = words[2].." какого-то мира"
+								elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
+									res = words[2]..", доступная в каком-то мире"
+								elseif second=="CHOICEMISC" then
+									res = words[1].." "..firsttolower(words[2])
+								end
+							end
+						end
+						if res then vv:SetString(res) end
+					elseif vv.name and vv.name:upper()=="OPTION" then --Спиннеры, нужно перевести в них текст
+						for iii,vvv in pairs(vv:GetChildren()) do
+							if vvv.name and vvv.name:upper()=="SPINNER" then
+								for _,opt in ipairs(vvv.options) do
+									if SandboxMenuData[opt.text] then
+										opt.text = STRINGS.UI.SANDBOXMENU[ SandboxMenuData[opt.text] ]
+									elseif opt.text then
+										local words = opt.text:split(" ")
+										for idx, txt in ipairs(words) do
+											local p = SandboxMenuData[txt]
+											words[idx] = p and STRINGS.UI.SANDBOXMENU[p] or words[idx]
+										end
+										if words[2]==STRINGS.UI.SANDBOXMENU.DAY then
+											if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","дня"}
+											elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгий" end
+										elseif words[2]==STRINGS.UI.SANDBOXMENU.DUSK then
+											if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","вечера"}
+											elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгий" end
+										elseif words[2]==STRINGS.UI.SANDBOXMENU.NIGHT then
+											if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","ночи"}
+											elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгая" end
+										end
+										opt.text = words[1] or opt.text
+										for idx=2,#words do opt.text = opt.text.." "..firsttolower(words[idx]) end
+									end
+								end
+								vvv:UpdateState()
+							elseif vvv.name and vvv.name:upper()=="IMAGEPARENT" then
+								local list={["day.tex"]=1,
+											["season.tex"]=1,
+											["season_start.tex"]=1,
+											["world_size.tex"]=1,
+											["world_branching.tex"]=1,
+											["world_loop.tex"]=1,
+											["world_map.tex"]=1,
+											["world_start.tex"]=1,
+											["starting_variety.tex"]=1,
+											["winter.tex"]=1,
+											["summer.tex"]=1,
+											["autumn.tex"]=1,
+											["spring.tex"]=1}
+								for iiii,vvvv in pairs(vvv:GetChildren()) do
+									if vvvv.name and vvvv.name:upper()=="IMAGE" then
+										if list[vvvv.texture] then
+											vvvv:SetTexture("images/rus_mapgen.xml", "rus_"..vvvv.texture)
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end)
+
+--Сохраняем непереведённый текст пресетов настроек в свойствах мира (см. ниже)
+local PresetLevels = {}
+for i,v in pairs(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS) do
+	PresetLevels[v] = i
+end
+for i,v in pairs(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC) do
+	PresetLevels[v] = i
+end
+
+--Баг разработчиков: Не переведённые пресеты
+AddClassPostConstruct("widgets/redux/worldcustomizationtab", function(self)
+	local Levels = require "map/levels"
+	local oldGetDataForLevelID=Levels.GetDataForLevelID
+	Levels.GetDataForLevelID=function(id, nolocation)
+		local ret = oldGetDataForLevelID(id, nolocation)
+		if ret and STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[id] then
+			ret.desc=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[id]
+			ret.name=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[id]
+		end
+		return ret
+	end
+	function self:UpdatePresetInfo(level)
+		if level ~= self.currentmultilevel -- this might be called for the "unselected" level, so we don't want to do anything.
+			or not self:IsLevelEnabled(level) -- invalid so we can't show anything.
+			then
+			return
+		end
+
+		local clean = self:GetNumberOfTweaks(self.currentmultilevel) == 0
+
+		if not self.allowEdit then
+			
+			local levelid=self.slotoptions[self.slot][self.currentmultilevel].id
+			self.slotoptions[self.slot][self.currentmultilevel].desc=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[levelid]
+			self.slotoptions[self.slot][self.currentmultilevel].name=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[levelid]
+			self.presetdesc:SetString(self.slotoptions[self.slot][self.currentmultilevel].desc)
+			--print(self.slotoptions[self.slot][self.currentmultilevel].name)
+			self.presetspinner.spinner:UpdateText(self.slotoptions[self.slot][self.currentmultilevel].name)
+		elseif clean then
+			self.presetdesc:SetString(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).desc)
+			--print(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name)
+			self.presetspinner.spinner:UpdateText(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name)
+		elseif self.current_option_settings[self.currentmultilevel].preset == "MOD_MISSING" then
+			self.presetdesc:SetString(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC.MOD_MISSING)
+			self.presetspinner.spinner:UpdateText(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS.MOD_MISSING)
+		else
+			self.presetdesc:SetString(STRINGS.UI.CUSTOMIZATIONSCREEN.CUSTOMDESC)
+			self.presetspinner.spinner:UpdateText(string.format(STRINGS.UI.CUSTOMIZATIONSCREEN.CUSTOM, Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name))
+		end
+
+		if self.allowEdit then
+			self.revertbutton:Show()
+			self.savepresetbutton:Show()
+		else
+			self.revertbutton:Hide()
+			self.savepresetbutton:Hide()
+		end
+
+		if not clean and self.allowEdit then
+			self.revertbutton:Unselect()
+		else
+			self.revertbutton:Select()
+		end
+	end
+end)
+
+
+--согласовываем слово "дней" с количеством дней
+AddClassPostConstruct("widgets/worldresettimer", function(self)
+	if self.countdown_message then self.countdown_message:SetSize(27) end
+	SetHookFunction(self.countdown_message, "SetString", function(self, str)
+		local val=tonumber((str or ""):match(" ([^ ]*)$"))
+		return str..(val and " "..StringTime(val,{"секунду","секунды","секунд"}) or "")
+	end, false, true, self.countdown_message and self.countdown_message:GetString())
+
+	if self.survived_message then self.survived_message:SetSize(27) end
+	self.oldStartTimer=self.StartTimer
+	function self:StartTimer()
+		self:oldStartTimer()
+		if self.survived_message then
+			local age = self.owner.Network:GetPlayerAge()
+			local newmsg=self.survived_message:GetString()
+			self.survived_message:SetString(newmsg:gsub("дней",StringTime(age),1))
+		end
+	end
+	-- SetHookFunction(self.survived_message, "SetString", function(self, str)
+	-- 	local val=tonumber((str or ""):match(" ([^ ]*)$"))
+	-- 	return str..(val and " "..StringTime(val) or "")
+	-- end, false, true, self.survived_message and self.survived_message:GetString())
+end)
 
 --Перегоняем перевод в STRINGS
 TranslateStringTable(STRINGS)
@@ -2304,16 +2277,20 @@ AddClassPostConstruct("widgets/intentionpicker", postintentionpicker)
 AddClassPostConstruct("widgets/redux/intentionpicker", postintentionpicker)
 
 --Исправляем жёстко зашитые надписи на кнопках в казане и телепорте.
+local BUTTON_TRANSLATION = {
+	["Cook"] = "Готовить",
+	["Activate"] = "Запустить",
+}
+
 AddClassPostConstruct("widgets/containerwidget", function(self)
-	self.oldOpen=self.Open
-	local function newOpen(self, container, doer)
-		self:oldOpen(container, doer)
-		if self.button then
-			if self.button:GetText()=="Cook" then self.button:SetText("Готовить") end
-			if self.button:GetText()=="Activate" then self.button:SetText("Запустить") end
+	local _Open = self.Open
+	self.Open = function(self, container, doer, ...)
+		local args = {_Open(container, doer, ...)}
+		if self.button and BUTTON_TRANSLATION[self.button:GetText()] then
+			self.button:SetText(BUTTON_TRANSLATION[txt])
 		end
+		return unpack(args)
 	end
-	self.Open=newOpen
 end)
 
 AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем шрифт описания рецепта в попапе рецептов
@@ -2331,8 +2308,7 @@ AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем
 					self.bg.light_box:SetPosition(30, -42)
 				end
 				
-				
-				if (self.skins_options ~= nil and #self.skins_options == 1) or not self.skins_options then
+				if (self.skins_options and #self.skins_options == 1) or not self.skins_options then
 					self.contents:SetPosition(-75,-20,0)
 					self.name:SetPosition(320, 157, 0)
 					self.button:SetPosition(320, -95, 0)
@@ -2340,6 +2316,7 @@ AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем
 				else
 					self.name:SetPosition(320, 182, 0)
 				end
+				
 				if not self.name.OldSetTruncatedString then
 					self.name.OldSetTruncatedString = self.name.SetTruncatedString
 					if self.name.OldSetTruncatedString then
@@ -2354,6 +2331,7 @@ AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем
 						self.name.SetTruncatedString=NewSetTruncatedString
 					end
 				end
+				
 				if self.desc then
 					self.desc:SetSize(28)
 					self.desc:SetRegionSize(64*3+30,130)
@@ -2368,7 +2346,6 @@ AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем
 						end
 					end
 				end
-
 			end
 		end
 	end
@@ -2428,13 +2405,6 @@ end)]]
 
 --Перевод настроек приватности при создании сервера
 AddClassPostConstruct("screens/redux/cloudserversettingspopup", function(self)
-	PRIVACY_TYPE =
-	{
-		PUBLIC = 0,
-		FRIENDS = 1,
-		LOCAL = 2,
-		CLAN = 3,
-	}
 	local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
 	function self:RefreshPrivacyButtons()
 		oldRefreshPrivacyButtons(self)
@@ -2532,16 +2502,16 @@ end)
 --Комплекс из двух подмен для того, чобы названия серверов слева в окне создания сервера были поменьше
 --Грязный хак, подменяем то, что, как нам кажется, будет только в ServerCreationScreen:MakeSaveSlotButton
 --Это нужно, чтобы строка оканчивалась тремя точками попозже, ведь шрифт будет поменьше
-if FrontEnd and FrontEnd.GetTruncatedString then
-	local OldGetTruncatedString = FrontEnd.GetTruncatedString
-	function FrontEnd:GetTruncatedString(str, font, size, maxwidth, maxchars, suffix, ...)
-		if font==NEWFONT and size==35 and maxwidth==140 and not maxchars and suffix then
-			size = 28 --Надеюсь, это произойдёт только в ServerCreationScreen:MakeSaveSlotButton
-		end
-		local res = OldGetTruncatedString(self, str, font, size, maxwidth, maxchars, suffix, ...)
-		return res
-	end
-end
+-- if FrontEnd and FrontEnd.GetTruncatedString then
+	-- local OldGetTruncatedString = FrontEnd.GetTruncatedString
+	-- function FrontEnd:GetTruncatedString(str, font, size, maxwidth, maxchars, suffix, ...)
+		-- if font==NEWFONT and size==35 and maxwidth==140 and not maxchars and suffix then
+			-- size = 28 --Надеюсь, это произойдёт только в ServerCreationScreen:MakeSaveSlotButton
+		-- end
+		-- local res = OldGetTruncatedString(self, str, font, size, maxwidth, maxchars, suffix, ...)
+		-- return res
+	-- end
+-- end
 
 --Меняем меню создания сервера, чтоб текст не вылазил за кнопку
 local function ServerCreationScreenPost(self)
@@ -2583,6 +2553,7 @@ local function serversettingstabpost(self)
 	end
 end
 AddClassPostConstruct("widgets/serversettingstab", serversettingstabpost)
+
 --Клей отрубили подгрузку шрифтов, поэтому подменяем шрифты в попапах
 local function PopUpdialogPost(self)
 	if self.title then
@@ -2592,59 +2563,37 @@ local function PopUpdialogPost(self)
 	if self.text then
 		self.text:SetFont(CHATFONT)
 	end
-
-	if self.title and self.title.string==STRINGS.UI.MODSSCREEN.UPDATEALL_TITLE then
-		self:SetTitleTextSize(27)
-	end
-
-	if self.title and self.title.string==STRINGS.UI.MODSSCREEN.CLEANALL_TITLE then
-		self:SetTitleTextSize(27)
-	end
 end
 
 AddClassPostConstruct("screens/popupdialog", PopUpdialogPost)
 AddClassPostConstruct("screens/redux/popupdialog", PopUpdialogPost)
 
---Тут не переводилось, так что фиксим
+-- Не переводятся опции спиннеров
 AddClassPostConstruct("screens/redux/optionsscreen", function(self)
-	local SPINNERS = {
-		"fullscreenSpinner",
-		"displaySpinner",
-		"refreshRateSpinner",
-		"netbookModeSpinner",
-		"smallTexturesSpinner",
-		"bloomSpinner",
-		"distortionSpinner",
-		"screenshakeSpinner",
-		"vibrationSpinner",
-		"passwordSpinner",
-		"wathgrithrfontSpinner",
-		"automodsSpinner",
-	}
-	
-	for _,v in pairs(SPINNERS) do
-		--Небольшая проверка. Мы же не хотим крашей
-		if not self[v] then
-			return
+	local enableDisableOptions = { { text = "Выключено", data = false }, { text = "Включено", data = true } }
+	local function DoPatch(w)
+		-- Только для Enable/Disable
+		if w.options and next(w.options) and w.options[1].data == false then
+			local text = w:GetSelectedText()
+			if text == "Disabled" then
+				w.text:SetString("Выключено")
+			elseif text == "Enabled" then
+				w.text:SetString("Включено")
+			end
+			
+			w.options = enableDisableOptions
 		end
-		
-		local text = self[v]:GetSelectedText()
-		if text == nil or type(text) ~= "string" then
-			t.print("ERROR! text == nil or type(text) ~= \"string\"")
-			return
-		end
-		
-		if text == "Disabled" then
-			self[v].text:SetString("Выключено")
-		elseif text == "Enabled" then
-			self[v].text:SetString("Включено")
-		end
-		
-		local enableDisableOptions = { { text = "Выключено", data = false }, { text = "Включено", data = true } }
-		self[v].options = enableDisableOptions
 	end
+	
+	for _, w in ipairs(self.left_spinners) do
+		DoPatch(w)
+	end
+	for _, w in ipairs(self.right_spinners) do
+		DoPatch(w)
+	end
+	
 	--Та же картина
-	if self.title ~= nil then
+	if self.title then
 		self.title.big:SetString("Настройки игры")
 	end
 end)
