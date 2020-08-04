@@ -145,6 +145,10 @@ local function ApplyLocalizedFonts()
 	-- Сжимаем немного новый шрифт
 	TheSim:AdjustFontAdvance(CHATFONT, -2.5)
 	TheSim:AdjustFontAdvance(HEADERFONT, -1)
+	
+	if rawget(_G, "TheFrontEnd") then
+		TheFrontEnd.consoletext:SetFont(BODYTEXTFONT) --Нужно, чтобы шрифт в консоли не слетал
+	end
 end
 
 local _UnregisterAllPrefabs = Sim.UnregisterAllPrefabs
