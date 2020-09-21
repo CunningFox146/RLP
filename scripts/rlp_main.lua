@@ -103,6 +103,10 @@ for k, v in pairs(t.PO) do
 		t.PO[k] = nil
 	end
 end
+
+--Перегоняем перевод в STRINGS
+TranslateStringTable(STRINGS)
+
 print("PO файл загружен!")
 
 --Возвращает корректную форму слова день (или другого, переданного вторым параметром)
@@ -702,7 +706,7 @@ end
 --Необязательный параметр talker сообщает название префаба говорящего. Сейчас нужен для корректной обработки ситуации с Веббером
 function t.ParseTranslationTags(message, char, talker, optionaltags)
 	if not (message and string.find(message,"[",1,true)) then return message end
-
+	t.print("ParseTranslationTags", message, char, talker, optionaltags)
 	local gender="neutral"
 	local function parse(str)
 		local vars=split(str,"|")
@@ -781,17 +785,15 @@ function t.ParseTranslationTags(message, char, talker, optionaltags)
 	if char then
 		char=char:lower()
 		if char=="generic" then char="wilson" end
-
-		if rawget(_G,"CHARACTER_GENDERS") then
-			if CHARACTER_GENDERS.MALE and table.contains(CHARACTER_GENDERS.MALE, char) then gender="he"
-			elseif CHARACTER_GENDERS.FEMALE and table.contains(CHARACTER_GENDERS.FEMALE, char) then gender="she"
-			elseif CHARACTER_GENDERS.ROBOT and table.contains(CHARACTER_GENDERS.ROBOT, char) then gender="he"
-			elseif CHARACTER_GENDERS.IT and table.contains(CHARACTER_GENDERS.IT, char) then gender="it"
-			elseif CHARACTER_GENDERS.NEUTRAL and table.contains(CHARACTER_GENDERS.IT, char) then gender="neutral"
-			elseif CHARACTER_GENDERS.PLURAL and table.contains(CHARACTER_GENDERS.PLURAL, char) then gender="plural" end
-		end
+		
 		--Если это Веббер и он говорит сам о себе, то это множественное число
-		if char=="webber" and (not talker or talker:lower()==char) then gender="plural" end
+		if char=="webber" and (not talker or talker:lower()==char) then gender="plural"
+		elseif CHARACTER_GENDERS.MALE and table.contains(CHARACTER_GENDERS.MALE, char) then gender="he"
+		elseif CHARACTER_GENDERS.FEMALE and table.contains(CHARACTER_GENDERS.FEMALE, char) then gender="she"
+		elseif CHARACTER_GENDERS.ROBOT and table.contains(CHARACTER_GENDERS.ROBOT, char) then gender="he"
+		elseif CHARACTER_GENDERS.IT and table.contains(CHARACTER_GENDERS.IT, char) then gender="it"
+		elseif CHARACTER_GENDERS.NEUTRAL and table.contains(CHARACTER_GENDERS.IT, char) then gender="neutral"
+		elseif CHARACTER_GENDERS.PLURAL and table.contains(CHARACTER_GENDERS.PLURAL, char) then gender="plural" end
 	end
 	message=search("["..message.."]") or message
 	if CaseAdoptationNeeded then
@@ -937,11 +939,13 @@ function t.BuildCharacterHash(charname,russource)
 	CreateRussianHashTable(t.SpeechHashTbl[charname],STRINGS.CHARACTERS[charname],"STRINGS.CHARACTERS."..charname)
 end
 
-
 --Генерируем хеши для всех персонажей, перечисленных в STRINGS.CHARACTERS
-for charname,v in pairs(STRINGS.CHARACTERS) do
-	t.BuildCharacterHash(charname)
-end
+--ХАК!!! Не знаю почему, но хеш реврайтится
+env.AddPrefabPostInit("world",function(inst)
+	for charname, _ in pairs(STRINGS.CHARACTERS) do
+		t.BuildCharacterHash(charname)
+	end
+end)
 
 --Генерируем хеш-таблицы для названий предметов в обе стороны
 --А так же извлекаем мета-данные о поле предмета, его особых формах и необходимости писать с большой буквы
@@ -1157,6 +1161,7 @@ end
 --Если персонаж не указан, используется уилсон.
 --Возвращает переведённое сообщение и вторым параметром таблицу всех замен %s, если таковые были.
 function t.GetFromSpeechesHash(message, char)
+	print("GetFromSpeechesHash", message, char, CalledFrom())
 	local function GetMentioned(message,char)
 		if not (message and t.SpeechHashTbl[char] and t.SpeechHashTbl[char]["mentioned_class"] and type(t.SpeechHashTbl[char]["mentioned_class"])=="table") then return nil end
 		for i,v in pairs(t.SpeechHashTbl[char]["mentioned_class"]) do
@@ -1167,8 +1172,10 @@ function t.GetFromSpeechesHash(message, char)
 		end
 		return nil
 	end
+	
+	char = char or "GENERIC"
 	local mentions
-	if not char then char = "GENERIC" end
+	
 	if message and t.SpeechHashTbl[char] then
 		local umlautified = false
 		-- if char=="WATHGRITHR" then
@@ -1259,11 +1266,14 @@ if DEBUG_ENABLED then
 end
 
 function t.TranslateToRussian(message, entity)
-	t.print("t.TranslateToRussian", message, entity.prefab)
-	if not (entity and entity.prefab and entity.components.talker and type(message)=="string") then return message end
+	if t.debug then
+		t.print("t.TranslateToRussian", message, entity.prefab, CalledFrom())
+	end
 	
-	local new_line = string.find(message,"\n",1,true)
-	if new_line ~= nil then
+	if not (entity and entity.prefab --[[and entity.components.talker and type(message)=="string"]]) then t.print("fail") return message end
+	
+	local new_line = string.find(message,"\n", 1, true)
+	if new_line then
 		local mess1 = message:sub(1, new_line - 1)
 		if t.mod_phrases[mess1] then
 			local mess2 = message:sub(new_line)
@@ -1276,9 +1286,7 @@ function t.TranslateToRussian(message, entity)
 	if entity:HasTag("playerghost") then --Если это реплика игрока-привидения
 		message=string.gsub(message, "h", "у")
 		return message
-	end
-
-	if entity.prefab == "quagmire_goatmum" then
+	elseif entity.prefab == "quagmire_goatmum" then
 		if t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[message] then 
 			return t.SpeechHashTbl.GOATMUM_WELCOME_INTRO.Eng2Rus[message]
 		end
@@ -1302,9 +1310,7 @@ function t.TranslateToRussian(message, entity)
 			end	
 		end
 		return message
-	end
-
-	if t.SpeechHashTbl.EPITAPHS[message] then --если это описание эпитафии
+	elseif t.SpeechHashTbl.EPITAPHS[message] then --если это описание эпитафии
 		return t.SpeechHashTbl.EPITAPHS[message]
 	end
 
@@ -1316,10 +1322,11 @@ function t.TranslateToRussian(message, entity)
 
 	--Обработка сообщения
 	local function TranslateMessage(message)
+		print("\tTranslateMessage", message, CalledFrom())
 		--Получаем перевод реплики и список отсылок %s, если они есть в реплике
 		if not message then return end
 		local NotTranslated=message
-		local msg, mentions=t.GetFromSpeechesHash(message,entity)
+		local msg, mentions=t.GetFromSpeechesHash(message, entity)
 		message=msg or message
 		
 		if NotTranslated==message then return (t.ParseTranslationTags(message, ent.prefab, nil, nil)) or message end
@@ -1389,6 +1396,7 @@ function t.TranslateToRussian(message, entity)
 			break
 		end
 	end
+	
 	return message
 end
 
@@ -1396,7 +1404,9 @@ end
 local _Networking_Talk = Networking_Talk
 function Networking_Talk(guid, message, ...)
 	local entity = Ents[guid]
+	t.print("Message before", message)
 	message = t.TranslateToRussian(message, entity) or message --Переводим на русский
+	t.print("Message after", message)
 	return _Networking_Talk(guid, message, ...)
 end
 
@@ -2109,9 +2119,6 @@ AddClassPostConstruct("widgets/worldresettimer", function(self)
 	-- 	return str..(val and " "..StringTime(val) or "")
 	-- end, false, true, self.survived_message and self.survived_message:GetString())
 end)
-
---Перегоняем перевод в STRINGS
-TranslateStringTable(STRINGS)
 
 --Функция меняет окончания прилагательного prefix в зависимости от падежа, пола и числа предмета
 local function FixPrefix(prefix, act, item)
