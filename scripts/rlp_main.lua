@@ -1118,45 +1118,6 @@ function GetSkinUsableOnString(item_type, popup_txt)
 	return usable_on_str
 end
 
-require("widgets/eventannouncer")
---Переопределяем глобальную функцию, формирующую анонс-сообщение о смерти
---Делаем это тут, потому что она объявлена в классе eventannouncer, и не видна до обращения к этому классу.
---Тут нам нужно позаботиться об выводе имени убийцы на английском языке.
-local _GetNewDeathAnnouncementString = GetNewDeathAnnouncementString
-function GetNewDeathAnnouncementString(theDead, source, pkname)
-	local str = _GetNewDeathAnnouncementString(theDead, source, pkname)
-	if TheWorld and not TheWorld.ismastersim then return str end
-	if string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1,1,true) then
-		--если игрок был убит
-		local capturestring=nil
-		if string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE,1,true) then
-			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE..")"
-		elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE,1,true) then
-			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE..")"
-		elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT,1,true) then
-			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT..")"
-		elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT,1,true) then
-			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT..")"
-		else 
-			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)(%.)$"
-		end
-		if capturestring then -- выяснилось, что кто-то убит
-			local a, killername, b=str:match(capturestring)
-			if killername then
-				killername=t.SpeechHashTbl.NAMES.Rus2Eng[killername] or killername--Переводим на английский
-				str=str:gsub(capturestring,"%1"..killername.."%3")
-			end
-		end
-	end	
-	return str
-end
---Сообщение о том, что кто-то был оживлён. Тут нужно подменить на английский источник оживления
-local _GetNewRezAnnouncementString = GetNewRezAnnouncementString
-function GetNewRezAnnouncementString(theRezzed, source, ...)
-	source = source and (t.SpeechHashTbl.NAMES.Rus2Eng[source] or source) --Переводим имя на английский
-	return _GetNewRezAnnouncementString(theRezzed, source, ...)
-end
-
 --Подбирает сообщение из хеш-таблиц по указанному персонажу и сообщению на английском.
 --Если персонаж не указан, используется уилсон.
 --Возвращает переведённое сообщение и вторым параметром таблицу всех замен %s, если таковые были.
@@ -1425,10 +1386,11 @@ NetworkProxy.Talker = function(self, message, entity, ...)
 end
 
 --Сообщения о событиях в игре
+--[[
 AddClassPostConstruct("widgets/eventannouncer", function(self)
 	--Вывод любых анонсов на экран. Тут подменяем все нестандартные фразы, и не только
 	local _ShowNewAnnouncement = self.ShowNewAnnouncement
-	if _ShowNewAnnouncement then function self:ShowNewAnnouncement(announcement, ...)
+	function self:ShowNewAnnouncement(announcement, ...)
 		local gender, player, RussianMessage, name, name2, killerkey
 
 		local function test(adder1,msg1,rusmsg1,adder2,msg2,rusmsg2,ending)
@@ -1497,8 +1459,121 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 			announcement = string.format((t.ParseTranslationTags(RussianMessage, "wilson", "announce", killerkey)), name or "", name2 or "", "" ,"") or announcement
 		end
 		return _ShowNewAnnouncement(self, announcement, ...)
-	end end
-end) -- для AddClassPostConstruct "widgets/eventannouncer"
+	end
+end)]]
+
+local _Networking_Announcement = Networking_Announcement
+Networking_Announcement = function(announcement, ...)
+	local RussianMessage, name, name2, killerkey
+	print("Networking_Announcement", announcement)
+	local function test(adder1,msg1,rusmsg1,adder2,msg2,rusmsg2,ending)
+		print("Test:", tostring(adder1), tostring(msg1), tostring(rusmsg1), tostring(adder2), tostring(msg2), tostring(rusmsg2), tostring(ending))
+		if name or name2 then return end
+		msg1=msg1 and msg1:gsub("([.%-?])","%%%1"):gsub("%%s","(.*)") or ""
+		msg2=msg2 and msg2:gsub("([.%-?])","%%%1"):gsub("%%s","(.*)") or ""
+		name, name2=announcement:match((adder1 or "")..msg1..(adder2 or "")..msg2)
+		if name then RussianMessage=rusmsg1 end
+		if adder2 and name and name2 and rusmsg2 then RussianMessage=RussianMessage..rusmsg2 end
+		if ending and RussianMessage then RussianMessage=RussianMessage..ending end
+		print(RussianMessage, name, name2, killerkey)
+	end
+	
+	--Проверяем голосования
+	--test(nil,STRINGS.VOTING.KICK.START, announcerus.VOTINGKICKSTART)
+	--test(nil,STRINGS.VOTING.KICK.SUCCESS, announcerus.VOTINGKICKSUCCESS)
+	--test(nil,STRINGS.VOTING.KICK.FAILURE, announcerus.VOTINGKICKFAILURE)
+	--Присоединение/Отсоединение
+	--C 176665 в этих двух изначально есть %s
+	--test("(.*) ",STRINGS.UI.NOTIFICATION.JOINEDGAME, announcerus.JOINEDGAME)
+	--test("(.*) ",STRINGS.UI.NOTIFICATION.LEFTGAME, announcerus.LEFTGAME)
+	test(nil,STRINGS.UI.NOTIFICATION.JOINEDGAME, announcerus.JOINEDGAME)
+	test(nil,STRINGS.UI.NOTIFICATION.LEFTGAME, announcerus.LEFTGAME)
+	--Кик/Бан
+	test(nil,STRINGS.UI.NOTIFICATION.KICKEDFROMGAME, announcerus.KICKEDFROMGAME)
+	test(nil,STRINGS.UI.NOTIFICATION.BANNEDFROMGAME, announcerus.BANNEDFROMGAME)
+	
+	-- Даем возможность модам переводить аннонсы
+	for eng, rus in pairs(t.mod_announce) do
+		test(nil, eng, rus)
+	end
+	
+	--Новый скин
+--		test(nil,STRINGS.UI.NOTIFICATION.NEW_SKIN_ANNOUNCEMENT, announcerus.NEW_SKIN_ANNOUNCEMENT)
+	if not name2 then
+		--Реплики о смерти
+		test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
+			 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE, announcerus.DEATH_ANNOUNCEMENT_2_MALE)
+		test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
+			 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE, announcerus.DEATH_ANNOUNCEMENT_2_FEMALE)
+		test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
+			 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT, announcerus.DEATH_ANNOUNCEMENT_2_ROBOT)
+		test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1,
+			 " (.*)",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT, announcerus.DEATH_ANNOUNCEMENT_2_DEFAULT)
+		test("(.*) ",STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1, announcerus.DEATH_ANNOUNCEMENT_1, " (.*)%.$", nil, nil, ".")
+		test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_MALE, announcerus.GHOST_DEATH_ANNOUNCEMENT_MALE)
+		test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_FEMALE, announcerus.GHOST_DEATH_ANNOUNCEMENT_FEMALE)
+		test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_ROBOT, announcerus.GHOST_DEATH_ANNOUNCEMENT_ROBOT)
+		test("(.*) ",STRINGS.UI.HUD.GHOST_DEATH_ANNOUNCEMENT_DEFAULT, announcerus.GHOST_DEATH_ANNOUNCEMENT_DEFAULT)
+		--Реплика об оживлении
+		test("(.*) ",STRINGS.UI.HUD.REZ_ANNOUNCEMENT, announcerus.REZ_ANNOUNCEMENT, " (.*)%.$", nil, nil, ".")
+		if name2 then --Было обнаружено второе имя, и это сообщение о смерти/оживлении
+			--Переводим имя на русский, если получится
+			killerkey=t.SpeechHashTbl.NAMES.Eng2Key[name2] --Получаем ключ имени
+			if killerkey then
+				name2=STRINGS.NAMES[killerkey] or STRINGS.NAMES["SHENANIGANS"] --Тут переводим имя на русский
+				name2=t.RussianNames[name2] and t.RussianNames[name2]["KILL"] or rebuildname(name2,"KILL",killerkey) or name2
+				if not t.ShouldBeCapped[killerkey:lower()] and not table.contains(GetActiveCharacterList(), killerkey:lower()) then
+					name2=firsttolower(name2)
+				end
+				killerkey=killerkey:lower()
+				if table.contains(GetActiveCharacterList(), killerkey) then killerkey=nil end
+			end
+		end
+	end
+	if name and RussianMessage then
+		announcement = string.format((t.ParseTranslationTags(RussianMessage, "wilson", "announce", killerkey)), name or "", name2 or "", "" ,"") or announcement
+	end
+	return _Networking_Announcement(announcement, ...)
+end
+
+require("widgets/eventannouncer")
+--Переопределяем глобальную функцию, формирующую анонс-сообщение о смерти
+--Делаем это тут, потому что она объявлена в классе eventannouncer, и не видна до обращения к этому классу.
+--Тут нам нужно позаботиться об выводе имени убийцы на английском языке.
+local _GetNewDeathAnnouncementString = GetNewDeathAnnouncementString
+function GetNewDeathAnnouncementString(theDead, source, pkname, ...)
+	local str = _GetNewDeathAnnouncementString(theDead, source, pkname, ...)
+	if TheWorld and not TheWorld.ismastersim then return str end
+	if string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1,1,true) then
+		--если игрок был убит
+		local capturestring=nil
+		if string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE,1,true) then
+			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_MALE..")"
+		elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE,1,true) then
+			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_FEMALE..")"
+		elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT,1,true) then
+			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_ROBOT..")"
+		elseif string.find(str,STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT,1,true) then
+			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)("..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_2_DEFAULT..")"
+		else 
+			capturestring="( "..STRINGS.UI.HUD.DEATH_ANNOUNCEMENT_1.." )(.*)(%.)$"
+		end
+		if capturestring then -- выяснилось, что кто-то убит
+			local a, killername, b=str:match(capturestring)
+			if killername then
+				killername=t.SpeechHashTbl.NAMES.Rus2Eng[killername] or killername--Переводим на английский
+				str=str:gsub(capturestring,"%1"..killername.."%3")
+			end
+		end
+	end	
+	return str
+end
+--Сообщение о том, что кто-то был оживлён. Тут нужно подменить на английский источник оживления
+local _GetNewRezAnnouncementString = GetNewRezAnnouncementString
+function GetNewRezAnnouncementString(theRezzed, source, ...)
+	source = source and (t.SpeechHashTbl.NAMES.Rus2Eng[source] or source) --Переводим имя на английский
+	return _GetNewRezAnnouncementString(theRezzed, source, ...)
+end
 
 --Тут мы должны переделать описание скелета, чтобы в него не попал русский
 -- Жуть какая. Столько кода просто для перевода скелета
