@@ -2264,7 +2264,7 @@ end)
 local function postintentionpicker(self)
 	if self.headertext then
 		local w,h = self.headertext:GetRegionSize()
-		self.headertext:SetRegionSize(w, h + 10)
+		self.headertext:SetRegionSize(w,h+10)
 	end
 	--Не переводится. Значит переводим насильно
 	local intention_options={{text='Дружеский'},{text='Командный'},{text='Агрессивный'},{text='Безумие'},}
@@ -2285,8 +2285,7 @@ AddClassPostConstruct("widgets/containerwidget", function(self)
 	local _Open = self.Open
 	self.Open = function(self, container, doer, ...)
 		local args = {_Open(self, container, doer, ...)}
-		local txt = self.button and self.button:GetText() or nil
-		if txt and BUTTON_TRANSLATION[txt] then
+		if self.button and BUTTON_TRANSLATION[self.button:GetText()] then
 			self.button:SetText(BUTTON_TRANSLATION[txt])
 		end
 		return unpack(args)
