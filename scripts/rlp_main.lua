@@ -99,7 +99,7 @@ env.LoadPOFile(t.StorePath..t.MainPOfilename, t.SelectedLanguage)
 t.PO = LanguageTranslator.languages[t.SelectedLanguage]
 -- TEMP HACK!!!! Убираем все <пусто> из файла
 for k, v in pairs(t.PO) do
-	if v == "<пусто>" or v:find("*PLACEHOLDER") then
+	if v == "<пусто>" then
 		t.PO[k] = nil
 	end
 end
@@ -541,6 +541,7 @@ if DEBUG_ENABLED then
 		end
 		t.print("Сменить скин у "..rebuildname(name,"reskin", key))
 	end)
+	
 	
 	--Сохраняет в файле fn все имена с действием, указанным в параметре action)
 	rawset(_G, "printnames", function(fn, action, openfn)
@@ -2086,6 +2087,7 @@ AddClassPostConstruct("widgets/redux/worldcustomizationtab", function(self)
 	end
 end)
 
+
 --согласовываем слово "дней" с количеством дней
 AddClassPostConstruct("widgets/worldresettimer", function(self)
 	if self.countdown_message then self.countdown_message:SetSize(27) end
@@ -2284,7 +2286,7 @@ local BUTTON_TRANSLATION = {
 AddClassPostConstruct("widgets/containerwidget", function(self)
 	local _Open = self.Open
 	self.Open = function(self, container, doer, ...)
-		local args = {_Open(self, container, doer, ...)}
+		local args = {_Open(container, doer, ...)}
 		if self.button and BUTTON_TRANSLATION[self.button:GetText()] then
 			self.button:SetText(BUTTON_TRANSLATION[txt])
 		end
@@ -2294,6 +2296,7 @@ end)
 
 AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем шрифт описания рецепта в попапе рецептов
 	if self.name and self.Refresh and not self.horizontal then --Перехватываем вывод названия, проверяем, вмещается ли оно, и если нужно, меняем его размер
+
 		if not self.OldRefresh then
 			self.OldRefresh=self.Refresh
 			function self.Refresh(self,...)
