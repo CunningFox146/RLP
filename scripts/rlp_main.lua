@@ -27,6 +27,12 @@ if DEBUG_ENABLE_ID[TheNet:GetUserID()] then
 	CHEATS_ENABLED = true
 	DEBUG_ENABLED = true
 	t.debug = true
+
+	t.mod_startup_t = os.clock()
+
+	t.ModLoaded = function()
+		t.print("[RLP] MOD WAS LOADED IN ", os.clock() - t.mod_startup_t)
+	end
 end
 
 -- Удаляем уведомление о модах
@@ -90,6 +96,9 @@ end)
 
 if t.CurrentTranslationType == t.TranslationTypes.FontsOnly then
 	t.print("[RLP] Загрузка FontsOnly версии завершена.")
+	if DEBUG_ENABLED then
+		t.ModLoaded()
+	end
 	return
 end
 
@@ -2026,17 +2035,25 @@ AddClassPostConstruct("widgets/intentionpicker", postintentionpicker)
 AddClassPostConstruct("widgets/redux/intentionpicker", postintentionpicker)
 
 --Исправляем жёстко зашитые надписи на кнопках в казане и телепорте.
-AddClassPostConstruct("widgets/containerwidget", function(self)
-	self.oldOpen=self.Open
-	local function newOpen(self, container, doer)
-		self:oldOpen(container, doer)
-		if self.button then
-			if self.button:GetText()=="Cook" then self.button:SetText("Готовить") end
-			if self.button:GetText()=="Activate" then self.button:SetText("Запустить") end
+do
+	local TRANSLATED_BTNS = {
+		["Cook"] = "Готовить",
+		["Activate"] = "Запустить",
+	}
+
+	AddClassPostConstruct("widgets/containerwidget", function(self)
+		local _Open = self.Open
+		function self:Open(container, doer, ...)
+			_Open(self, container, doer, ...)
+			if self.button then
+				local text = self.button:GetText()
+				if text and TRANSLATED_BTNS[text] then
+					self.button:SetText(TRANSLATED_BTNS[text])
+				end
+			end
 		end
-	end
-	self.Open=newOpen
-end)
+	end)
+end
 
 AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем шрифт описания рецепта в попапе рецептов
 	if self.name and self.Refresh and not self.horizontal then --Перехватываем вывод названия, проверяем, вмещается ли оно, и если нужно, меняем его размер
@@ -2608,3 +2625,7 @@ AddClassPostConstruct("components/playercontroller", function(self)
 		end
 	end
 end)
+
+if DEBUG_ENABLED then
+	t.ModLoaded()
+end
