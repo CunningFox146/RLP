@@ -1470,6 +1470,7 @@ do
 			end
 		end
 	end)
+
 	AddClassPostConstruct("widgets/text", function(self)
 		local function IsWhiteSpace(charcode)
 		    -- 32: space
@@ -2096,7 +2097,6 @@ AddClassPostConstruct("widgets/recipepopup", function(self) --Уменьшаем
 					self.bg.light_box:SetPosition(30, -42)
 				end
 				
-				
 				if (self.skins_options ~= nil and #self.skins_options == 1) or not self.skins_options then
 					self.contents:SetPosition(-75,-20,0)
 					self.name:SetPosition(320, 157, 0)
@@ -2250,20 +2250,6 @@ AddClassPostConstruct("widgets/truescrolllist", function(self)
 	end
 end)
 
---Комплекс из двух подмен для того, чобы названия серверов слева в окне создания сервера были поменьше
---Грязный хак, подменяем то, что, как нам кажется, будет только в ServerCreationScreen:MakeSaveSlotButton
---Это нужно, чтобы строка оканчивалась тремя точками попозже, ведь шрифт будет поменьше
-if FrontEnd and FrontEnd.GetTruncatedString then
-	local OldGetTruncatedString = FrontEnd.GetTruncatedString
-	function FrontEnd:GetTruncatedString(str, font, size, maxwidth, maxchars, suffix, ...)
-		if font==NEWFONT and size==35 and maxwidth==140 and not maxchars and suffix then
-			size = 28 --Надеюсь, это произойдёт только в ServerCreationScreen:MakeSaveSlotButton
-		end
-		local res = OldGetTruncatedString(self, str, font, size, maxwidth, maxchars, suffix, ...)
-		return res
-	end
-end
-
 --Меняем меню создания сервера, чтоб текст не вылазил за кнопку
 local function ServerCreationScreenPost(self)
 	local oldSetString=self.day_title and self.day_title.SetString
@@ -2304,6 +2290,7 @@ local function serversettingstabpost(self)
 	end
 end
 AddClassPostConstruct("widgets/serversettingstab", serversettingstabpost)
+
 --Клей отрубили подгрузку шрифтов, поэтому подменяем шрифты в попапах
 local function PopUpdialogPost(self)
 	if self.title then
@@ -2328,44 +2315,44 @@ AddClassPostConstruct("screens/redux/popupdialog", PopUpdialogPost)
 
 --Тут не переводилось, так что фиксим
 AddClassPostConstruct("screens/redux/optionsscreen", function(self)
-	local SPINNERS = {
-		"fullscreenSpinner",
-		"displaySpinner",
-		"refreshRateSpinner",
-		"netbookModeSpinner",
-		"smallTexturesSpinner",
-		"bloomSpinner",
-		"distortionSpinner",
-		"screenshakeSpinner",
-		"vibrationSpinner",
-		"passwordSpinner",
-		"wathgrithrfontSpinner",
-		"automodsSpinner",
-	}
-	
-	for _,v in pairs(SPINNERS) do
-		--Небольшая проверка. Мы же не хотим крашей
-		if not self[v] then
-			return
+	local function UpdateSpinners(items)
+		for _, item in pairs(items) do
+			if item.options then -- Проверяем чайлда спинер он или нет
+				local opts = item.options
+				if #opts == 2 and opts[1].data == false then
+					--Настройки рюкзака тоже булеан. Проверяем
+					print(opts[1].text)
+					local txt = item ~= self.integratedbackpackSpinner and
+					{
+						STRINGS.UI.OPTIONS.DISABLED,
+						STRINGS.UI.OPTIONS.ENABLED,
+					}
+					or
+					{
+						STRINGS.UI.OPTIONS.INTEGRATEDBACKPACK_DISABLED,
+						STRINGS.UI.OPTIONS.INTEGRATEDBACKPACK_ENABLED,
+					}
+
+					opts[1].text = txt[1]
+					opts[2].text = txt[2]
+
+					--Обновляем и текст
+					local data = item:GetSelected()
+					local txt = (data and data.data) and txt[2] or txt[1]
+					item:UpdateText(txt)
+				end
+			end
 		end
-		
-		local text = self[v]:GetSelectedText()
-		if text == nil or type(text) ~= "string" then
-			t.print("ERROR! text == nil or type(text) ~= \"string\"")
-			return
-		end
-		
-		if text == "Disabled" then
-			self[v].text:SetString("Выключено")
-		elseif text == "Enabled" then
-			self[v].text:SetString("Включено")
-		end
-		
-		local enableDisableOptions = { { text = "Выключено", data = false }, { text = "Включено", data = true } }
-		self[v].options = enableDisableOptions
 	end
-	--Та же картина
-	if self.title ~= nil then
+
+	if self.right_spinners then
+		UpdateSpinners(self.right_spinners)
+	end
+	if self.left_spinners then
+		UpdateSpinners(self.left_spinners)
+	end
+
+	if self.title then
 		self.title.big:SetString("Настройки игры")
 	end
 end)
@@ -2391,7 +2378,6 @@ AddClassPostConstruct("screens/redux/hostcloudserverpopup", function(self)
 		
 		if cloudServerRequestState >= 8 then return end
 		
-		self.status_msg:SetString("")
 		self.status_msg:SetString(phases[cloudServerRequestState] or "")
 	end
 end)
