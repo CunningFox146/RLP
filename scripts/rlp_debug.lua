@@ -20,7 +20,7 @@ function testname(name, key, rtrn)
 end
 
 --Сохраняет в файле fn все имена с действием, указанным в параметре action)
-function debugnames(name)
+function debugnames(name, mode)
     local filename = t.StorePath..(name or "rlp_names")..".txt"
     local str1,str2
     local names={}
@@ -29,7 +29,7 @@ function debugnames(name)
         if type(v) == "table" and not v[1] then
             print("skipped", k)
         else
-            f:write(string.format("\n*********************************\nПеревод %s (%s)\n", k, type(v) == "table" and v[1] or v))
+            f:write(string.format((mode and "#. STRINGS.NAMES.%s\n" or "\n*********************************\nПеревод %s (%s)\n"), mode and k:upper() or k, type(v) == "table" and v[1] or v))
             f:write(testname(k, nil, true))
         end
     end
