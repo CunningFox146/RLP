@@ -35,3 +35,4 @@ function debugnames(name, mode)
     end
     f:close()
 end
+
