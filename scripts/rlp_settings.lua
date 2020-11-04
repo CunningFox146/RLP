@@ -8,6 +8,13 @@ GLOBAL.setfenv(1, GLOBAL)
 
 do 
 	local USE_SETTINGS_FILE = PLATFORM ~= "PS4" and PLATFORM ~= "NACL"
+
+	local function tobool(str)
+		if not str or str:lower() == "false" then
+			return false
+		end
+		return true
+	end
 	
 	local function SetLocalizaitonValue(self, name, value) --Метод, сохраняющий опцию с именем name и значением value
 		-- print("SetLocalizaitonValue", name, value, CalledFrom())
@@ -56,6 +63,23 @@ do
 	
 	self.GetTranslationType = GetTranslationType
 	self.GetModTranslationEnabled = GetModTranslationEnabled
+
+	if t.IsBeta then
+		if self:GetLocalizaitonValue("beta_popup") == nil then
+			self:SetLocalizaitonValue("beta_popup", tostring(true))
+		end
+
+		local function ShouldWarnBeta(self)
+			return tobool(self:GetLocalizaitonValue("beta_popup"))
+		end
+
+		local function SetShouldWarnBeta(self, val)
+			return self:SetLocalizaitonValue("beta_popup", tostring(val))
+		end
+
+		self.ShouldWarnBeta = ShouldWarnBeta
+		self.SetShouldWarnBeta = SetShouldWarnBeta
+	end
 end
 
 t.CurrentTranslationType = Profile:GetTranslationType()
@@ -79,14 +103,14 @@ env.AddGamePostInit(function()
 				if table.contains(BADGUYS, id) then
 					local PopupDialogScreen = require "screens/redux/popupdialog"
 					TheFrontEnd:PushScreen(PopupDialogScreen("Забанен",
-					"Вы были забанены, и не можете пользоваться нашим модом. Можете извиниться в коментариях к моду, и мы вас разбаним.",
+					"Вы были забанены, и не можете пользоваться нашей модификацией. Может, вам стоит извиниться?",
 						{
 							{text="Извиниться", cb = function()
 								VisitURL(t.SteamURL)
 							end},
-							{text="Отключить мод", cb = function()
+							{text="Отключить", cb = function()
 								TheFrontEnd:PopScreen()
-								KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-354836336")
+								KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-"..t.SteamID)
 								ForceAssetReset()
 								KnownModIndex:Save(function()
 									SimReset()
@@ -123,5 +147,90 @@ env.AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self, 
 	self.rlp_update_checker = self.fixed_root:AddChild(UpdateChecker())
 	self.rlp_update_checker:SetScale(.7)
 	self.rlp_update_checker:SetPosition(500, -100)
+end)
+
+
+env.AddGamePostInit(function()
+	if InGamePlay() or IsMigrating() or not TheFrontEnd then
+		return
+	end
 	
+	local PopupDialogScreen = require "screens/redux/popupdialog"
+	
+	if KnownModIndex:IsModEnabled("workshop-55043536") then
+		TheFrontEnd:PushScreen(PopupDialogScreen(
+		"Обнаружен устаревший\nмод!",
+		"Внимание! В игре обнаружен переводчик модов (Russian For Mods). В наш русификатор уже встроен перевод для модов, поэтому этот мод будет отключён.",
+		{
+			{
+				text="Хорошо",
+				cb = function() 
+					TheFrontEnd:PopScreen()
+					KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-55043536")
+					
+					ForceAssetReset()
+					KnownModIndex:Save(function()
+						SimReset()
+					end)
+				end
+			}
+		}))
+	elseif KnownModIndex:IsModEnabled("workshop-354836336") then
+		TheFrontEnd:PushScreen(PopupDialogScreen(
+		"Обнаружен устаревший\nмод!",
+		"Внимание! В игре обнаружен устаревший перевод (Russian Language Pack). Он будет отключен для корректной работы перевода.",
+		{
+			{
+				text="Хорошо",
+				cb = function() 
+					TheFrontEnd:PopScreen()
+					KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-354836336")
+					
+					ForceAssetReset()
+					KnownModIndex:Save(function()
+						SimReset()
+					end)
+				end
+			}
+		}))
+	end
+
+	if t.IsBeta and Profile and Profile:ShouldWarnBeta() then
+		local Text = require("widgets/text")
+
+		local scr = PopupDialogScreen(
+		"Добро пожаловать в Бета версию.",
+		"Перевод находится в ранней стадии разработки. Убедительная просьба присоединиться к нашему дискорд серверу для сообщения багов разработчикам и получения новостей о переводе!",
+		{
+			{
+				text="Присоеденится к дискорду",
+				cb = function()
+					VisitURL(t.DiscordURL)
+					TheFrontEnd:PopScreen()
+				end
+			},
+			{
+				text="Нет, спасибо",
+				cb = function() 
+					TheFrontEnd:PopScreen()
+				end
+			},
+		}, nil, "medium")
+		scr.dialog.body:SetPosition(scr.dialog.body:GetPosition() + Vector3(0, 35, 0))
+
+		local function oncheckbox()
+			local val = not Profile:ShouldWarnBeta()
+			Profile:SetShouldWarnBeta(val)
+			return val
+		end
+
+		scr.chechbox = scr.proot:AddChild(TEMPLATES.StandardCheckbox(oncheckbox, 64, Profile:ShouldWarnBeta()))
+		scr.chechbox:SetPosition(-100, -32)
+
+		scr.chechbox_text = scr.proot:AddChild(Text(CHATFONT, 25, "Показывать при запуске", WHITE))
+		scr.chechbox_text:SetPosition(22, -32)
+		scr.chechbox_text:MoveToFront()
+
+		TheFrontEnd:PushScreen(scr)
+	end
 end)

@@ -11,7 +11,8 @@ PrefabFiles = {
 	"russian_assets"
 }
 
-local SteamID = "1240565842"
+local IsBeta = true
+local SteamID = IsBeta and "1240565842" or "1240565842"
 
 mods.RussianLanguagePack = {
 	modinfo = modinfo,
@@ -33,6 +34,7 @@ mods.RussianLanguagePack = {
 	IsModTranslEnabled = nil,
 	SteamID = SteamID,
 	SteamURL = "http://steamcommunity.com/sharedfiles/filedetails/?id="..SteamID,
+	DiscordURL = "https://discord.gg/eHEgH3xSF8",
 	SelectedLanguage = "ru",
 
 	--Склонения
@@ -47,6 +49,8 @@ mods.RussianLanguagePack = {
 		instrumental = "ins"--unused
 	},
 	DefaultActionCase = "accusative",
+
+	IsBeta = IsBeta,
 }
 
 print("About to load RLP ver. ", modinfo.version)

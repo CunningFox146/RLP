@@ -41,7 +41,7 @@ if DEBUG_ENABLE_ID[TheNet:GetUserID()] then
 	t.mod_startup_t = os.clock()
 
 	t.ModLoaded = function()
-		t.print("[RLP] MOD WAS LOADED IN ", os.clock() - t.mod_startup_t)
+		t.print("MOD WAS LOADED IN ", os.clock() - t.mod_startup_t)
 	end
 end
 
@@ -56,52 +56,6 @@ modimport("scripts/rlp_settings.lua")
 AddClassPostConstruct("widgets/spinner", function(self, options, width, height, textinfo, ...)
 	if textinfo then return end
 	self.text:SetFont(BUTTONFONT)
-end)
-
-env.AddGamePostInit(function()
-	if InGamePlay() or IsMigrating() or not TheFrontEnd then
-		return
-	end
-	
-	local PopupDialogScreen = require "screens/redux/popupdialog"
-	
-	if KnownModIndex:IsModEnabled("workshop-55043536") then
-		TheFrontEnd:PushScreen(PopupDialogScreen(
-		"Обнаружен устаревший\nмод!",
-		"Внимание! В игре обнаружен переводчик модов (Russian For Mods). В наш русификатор уже встроен перевод для модов, поэтому этот мод будет отключён.",
-		{
-			{
-				text="Хорошо",
-				cb = function() 
-					TheFrontEnd:PopScreen()
-					KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-55043536")
-					
-					ForceAssetReset()
-					KnownModIndex:Save(function()
-						SimReset()
-					end)
-				end
-			}
-		}))
-	elseif KnownModIndex:IsModEnabled("workshop-354836336") then
-		TheFrontEnd:PushScreen(PopupDialogScreen(
-		"Обнаружен устаревший\nмод!",
-		"Внимание! В игре обнаружен устаревший перевод (Russian Language Pack). Он будет отключен для корректной работы перевода.",
-		{
-			{
-				text="Хорошо",
-				cb = function() 
-					TheFrontEnd:PopScreen()
-					KnownModIndex:DisableBecauseIncompatibleWithMode("workshop-354836336")
-					
-					ForceAssetReset()
-					KnownModIndex:Save(function()
-						SimReset()
-					end)
-				end
-			}
-		}))
-	end
 end)
 
 if t.CurrentTranslationType == t.TranslationTypes.FontsOnly then
@@ -1004,11 +958,6 @@ end
 --Переводит сообщение на русский, пользуясь хеш-таблицами
 --message - сообщение на английском
 --entity - ссылка на говорящего это сообщение персонажа
-
-if DEBUG_ENABLED then
-	DumpModPhrases = function() printwrap("t.mod_phrases", t.mod_phrases) end
-end
-
 function t.TranslateToRussian(message, entity)
 	t.print("t.TranslateToRussian", message, entity.prefab)
 	if not (entity and entity.prefab and entity.components.talker and type(message)=="string") then return message end

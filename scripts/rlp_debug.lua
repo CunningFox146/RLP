@@ -35,3 +35,5 @@ function debugnames(name, mode)
     end
     f:close()
 end
+
+function DumpModPhrases() printwrap("t.mod_phrases", t.mod_phrases) end
