@@ -27,7 +27,7 @@ local RLPModButton = Class(Widget, function(self)
 	self.info.highlight:SetClickable(false)
 	self.info.highlight:Hide()
 	
-	self.status = transtype == t.ModTranslationTypes.enabled and "enabled" or "disabled" --сохраняем то значение, которое у нас при входе в это окно
+	self.status = transtype == t.ModTranslationTypes.Enabled and "enabled" or "disabled" --сохраняем то значение, которое у нас при входе в это окно
 	
 	self.btn = self:AddChild(UIAnimButton("mods_button", "mods_button", nil, nil, nil, nil, nil))--bank, build, idle_anim, focus_anim, disabled_anim, down_anim, selected_anim
 	
@@ -65,7 +65,7 @@ local RLPModButton = Class(Widget, function(self)
 			AntiSpam(.6)
 			
 			self.status = "disabled"
-			Profile:SetLocalizaitonValue("mod_translation_type", t.ModTranslationTypes.disabled)
+			Profile:SetLocalizaitonValue("mod_translation_type", t.ModTranslationTypes.Disabled)
 			
 			self:UpdateText()
 		else
@@ -76,7 +76,7 @@ local RLPModButton = Class(Widget, function(self)
 			AntiSpam(.6)
 			
 			self.status = "enabled"
-			Profile:SetLocalizaitonValue("mod_translation_type", t.ModTranslationTypes.enabled)
+			Profile:SetLocalizaitonValue("mod_translation_type", t.ModTranslationTypes.Enabled)
 			
 			self:UpdateText()
 		end

@@ -40,9 +40,9 @@ do
 	
 	local function GetModTranslationEnabled(self)
 		local val = self:GetLocalizaitonValue("mod_translation_type")
-		if not val or not tonumber(val) then
-			self:SetLocalizaitonValue("mod_translation_type", t.ModTranslationTypes.enabled)
-			return t.ModTranslationTypes.enabled
+		if not val or not tonumber(val) then -- Фикс старых настроек
+			self:SetLocalizaitonValue("mod_translation_type", t.ModTranslationTypes.Enabled)
+			return t.ModTranslationTypes.Enabled
 		end
 		return val
 	end

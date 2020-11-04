@@ -1002,7 +1002,6 @@ for i,v in pairs(STRINGS.GOATMUM_CRAVING_MISMATCH) do
 	end
 end
 
-
 t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2={Eng2Rus={}}
 for i,v in pairs(STRINGS.GOATMUM_CRAVING_HINTS_PART2) do
 	t.SpeechHashTbl.GOATMUM_CRAVING_HINTS_PART2.Eng2Rus[v]=t.PO["STRINGS.GOATMUM_CRAVING_HINTS_PART2."..i] or v
@@ -1048,29 +1047,20 @@ end
 
 t.SpeechHashTbl.EPITAPHS={}
 
-if t.CurrentTranslationType ~= t.TranslationTypes.Full and
-(t.CurrentTranslationType == t.TranslationTypes.InterfaceChat or t.CurrentTranslationType == t.TranslationTypes.ChatOnly) then --Интерфейс и чат. Тоже ничего не делаем. Блокировка произойдёт позже.
+--[[ Юзалось в режиме только UI
 	for charname,v in pairs(STRINGS.CHARACTERS) do
 		t.SpeechHashTbl[charname]={}
 	end
-	
+
 	t.SpeechHashTbl.EPITAPHS={}
 	t.SpeechHashTbl.NAMES={Eng2Key={},Rus2Eng={}}
 	t.SpeechHashTbl.PIGNAMES={Eng2Rus={}}
 	t.SpeechHashTbl.BUNNYMANNAMES={Eng2Rus={}}
 
-	if t.CurrentTranslationType==t.TranslationTypes.ChatOnly then --Только чат. Убираем перевод всего.
-		local a1=t.PO["STRINGS.LMB"]
-		local a2=t.PO["STRINGS.RMB"]
-		t.PO={} --Да, вот так. Убираем весь перевод.
-		t.PO["STRINGS.LMB"]=a1
-		t.PO["STRINGS.RMB"]=a2
-	else
-		for i,v in pairs(t.PO) do
-			if string.sub(i,8+1,8+3)~="UI." then t.PO[i]=nil end
-		end
+	for i,v in pairs(t.PO) do
+		if string.sub(i,8+1,8+3)~="UI." then t.PO[i]=nil end
 	end
-end
+end]]
 
 --Подменяем названия режимов игры
 if rawget(_G, "GAME_MODES") and STRINGS.UI.GAMEMODES then
@@ -1426,10 +1416,6 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 	--Вывод любых анонсов на экран. Тут подменяем все нестандартные фразы, и не только
 	local _ShowNewAnnouncement = self.ShowNewAnnouncement
 	if _ShowNewAnnouncement then function self:ShowNewAnnouncement(announcement, ...)
-		--Ничего не делаем, если переводится только чат или только чат и интерфейс
-		if t.CurrentTranslationType==t.TranslationTypes.ChatOnly or t.CurrentTranslationType==t.TranslationTypes.InterfaceChat then
-			return _ShowNewAnnouncement(self, announcement, ...)
-		end
 
 		local gender, player, RussianMessage, name, name2, killerkey
 
@@ -1600,7 +1586,7 @@ AddPrefabPostInit("blueprint", function(inst)
 end)
 
 --Остальное не выполняется, если перевод в режиме только чата
-if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then
+do
 	--Вешает хук на любой метод класса указанного объекта.
 	--Функция fn получает в качестве параметров ссылку на объект и все параметры перехватываемого метода.
 	--DoAfter определяет, выполняется ли хук до, или после метода.

@@ -26,7 +26,7 @@ local assets =
 	Asset("ATLAS","images/inf_btn.xml"),
 }
 
-if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё остальное
+if t.CurrentTranslationType == t.TranslationTypes.Full then --Всё остальное
 	local ass = {
 		Asset("ATLAS","images/gradient.xml"), --Градиент на слишком длинных строках лога в настройках перевода
 		Asset("ATLAS","images/rus_mapgen.xml"), --Русифицированные пиктограммы в окне генерирования нового мира
