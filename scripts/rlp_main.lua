@@ -12,6 +12,7 @@ local VerChecker = require "ver_checker"
 t.VerChecker = VerChecker
 VerChecker:LoadVersion()
 
+global("POUpdater")
 POUpdater = require "po_updater"
 
 local DEBUG_ENABLED = false
@@ -96,6 +97,13 @@ end
 print("Загрузка PO файла")
 env.LoadPOFile(t.StorePath..t.MainPOfilename, t.SelectedLanguage)
 t.PO = LanguageTranslator.languages[t.SelectedLanguage]
+
+-- TODO: Сделать внешний скрипт для этого
+for k, v in pairs(t.PO) do
+	if v == "<пусто>" or v:find("*PLACEHOLDER") then
+		t.PO[k] = nil
+	end
+end
 print("PO файл загружен!")
 
 --Возвращает корректную форму слова день (или другого, переданного вторым параметром)
@@ -524,61 +532,9 @@ local function rebuildname(str1, action, objectname)
 end
 t.rebuildname = rebuildname
 
+-- Для тестировки имен
 if DEBUG_ENABLED then
-	rawset(_G, "testname" ,function(name,key)
-		if name and (not key) and type(name)=="string" and rawget(STRINGS.NAMES,name:upper()) then key=name:upper() name=STRINGS.NAMES[key] end
-		t.print("Идти к "..rebuildname(name,"WALKTO", key))
-		t.print("Осмотреть "..rebuildname(name,"DEFAULTACTION", key))
-		if key then
-			t.print("Был убит "..rebuildname(name,"KILL",key))
-		end
-		t.print("Сменить скин у "..rebuildname(name,"reskin", key))
-	end)
-	
-	
-	--Сохраняет в файле fn все имена с действием, указанным в параметре action)
-	rawset(_G, "printnames", function(fn, action, openfn)
-		local filename = env.MODROOT..fn..".txt"
-		local str1,str2
-		local names={}
-		local f=assert(io.open(env.MODROOT..(openfn or "names_new.txt"),"r"))
-		for line in f:lines() do
-			str1=string.match(line,"[.\t]([^.\t]*)$")
-			str2=STRINGS.NAMES[str1]
-			if not (t.RussianNames[str2] and t.RussianNames[str2]["KILL"]) then
-				local s1
-				if action=="DEFAULTACTION" then
-					s1="Изучить "
-				elseif action=="WALKTO" then
-					s1="Идти к "
-				elseif action=="KILL" then
-					s1="Он был убит "
-				end
-				s1=s1..rebuildname(str2,action,str1:lower())
-				local name=s1
-				local len=s1:utf8len()
-				while len<48 do
-					name=name.."\t"
-					len=len+8
-				end
-				s1=str2
-				name=name..s1
-				len=s1:utf8len()
-				while len<48 do
-					name=name.."\t"
-					len=len+8
-				end
-				name=name..str1.."\n"
-				table.insert(names,name)
-			end
-		end
-		f:close()
-		local file = io.open(filename, "w")
-		for i,v in ipairs(names) do
-			file:write(v)
-		end
-		file:close()
-	end)
+	require("rlp_debug")
 end
 
 t.RussianNames = {} --Таблица с особыми формами названий предметов в различных падежах
