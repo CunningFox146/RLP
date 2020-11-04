@@ -21,13 +21,23 @@ local DEBUG_ENABLE_ID = {
 	["OU_76561198137380697"] = true,
 	["KU_gwxUn9lD"] = true,
 	["OU_76561198089171367"] = true,
+	["KU_llXKvJxA"] = true, -- Олег
+}
+	
+local CHEATS_ENABLE_ID = {
+	["KU_YhiKhjfu"] = true,
+	["OU_76561198137380697"] = true,
+	["KU_gwxUn9lD"] = true,
+	["OU_76561198089171367"] = true,
 }
 
-if DEBUG_ENABLE_ID[TheNet:GetUserID()] then
+if CHEATS_ENABLE_ID[TheNet:GetUserID()] then
 	CHEATS_ENABLED = true
+end
+
+if DEBUG_ENABLE_ID[TheNet:GetUserID()] then
 	DEBUG_ENABLED = true
 	t.debug = true
-
 	t.mod_startup_t = os.clock()
 
 	t.ModLoaded = function()
