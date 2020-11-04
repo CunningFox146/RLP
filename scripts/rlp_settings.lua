@@ -174,7 +174,7 @@ env.AddGamePostInit(function()
 					end)
 				end
 			}
-		}))
+		}, nil, "medium"))
 	elseif KnownModIndex:IsModEnabled("workshop-354836336") then
 		TheFrontEnd:PushScreen(PopupDialogScreen(
 		"Обнаружен устаревший\nмод!",
@@ -192,7 +192,7 @@ env.AddGamePostInit(function()
 					end)
 				end
 			}
-		}))
+		}, nil, "medium"))
 	end
 
 	if t.IsBeta and Profile and Profile:ShouldWarnBeta() then
