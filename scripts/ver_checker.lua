@@ -1,5 +1,6 @@
+local t = mods.RussianLanguagePack
 local VerChecker = {
-	URL = "https://raw.githubusercontent.com/CunningFox146/RLP/master/modinfo.lua",
+	URL = "https://raw.githubusercontent.com/CunningFox146/RLP/"..(t.IsBeta and "wip" or "master").."/modinfo.lua",
 }
 
 -- local VerChecker = require("ver_checker") VerChecker:GetVersion(function(data) print(data) end)

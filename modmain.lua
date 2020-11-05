@@ -11,7 +11,7 @@ PrefabFiles = {
 	"russian_assets"
 }
 
-local IsBeta = true
+local IsBeta = modinfo.is_beta
 local SteamID = IsBeta and "1240565842" or "1240565842"
 
 mods.RussianLanguagePack = {

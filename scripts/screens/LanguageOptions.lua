@@ -127,7 +127,7 @@ local LanguageOptions = Class(Screen, function(self)
 	self.updateoptionstitle_fx:SetScale(.4)
 	self.updateoptionstitle_fx:Hide()
 	
-	self.updateoptionstitle.modicon = self.updateoptionstitle:AddChild(Image("images/rusif_icon.xml", "rusif_icon.tex"))
+	self.updateoptionstitle.modicon = self.updateoptionstitle:AddChild(Image("images/rlp_icon"..(t.IsBeta and "_beta.xml" or ".xml"), t.IsBeta and "rlp_icon_beta.tex" or "rlp_icon.tex"))
 	self.updateoptionstitle.modicon:SetScale(.5)
 	self.updateoptionstitle.modicon:Hide()
 	
@@ -322,10 +322,6 @@ local LanguageOptions = Class(Screen, function(self)
 	self.tf2:SetScale(.9)
 	self.tf1 = self.tf2:AddChild(Widget("tf1"))
 	self.tf1:SetPosition(right_col,0,0)
-	self.textfade = self.tf1:AddChild(Image("images/gradient.xml", "gradient.tex")) --затемнение справа для сильно длинных строк
-	self.textfade:ScaleToSize(90,480,1)
-	self.textfade:SetPosition(245,-25)
-
 
 	self.logtextpagenumber={}
 	for i=1,4 do
@@ -379,10 +375,6 @@ local LanguageOptions = Class(Screen, function(self)
 --	self.default_focus = self.updateoptionsspinner
 	self.default_focus = self.TranslationTypeSpinner
 	self.TranslationTypeSpinner:SetFocus()
-	self.urlbutton=ImageButton("images/eyebutton.xml", "eyebutton1.tex", "eyebutton2.tex", "eyebutton3.tex")
-	self.urlbutton:SetPosition(-265,-12)
-	self.urlbutton:SetScale(0.4)
-	self.urlbutton:Hide()
 	HistoryButtonClick()
 	
 	--Его делаем выше всех
@@ -464,7 +456,6 @@ function LanguageOptions:UpdateLogText()
 		self.logtextbg[i].OnLoseFocus=nil
 	end
 	local function DoDownload(...)
-		self.urlbutton:Enable()
 		if ... then --пустые они будут если сервер не вернёт ответа или в самый первый раз
 			local tbl={...}
 			if tbl and #tbl==3 and tbl[3]==200 then --получили ответ от сервера и он положителен

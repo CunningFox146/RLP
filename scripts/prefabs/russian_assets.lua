@@ -9,10 +9,6 @@ local assets =
 	
     Asset("ATLAS", "images/rus_button_icon.xml" ),
 	
-    Asset("ATLAS", "images/rusif_icon.xml"),
-	
-	Asset("ATLAS","images/eyebutton.xml"),
-	
 	Asset("ATLAS","images/rus_group.xml"),
 	
 	Asset("ATLAS","images/rus_wiki.xml"),
@@ -26,9 +22,10 @@ local assets =
 	Asset("ATLAS","images/inf_btn.xml"),
 }
 
+	table.insert(assets, Asset("ATLAS", "images/rlp_icon"..(t.IsBeta and "_beta.xml" or ".xml")))
+
 if t.CurrentTranslationType == t.TranslationTypes.Full then --Всё остальное
 	local ass = {
-		Asset("ATLAS","images/gradient.xml"), --Градиент на слишком длинных строках лога в настройках перевода
 		Asset("ATLAS","images/rus_mapgen.xml"), --Русифицированные пиктограммы в окне генерирования нового мира
 		--Персонажи
 		Asset("ATLAS","images/rus_locked.xml"), 

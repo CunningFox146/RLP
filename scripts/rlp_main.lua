@@ -2113,37 +2113,46 @@ AddClassPostConstruct("screens/redux/cloudserversettingspopup", function(self)
 	self.privacy_type.buttons:UpdateButtons()
 end)
 
-AddClassPostConstruct("widgets/writeablewidget", function(self)
-	if self.menu and self.menu.items then
-		local translations={["Cancel"]="Отмена",["Random"]="Случайно",["Write it!"]="Написать!"}
-		for i,v in pairs(self.menu.items) do
-			if v.text and translations[v.text:GetString()] then
-				v.text:SetString(translations[v.text:GetString()])
+do
+	local translations = {
+		["Cancel"] = "Отмена",
+		["Random"] = "Случайно",
+		["Write it!"] = "Написать!",
+	}
+
+	AddClassPostConstruct("widgets/writeablewidget", function(self)
+		if self.menu and self.menu.items then
+			for i,v in pairs(self.menu.items) do
+				if v.text and translations[v.text:GetString()] then
+					v.text:SetString(translations[v.text:GetString()])
+				end
 			end
 		end
-	end
-end)
+	end)
+end
 
 --сочетаем слово "День" с количеством дней
-AddClassPostConstruct("widgets/truescrolllist", function(self) 
+AddClassPostConstruct("widgets/truescrolllist", function(self)
+	local months = {Jan="Янв.",Feb="Февр.",Mar="Март",Apr="Апр.",May="Мая",Jun="Июня",Jul="Июля",Aug="Авг.",Sept="Сент.",Oct="Окт.",Nov="Нояб.",Dec="Дек."}
+	local list={["day.tex"]=1,
+				["season.tex"]=1,
+				["season_start.tex"]=1,
+				["world_size.tex"]=1,
+				["world_branching.tex"]=1,
+				["world_loop.tex"]=1,
+				["world_map.tex"]=1,
+				["world_start.tex"]=1,
+				["starting_variety.tex"]=1,
+				["winter.tex"]=1,
+				["summer.tex"]=1,
+				["autumn.tex"]=1,
+				["spring.tex"]=1}
+				
 	local oldupdate_fn=self.update_fn
 	self.update_fn=function(context, widget, data, index)
 		oldupdate_fn(context, widget, data, index)
 		if widget.opt_spinner and widget.opt_spinner.spinner.options then
 			if data and data.option and data.option.image then
-				local list={["day.tex"]=1,
-					["season.tex"]=1,
-					["season_start.tex"]=1,
-					["world_size.tex"]=1,
-					["world_branching.tex"]=1,
-					["world_loop.tex"]=1,
-					["world_map.tex"]=1,
-					["world_start.tex"]=1,
-					["starting_variety.tex"]=1,
-					["winter.tex"]=1,
-					["summer.tex"]=1,
-					["autumn.tex"]=1,
-					["spring.tex"]=1}
 				if list[data.option.image] then
 					widget.opt_spinner.image:SetTexture("images/rus_mapgen.xml", "rus_"..data.option.image)
 					widget.opt_spinner.image:SetSize(70,70)
@@ -2165,7 +2174,6 @@ AddClassPostConstruct("widgets/truescrolllist", function(self)
 			if widget.SEEN_DATE and not widget.SEEN_DATE.RLPFixed then
 				local OldSetString = widget.SEEN_DATE.SetString
 				if OldSetString then
-					local months = {Jan="Янв.",Feb="Февр.",Mar="Март",Apr="Апр.",May="Мая",Jun="Июня",Jul="Июля",Aug="Авг.",Sept="Сент.",Oct="Окт.",Nov="Нояб.",Dec="Дек."}
 					function widget.SEEN_DATE:SetString(s, ...)
 						s = s:gsub("(.-) (%d-), (%d-)",function(m, d, y)
 							if not months[m] then return end
