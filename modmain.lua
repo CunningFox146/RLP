@@ -33,6 +33,7 @@ mods.RussianLanguagePack = {
 	CurrentTranslationType = nil,
 	IsModTranslEnabled = nil,
 	SteamID = SteamID,
+	Repository = "https://github.com/CunningFox146/RLP/tree/"..(IsBeta and "wip" or "master"),
 	SteamURL = "http://steamcommunity.com/sharedfiles/filedetails/?id="..SteamID,
 	DiscordURL = "https://discord.gg/eHEgH3xSF8",
 	SelectedLanguage = "ru",

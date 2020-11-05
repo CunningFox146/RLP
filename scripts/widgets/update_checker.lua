@@ -13,7 +13,11 @@ local UpdateChecker = Class(Widget, function(self)
 	self.bg = self:AddChild(TEMPLATES.RectangleWindow(175, 250, "Внимание!",
 	{
 		{ text = "Обновить!", cb = function() 
-			TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return ModsScreen() end)
+			if t.IsBeta then
+				VisitURL(t.Repository)
+			else
+				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return ModsScreen() end)
+			end
 		end},
 	},
 	nil, "Вам нужно обновить русификатор! Последняя версия:"))
