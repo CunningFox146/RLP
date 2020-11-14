@@ -13,7 +13,7 @@ PrefabFiles = {
 
 local IsBeta = modinfo.is_beta
 local IsLive = MODROOT:find("workshop-") ~= nil
-local SteamID = IsBeta and "1240565842" or "1240565842"
+local SteamID = IsBeta and "2286791724" or "1240565842"
 
 mods.RussianLanguagePack = {
 	modinfo = modinfo,
