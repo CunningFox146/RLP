@@ -13,7 +13,7 @@ local UpdateChecker = Class(Widget, function(self)
 	self.bg = self:AddChild(TEMPLATES.RectangleWindow(175, 250, "Внимание!",
 	{
 		{ text = "Обновить!", cb = function() 
-			if t.IsLive then
+			if not t.IsLive then
 				VisitURL(t.Repository)
 			else
 				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return ModsScreen() end)
