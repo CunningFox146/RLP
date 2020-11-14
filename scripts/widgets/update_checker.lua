@@ -13,7 +13,7 @@ local UpdateChecker = Class(Widget, function(self)
 	self.bg = self:AddChild(TEMPLATES.RectangleWindow(175, 250, "Внимание!",
 	{
 		{ text = "Обновить!", cb = function() 
-			if t.IsBeta then
+			if t.IsLive then
 				VisitURL(t.Repository)
 			else
 				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return ModsScreen() end)
@@ -45,7 +45,7 @@ end)
 function UpdateChecker:SyncVersion()
 	t.VerChecker:GetVersion(function(ver)
 		if ver and t.modinfo.version ~= ver then
-			self.last_ver_text:SetString(ver)
+			self.last_ver_text:SetString(t.IsBeta and ver:gsub("_beta", "") or ver)
 			self.last_ver_text:SetColour(COLOUR_RED)
 			
 			self:Show()

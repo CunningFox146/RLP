@@ -608,6 +608,119 @@ local function russianlower(tmp)
 	return res
 end
 
+
+--Функция меняет окончания прилагательного prefix в зависимости от падежа, пола и числа предмета
+local FixPrefix
+do
+	local soft23={["г"]=1,["к"]=1,["х"]=1}
+	local soft45={["г"]=1,["ж"]=1,["к"]=1,["ч"]=1,["х"]=1,["ш"]=1,["щ"]=1}
+	local endings={}
+	--Таблица окончаний в зависимости от действия и пола
+	--case2 и case3, а так же case4 и case5 — твёрдый и мягкий пары
+				-- влажный      синий  скользкий    простой    большой
+	--Именительный Кто? Что?
+	endings["nom"]={
+		he=		{case1="ый",case2="ий",case3="ий",case4="ой",case5="ой"},
+		he2=	{case1="ый",case2="ий",case3="ий",case4="ой",case5="ой"},
+		she=	{case1="ая",case2="ая",case3="ая",case4="ая",case5="ая"},
+		it=		{case1="ое",case2="ее",case3="ое",case4="ое",case5="ое"},
+		plural=	{case1="ые",case2="ие",case3="ие",case4="ые",case5="ие"},
+		plural2={case1="ые",case2="ие",case3="ие",case4="ые",case5="ие"}}
+	--Винительный Кого? Что?
+	endings["acc"]={
+		he=		{case1="ый",case2="ий",case3="ий",case4="ой",case5="ой"},
+		he2=	{case1="ого",case2="его",case3="ого",case4="ого",case5="ого"},
+		she=	{case1="ую",case2="ую",case3="ую",case4="ую",case5="ую"},
+		it=		{case1="ое",case2="ее",case3="ое",case4="ое",case5="ое"},
+		plural=	{case1="ые",case2="ие",case3="ие",case4="ые",case5="ие"},
+		plural2={case1="ых",case2="их",case3="их",case4="ых",case5="их"}}
+	--Дательный Кому? Чему?
+	endings["dat"]={
+		he=		{case1="ому",case2="ему",case3="ому",case4="ому",case5="ому"},
+		he2=	{case1="ому",case2="ему",case3="ому",case4="ому",case5="ому"},
+		she=	{case1="ой",case2="ей",case3="ой",case4="ой",case5="ой"},                          
+		it=		{case1="ому",case2="ему",case3="ому",case4="ому",case5="ому"},
+		plural=	{case1="ым",case2="им",case3="им",case4="ым",case5="им"},
+		plural2={case1="ым",case2="им",case3="им",case4="ым",case5="им"}}
+	--Творительный Кем? Чем?
+	endings["abl"]={
+		he=		{case1="ым",case2="им",case3="им",case4="ым",case5="им"},
+		he2=	{case1="ым",case2="им",case3="им",case4="ым",case5="им"},
+		she=	{case1="ой",case2="ей",case3="ой",case4="ой",case5="ой"},
+		it=		{case1="ым",case2="им",case3="им",case4="ым",case5="им"},
+		plural=	{case1="ыми",case2="ими",case3="ими",case4="ыми",case5="ими"},
+		plural2=	{case1="ыми",case2="ими",case3="ими",case4="ыми",case5="ими"}}
+	--Родительный Кого? Чего?
+	endings["gen"]={
+		he=		{case1="ого",case2="его",case3="ого",case4="ого",case5="ого"},
+		he2=	{case1="ого",case2="его",case3="ого",case4="ого",case5="ого"},
+		she=	{case1="ой",case2="ей",case3="ой",case4="ой",case5="ой"},
+		it=		{case1="ого",case2="его",case3="ого",case4="ого",case5="ого"},
+		plural=	{case1="ых",case2="их",case3="их",case4="ых",case5="их"},
+		plural2={case1="ых",case2="их",case3="их",case4="ых",case5="их"}}
+	--Предложный О ком? О чём?
+	endings["loc"]={
+		he=		{case1="ом",case2="ем",case3="ом",case4="ом",case5="ом"},
+		he2=	{case1="ом",case2="ем",case3="ом",case4="ом",case5="ом"},
+		she=	{case1="ой",case2="ей",case3="ой",case4="ой",case5="ой"},
+		it=		{case1="ом",case2="ем",case3="ом",case4="ом",case5="ом"},
+		plural=	{case1="ых",case2="их",case3="их",case4="ых",case5="их"},
+		plural2={case1="ых",case2="их",case3="их",case4="ых",case5="их"}}
+		
+	--дополнительные поля под различные действия в игре
+	endings["NOACTION"] = endings["nom"]
+	endings["DEFAULTACTION"] = endings["acc"]
+	endings["WALKTO"] = endings["dat"]
+	endings["SLEEPIN"] = endings["loc"]
+	
+	FixPrefix = function(prefix, act, item)
+		if not t.NamesGender then return prefix end
+		--Определим пол
+		local gender="he"
+		if endings["nom"][item] then --Если item содержит непосредственно пол
+			gender = item
+		else
+			if t.NamesGender["he2"][item] then gender="he2"
+			elseif t.NamesGender["she"][item] then gender="she"
+			elseif t.NamesGender["it"][item] then gender="it"
+			elseif t.NamesGender["plural"][item] then gender="plural"
+			elseif t.NamesGender["plural2"][item] then gender="plural2" end
+		end
+
+		--Особый случай. Для действия "Собрать" у меня есть три записи с заменённым текстом. Там получается множественное число.
+		if act=="PICK" and item and t.RussianNames[STRINGS.NAMES[string.upper(item)]] and t.RussianNames[STRINGS.NAMES[string.upper(item)]][act] then gender="plural" end
+		--Ищем переданное действие в таблице выше
+
+		act = endings[act] and act or (item and "DEFAULTACTION" or "nom")
+		
+		local words=string.split(prefix," ") --разбиваем на слова
+		prefix=""
+		for _, word in ipairs(words) do
+			if --[[isupper(word:utf8sub(1,1)) and ]]word:utf8len()>3 and word~="влагой" then
+				--Заменяем по всем возможным сценариям
+				if word:utf8sub(-2)=="ый" then
+					word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case1"]
+				elseif word:utf8sub(-2)=="ий" then
+					if soft23[word:utf8sub(-3,-3)] then
+						word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case3"]
+					else
+						word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case2"]
+					end
+				elseif word:utf8sub(-2)=="ой" then
+					if soft45[word:utf8sub(-3,-3)] then
+						word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case5"]
+					else
+						word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case4"]
+					end
+				end
+			end
+			prefix=prefix..word.." "
+		end
+		prefix=prefix:utf8sub(1,1)..russianlower(prefix:utf8sub(2,-2))
+		return prefix
+	end
+end
+
 --Функция ищет в реплике спец-тэги, оформленные в [] и выбирает нужный, соответствующий персонажу char
 --Варианты с разным переводом для разного пола оформляются в [] и разделяются символом |.
 --В общем случае оформляется так: [мужчина|женщина|оно|множественное число|имя префаба персонажа=его вариант]
@@ -1830,117 +1943,6 @@ end
 
 --Перегоняем перевод в STRINGS
 TranslateStringTable(STRINGS)
-
---Функция меняет окончания прилагательного prefix в зависимости от падежа, пола и числа предмета
-local function FixPrefix(prefix, act, item)
-	if not t.NamesGender then return prefix end
---	prefix=prefix.." "
-	local soft23={["г"]=1,["к"]=1,["х"]=1}
-	
-	local soft45={["г"]=1,["ж"]=1,["к"]=1,["ч"]=1,["х"]=1,["ш"]=1,["щ"]=1}
-	local endings={}
-	--Таблица окончаний в зависимости от действия и пола
-	--case2 и case3, а так же case4 и case5 — твёрдый и мягкий пары
-				-- влажный      синий  скользкий    простой    большой
-	--Именительный Кто? Что?
-	endings["nom"]={
-		he=		{case1="ый",case2="ий",case3="ий",case4="ой",case5="ой"},
-		he2=	{case1="ый",case2="ий",case3="ий",case4="ой",case5="ой"},
-		she=	{case1="ая",case2="ая",case3="ая",case4="ая",case5="ая"},
-		it=		{case1="ое",case2="ее",case3="ое",case4="ое",case5="ое"},
-		plural=	{case1="ые",case2="ие",case3="ие",case4="ые",case5="ие"},
-		plural2={case1="ые",case2="ие",case3="ие",case4="ые",case5="ие"}}
-	--Винительный Кого? Что?
-	endings["acc"]={
-		he=		{case1="ый",case2="ий",case3="ий",case4="ой",case5="ой"},
-		he2=	{case1="ого",case2="его",case3="ого",case4="ого",case5="ого"},
-		she=	{case1="ую",case2="ую",case3="ую",case4="ую",case5="ую"},
-		it=		{case1="ое",case2="ее",case3="ое",case4="ое",case5="ое"},
-		plural=	{case1="ые",case2="ие",case3="ие",case4="ые",case5="ие"},
-		plural2={case1="ых",case2="их",case3="их",case4="ых",case5="их"}}
-	--Дательный Кому? Чему?
-	endings["dat"]={
-		he=		{case1="ому",case2="ему",case3="ому",case4="ому",case5="ому"},
-		he2=	{case1="ому",case2="ему",case3="ому",case4="ому",case5="ому"},
-		she=	{case1="ой",case2="ей",case3="ой",case4="ой",case5="ой"},                          
-		it=		{case1="ому",case2="ему",case3="ому",case4="ому",case5="ому"},
-		plural=	{case1="ым",case2="им",case3="им",case4="ым",case5="им"},
-		plural2={case1="ым",case2="им",case3="им",case4="ым",case5="им"}}
-	--Творительный Кем? Чем?
-	endings["abl"]={
-		he=		{case1="ым",case2="им",case3="им",case4="ым",case5="им"},
-		he2=	{case1="ым",case2="им",case3="им",case4="ым",case5="им"},
-		she=	{case1="ой",case2="ей",case3="ой",case4="ой",case5="ой"},
-		it=		{case1="ым",case2="им",case3="им",case4="ым",case5="им"},
-		plural=	{case1="ыми",case2="ими",case3="ими",case4="ыми",case5="ими"},
-		plural2=	{case1="ыми",case2="ими",case3="ими",case4="ыми",case5="ими"}}
-	--Родительный Кого? Чего?
-	endings["gen"]={
-		he=		{case1="ого",case2="его",case3="ого",case4="ого",case5="ого"},
-		he2=	{case1="ого",case2="его",case3="ого",case4="ого",case5="ого"},
-		she=	{case1="ой",case2="ей",case3="ой",case4="ой",case5="ой"},
-		it=		{case1="ого",case2="его",case3="ого",case4="ого",case5="ого"},
-		plural=	{case1="ых",case2="их",case3="их",case4="ых",case5="их"},
-		plural2={case1="ых",case2="их",case3="их",case4="ых",case5="их"}}
-	--Предложный О ком? О чём?
-	endings["loc"]={
-		he=		{case1="ом",case2="ем",case3="ом",case4="ом",case5="ом"},
-		he2=	{case1="ом",case2="ем",case3="ом",case4="ом",case5="ом"},
-		she=	{case1="ой",case2="ей",case3="ой",case4="ой",case5="ой"},
-		it=		{case1="ом",case2="ем",case3="ом",case4="ом",case5="ом"},
-		plural=	{case1="ых",case2="их",case3="их",case4="ых",case5="их"},
-		plural2={case1="ых",case2="их",case3="их",case4="ых",case5="их"}}
-		
-	--дополнительные поля под различные действия в игре
-	endings["NOACTION"] = endings["nom"]
-	endings["DEFAULTACTION"] = endings["acc"]
-	endings["WALKTO"] = endings["dat"]
-	endings["SLEEPIN"] = endings["loc"]
-	
-	--Определим пол
-	local gender="he"
-	if endings["nom"][item] then --Если item содержит непосредственно пол
-		gender = item
-	else
-		if t.NamesGender["he2"][item] then gender="he2"
-		elseif t.NamesGender["she"][item] then gender="she"
-		elseif t.NamesGender["it"][item] then gender="it"
-		elseif t.NamesGender["plural"][item] then gender="plural"
-		elseif t.NamesGender["plural2"][item] then gender="plural2" end
-	end
-
-	--Особый случай. Для действия "Собрать" у меня есть три записи с заменённым текстом. Там получается множественное число.
-	if act=="PICK" and item and t.RussianNames[STRINGS.NAMES[string.upper(item)]] and t.RussianNames[STRINGS.NAMES[string.upper(item)]][act] then gender="plural" end
-	--Ищем переданное действие в таблице выше
-
-	act = endings[act] and act or (item and "DEFAULTACTION" or "nom")
-	
-	local words=string.split(prefix," ") --разбиваем на слова
-	prefix=""
-	for _,word in ipairs(words) do
-		if --[[isupper(word:utf8sub(1,1)) and ]]word:utf8len()>3 and word~="влагой" then
-			--Заменяем по всем возможным сценариям
-			if word:utf8sub(-2)=="ый" then
-				word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case1"]
-			elseif word:utf8sub(-2)=="ий" then
-				if soft23[word:utf8sub(-3,-3)] then
-					word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case3"]
-				else
-					word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case2"]
-				end
-			elseif word:utf8sub(-2)=="ой" then
-				if soft45[word:utf8sub(-3,-3)] then
-					word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case5"]
-				else
-					word=word:utf8sub(1,word:utf8len()-2)..endings[act][gender]["case4"]
-				end
-			end
-		end
-		prefix=prefix..word.." "
-	end
-	prefix=prefix:utf8sub(1,1)..russianlower(prefix:utf8sub(2,-2))
-	return prefix
-end
 
 --Дядька, продающий скины должен склонять слова под названия вещей
 AddClassPostConstruct("widgets/skincollector", function(self)

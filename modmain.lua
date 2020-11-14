@@ -12,6 +12,7 @@ PrefabFiles = {
 }
 
 local IsBeta = modinfo.is_beta
+local IsLive = MODROOT:find("workshop-") ~= nil
 local SteamID = IsBeta and "1240565842" or "1240565842"
 
 mods.RussianLanguagePack = {
@@ -52,6 +53,7 @@ mods.RussianLanguagePack = {
 	DefaultActionCase = "accusative",
 
 	IsBeta = IsBeta,
+	IsLive = IsLive,
 }
 
 print("About to load RLP ver. ", modinfo.version)
