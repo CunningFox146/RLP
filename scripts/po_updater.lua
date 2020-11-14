@@ -6,7 +6,7 @@ local POUpdater = {
 	
 	git_ver = "0.0",
 	
-	disabled = not t.IsLive,
+	disabled = false--not t.IsLive,
 }
 
 function POUpdater:StartUpdating(auto)
