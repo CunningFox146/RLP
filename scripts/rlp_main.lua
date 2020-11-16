@@ -1672,15 +1672,26 @@ do
 	end
 	AddClassPostConstruct("screens/redux/serverlistingscreen", ServerListingScreenPost1)
 
-	AddClassPostConstruct("components/named_replica", function(self)
-		local function OnNameDirtyMoose(inst)
-			inst.name = inst.possiblenames[math.random(#inst.possiblenames)]
-		end
-		if self.inst.prefab == "moose" then
-			self.inst.possiblenames = {STRINGS.NAMES.MOOSE1, STRINGS.NAMES.MOOSE2}
-			self.inst:ListenForEvent("namedirty", OnNameDirtyMoose)
-		end
-	end)
+
+	do
+		-- Named игнорит перевод и отправляет сроку прям с сервера
+		local NAMES_OVERRIDE = {
+			moose = {STRINGS.NAMES.MOOSE1, STRINGS.NAMES.MOOSE2},
+			mooseegg = { STRINGS.NAMES.MOOSEEGG1, STRINGS.NAMES.MOOSEEGG2 },
+		}
+
+		AddClassPostConstruct("components/named_replica", function(self)
+			local possible_names = NAMES_OVERRIDE[self.inst]
+			if not possible_names then
+				return
+			end
+			
+			local function OnNameDirty(inst)
+				inst.name = possible_names[math.random(#inst.possible_names)]
+			end
+			self.inst:ListenForEvent("namedirty", OnNameDirty)
+		end)
+	end
 
 	--Сохраняем непереведённый текст настроек приватности серверов в свойствах мира (см. ниже)
 	local privacy_options = {}
