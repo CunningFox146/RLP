@@ -1441,6 +1441,8 @@ do
 		webber = true,
 		wormwood = true,
 		walter = true,
+
+		random = true,
 	}
 	
 	require("characterutil")
