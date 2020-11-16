@@ -2367,16 +2367,19 @@ env.AddClassPostConstruct("widgets/itemselector", function(self)
 	self.title:Hide()
 end)
 
-local function PatchTradeOverflowImg(file, override)
-	env.AddClassPostConstruct(file, function(self)
-		local name = override or "title"
-		self[name]:SetTexture("images/tradescreen_overflow_ru.xml", "TradeInnSign.tex")
-	end)
-end
+do
+	local function PatchTradeOverflowImg(file, override)
+		env.AddClassPostConstruct(file, function(self)
+			local name = override or "title"
+			self[name]:SetTexture("images/tradescreen_overflow_ru.xml", "TradeInnSign.tex")
+		end)
+	end
 
-PatchTradeOverflowImg("screens/tradescreen")
-PatchTradeOverflowImg("screens/crowgamescreen")
-PatchTradeOverflowImg("screens/snowbirdgamescreen")
+	PatchTradeOverflowImg("screens/tradescreen")
+	PatchTradeOverflowImg("screens/crowgamescreen")
+	PatchTradeOverflowImg("screens/snowbirdgamescreen")
+	PatchTradeOverflowImg("screens/redbirdgamescreen")
+end
 
 local Text = require "widgets/text"
 local function AddUpdtStr(parent)
