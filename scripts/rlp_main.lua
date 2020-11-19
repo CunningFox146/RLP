@@ -1689,7 +1689,9 @@ do
 			local function OnNameDirty(inst)
 				inst.name = possible_names[math.random(#inst.possible_names)]
 			end
+
 			self.inst:ListenForEvent("namedirty", OnNameDirty)
+			self.inst:DoTaskInTime(0, OnNameDirty)
 		end)
 	end
 
@@ -2008,12 +2010,22 @@ end
 AddClassPostConstruct("widgets/intentionpicker", postintentionpicker)
 AddClassPostConstruct("widgets/redux/intentionpicker", postintentionpicker)
 
---Исправляем жёстко зашитые надписи на кнопках в казане и телепорте.
+--Исправляем жёстко зашитые надписи на кнопках в контейнерах
 do
-	local TRANSLATED_BTNS = {
-		["Cook"] = "Готовить",
-		["Activate"] = "Запустить",
+	local CONTAINER_TEXT = {
+		"COOK",
+		"SPICE",
+		"WRAPBUNDLE",
+		"APPLYCONSTRUCTION",
 	}
+
+	TRANSLATED_BTNS = {
+		[STRINGS.ACTIONS.ACTIVATE.GENERIC] = t.PO["STRINGS.ACTIONS.ACTIVATE.GENERIC"],
+	}
+
+	for _, str in ipairs(CONTAINER_TEXT) do
+		TRANSLATED_BTNS[STRINGS.ACTIONS[str]] = t.PO["STRINGS.ACTIONS."..str]
+	end
 
 	AddClassPostConstruct("widgets/containerwidget", function(self)
 		local _Open = self.Open
@@ -2268,15 +2280,22 @@ end
 AddClassPostConstruct("screens/popupdialog", PopUpdialogPost)
 AddClassPostConstruct("screens/redux/popupdialog", PopUpdialogPost)
 
---Тут не переводилось, так что фиксим
+-- Не показываем настройки языка. Ультрамегахак
+do
+	local optionsscreen = require("screens/redux/optionsscreen")
+	local __ctor = optionsscreen._ctor
+	optionsscreen._ctor = function(self, prev_screen, ...) print("_ctor") return __ctor(self, nil, ...) end
+end
+
 AddClassPostConstruct("screens/redux/optionsscreen", function(self)
 	local function UpdateSpinners(items)
+		self.screenFlashSpinner.options = { { text = STRINGS.UI.OPTIONS.DEFAULT, data = 1 }, { text = STRINGS.UI.OPTIONS.DIM, data = 2 } , { text = STRINGS.UI.OPTIONS.DIMMEST, data = 3 } }
+		self.screenFlashSpinner:SetSelectedIndex(self.screenFlashSpinner.selectedIndex)
 		for _, item in pairs(items) do
 			if item.options then -- Проверяем чайлда спинер он или нет
 				local opts = item.options
 				if #opts == 2 and opts[1].data == false then
 					--Настройки рюкзака тоже булеан. Проверяем
-					print(opts[1].text)
 					local txt = item ~= self.integratedbackpackSpinner and
 					{
 						STRINGS.UI.OPTIONS.DISABLED,
@@ -2292,9 +2311,7 @@ AddClassPostConstruct("screens/redux/optionsscreen", function(self)
 					opts[2].text = txt[2]
 
 					--Обновляем и текст
-					local data = item:GetSelected()
-					local txt = (data and data.data) and txt[2] or txt[1]
-					item:UpdateText(txt)
+					item:SetSelectedIndex(item.selectedIndex)
 				end
 			end
 		end
@@ -2380,62 +2397,6 @@ do
 	PatchTradeOverflowImg("screens/snowbirdgamescreen")
 	PatchTradeOverflowImg("screens/redbirdgamescreen")
 end
-
-local Text = require "widgets/text"
-local function AddUpdtStr(parent)
-	local self = parent:AddChild(Text(NEWFONT_OUTLINE, 25, nil, UICOLOURS.WHITE))
-	self:SetClickable(false)
-	self:MoveToFront()
-	self:SetClickable(false)
-
-	self:SetVAnchor(ANCHOR_TOP)
-	self:SetHAnchor(ANCHOR_LEFT)
-
-	local _SetString = self.SetString or (function() end)
-	self.SetString = function (self, ...)
-		_SetString(self, ...)
-		local w, h = self:GetRegionSize()
-		w, h = w * 0.5, h * 0.5
-		self:SetPosition(w + 5, -h - 5)
-	end
-
-	return self
-end
-
-env.AddGamePostInit(function(test)		
-	TheFrontEnd.consoletext:SetFont(BODYTEXTFONT) --Нужно, чтобы шрифт в консоли не слетал
-	TheFrontEnd.consoletext:SetRegionSize(900, 404) --Чуть-чуть увеличил по вертикали, чтобы не обрезало буквы в нижней строке
-	
-	if not POUpdater:IsDisabled() and not InGamePlay() then
-		if not TheFrontEnd.updt_str then
-			TheFrontEnd.updt_str = AddUpdtStr(TheFrontEnd.overlayroot)
-		end
-		TheFrontEnd.updt_str:SetString("Проверка версии перевода...")
-		POUpdater:ShouldUpdate(function(val)
-			if val then
-				TheFrontEnd.updt_str:SetString("Обновление перевода...")
-				
-				local function OnUpdateDone(_, data)
-					TheFrontEnd.updt_str.inst:RemoveEventCallback("rlp_updated", OnUpdateDone, TheGlobalInstance)
-					
-					TheFrontEnd.updt_str:SetString(data and "Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
-					TheFrontEnd.updt_str.inst:DoTaskInTime(1, function()
-						TheFrontEnd.updt_str:Kill()
-					end)
-				end
-				
-				TheFrontEnd.updt_str.inst:ListenForEvent("rlp_updated", OnUpdateDone, TheGlobalInstance)
-				POUpdater:StartUpdating(true)
-			else
-				TheFrontEnd.updt_str:SetString("Перевод последней версии.")
-				TheFrontEnd.updt_str.inst:DoTaskInTime(1, function()
-					TheFrontEnd.updt_str:Kill()
-					TheFrontEnd.updt_str = nil
-				end)
-			end
-		end)
-	end
-end)
 
 -- env.modimport("scripts/mod_translator.lua")
 

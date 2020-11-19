@@ -150,6 +150,63 @@ env.AddClassPostConstruct("screens/redux/multiplayermainscreen", function(self, 
 end)
 
 
+local Text = require "widgets/text"
+local function AddUpdtStr(parent)
+	local self = parent:AddChild(Text(NEWFONT_OUTLINE, 25, nil, UICOLOURS.WHITE))
+	self:SetClickable(false)
+	self:MoveToFront()
+	self:SetClickable(false)
+
+	self:SetVAnchor(ANCHOR_TOP)
+	self:SetHAnchor(ANCHOR_LEFT)
+
+	local _SetString = self.SetString or (function() end)
+	self.SetString = function (self, ...)
+		_SetString(self, ...)
+		local w, h = self:GetRegionSize()
+		w, h = w * 0.5, h * 0.5
+		self:SetPosition(w + 5, -h - 5)
+	end
+
+	return self
+end
+
+env.AddGamePostInit(function(test)		
+	TheFrontEnd.consoletext:SetFont(BODYTEXTFONT) --Нужно, чтобы шрифт в консоли не слетал
+	TheFrontEnd.consoletext:SetRegionSize(900, 404) --Чуть-чуть увеличил по вертикали, чтобы не обрезало буквы в нижней строке
+	
+	if not POUpdater:IsDisabled() and not InGamePlay() and not IsMigrating() then
+		if not TheFrontEnd.updt_str then
+			TheFrontEnd.updt_str = AddUpdtStr(TheFrontEnd.overlayroot)
+		end
+		TheFrontEnd.updt_str:SetString("Проверка версии перевода...")
+		POUpdater:ShouldUpdate(function(val)
+			if val then
+				TheFrontEnd.updt_str:SetString("Обновление перевода...")
+				
+				local function OnUpdateDone(_, data)
+					TheFrontEnd.updt_str.inst:RemoveEventCallback("rlp_updated", OnUpdateDone, TheGlobalInstance)
+					
+					TheFrontEnd.updt_str:SetString(data and "Перевод обновлен успешно." or "Произошла ошибка при обновлении.")
+					TheFrontEnd.updt_str.inst:DoTaskInTime(1, function()
+						TheFrontEnd.updt_str:Kill()
+						TheFrontEnd.updt_str = nil
+					end)
+				end
+				
+				TheFrontEnd.updt_str.inst:ListenForEvent("rlp_updated", OnUpdateDone, TheGlobalInstance)
+				POUpdater:StartUpdating(true)
+			else
+				TheFrontEnd.updt_str:SetString("Перевод последней версии.")
+				TheFrontEnd.updt_str.inst:DoTaskInTime(1, function()
+					TheFrontEnd.updt_str:Kill()
+					TheFrontEnd.updt_str = nil
+				end)
+			end
+		end)
+	end
+end)
+
 env.AddGamePostInit(function()
 	if InGamePlay() or IsMigrating() or not TheFrontEnd then
 		return
