@@ -1209,6 +1209,7 @@ end
 local _Networking_Talk = Networking_Talk
 function Networking_Talk(guid, message, ...)
 	local entity = Ents[guid]
+	t.print("Networking_Talk", entity, message)
 	message = t.TranslateToRussian(message, entity) or message --Переводим на русский
 	return _Networking_Talk(guid, message, ...)
 end

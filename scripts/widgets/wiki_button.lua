@@ -14,7 +14,7 @@ local WikiButton = Class(Widget, function(self)
 	self.btn.highlight:SetClickable(false)
 	self.btn.highlight:Hide()
 
-	self.btn:SetText("Википедия\nDon't Starve")
+	self.btn:SetText("Don't Starve\nВики")
 	self.btn:SetTextSize(25)
 	self.btn.text:SetPosition(-12, -80)
 	self.btn:SetFont(CHATFONT)
