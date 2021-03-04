@@ -1334,22 +1334,28 @@ AddPrefabPostInit("skeleton_player", function(inst)
 			dead=inst.playername or t.SpeechHashTbl.NAMES.Rus2Eng[dead] or dead --переводим на английский имя убитого
 			if t.SpeechHashTbl.NAMES.Rus2Eng[killer] and inst.pkname == nil then
 				local mentions=t.SpeechHashTbl.NAMES.Rus2Eng[killer]
-				killerkey=t.SpeechHashTbl.NAMES.Eng2Key[mentions] --Получаем ключ имени убийцы
+				local killerkey=t.SpeechHashTbl.NAMES.Eng2Key[mentions] --Получаем ключ имени убийцы
 				t.print("[RLP DEBUG] 2302 "..killerkey)
+
 				if not killerkey and key=="WX78" then --тут только полный перебор, т.к. он говорит всё в верхнем регистре
 					for eng, key in pairs(t.SpeechHashTbl.NAMES.Eng2Key) do
 						if eng:upper()==mentions then killerkey = key break end
 					end
 				end
+
 				mentions=killerkey and STRINGS.NAMES[killerkey] or mentions
 				if killerkey then
 					mentions=t.RussianNames[mentions] and t.RussianNames[mentions]["KILL"] or rebuildname(mentions,"KILL",killerkey) or mentions
 					if not t.ShouldBeCapped[killerkey:lower()] and not table.contains(GetActiveCharacterList(), killerkey:lower()) then
 						mentions=firsttolower(mentions)
 					end
+
 					killerkey=killerkey:lower()
-					if table.contains(GetActiveCharacterList(), killerkey) then killerkey=nil end
+					if table.contains(GetActiveCharacterList(), killerkey) then
+						killerkey=nil
+					end
 				end
+
 				killer=mentions
 			else
 				killer=t.SpeechHashTbl.NAMES.Rus2Eng[killer] or killer --Переводим на английский имя убийцы
