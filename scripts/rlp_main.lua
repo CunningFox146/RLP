@@ -1434,6 +1434,7 @@ do
 	local TRANSLATED_LIST = {
 		wortox = true,
 		warly = true,
+		wanda = true,
 		wurt = true,
 		winona = true,
 		wickerbottom = true,

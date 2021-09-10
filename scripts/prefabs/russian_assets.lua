@@ -55,6 +55,7 @@ if t.CurrentTranslationType == t.TranslationTypes.Full then --Всё остал�
 		Asset("ATLAS","images/rus_names_wortox.xml"),
 		Asset("ATLAS","images/rus_names_wormwood.xml"),
 		Asset("ATLAS","images/rus_names_warly.xml"),
+		Asset("ATLAS","images/rus_names_wanda.xml"),
 		Asset("ATLAS","images/rus_names_wurt.xml"),
 		Asset("ATLAS","images/rus_names_walter.xml"),
 		Asset("ATLAS","images/rus_names_random.xml"),
@@ -75,6 +76,7 @@ if t.CurrentTranslationType == t.TranslationTypes.Full then --Всё остал�
 		Asset("ATLAS","images/rus_names_gold_wortox.xml"),
 		Asset("ATLAS","images/rus_names_gold_wormwood.xml"),
 		Asset("ATLAS","images/rus_names_gold_warly.xml"),
+		Asset("ATLAS","images/rus_names_gold_wanda.xml"),
 		Asset("ATLAS","images/rus_names_gold_wurt.xml"),
 		Asset("ATLAS","images/rus_names_gold_walter.xml"),
 		
