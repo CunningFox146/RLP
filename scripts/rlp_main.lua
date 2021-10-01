@@ -335,12 +335,34 @@ local function rebuildname(str1, action, objectname)
 				end
 			-- (Кого? Чего?) Изменяет внешний вид у (кого? чего?) Родительный
 			elseif action=="reskin" then
-						if SubSize(str, size -3)=="шина" then
+						if SubSize(str, size -5)=="камень" then
+							str=repsubstr(str,size -5,"камня ")
+						elseif SubSize(str, size -3)=="шина" then
 							str=repsubstr(str,size -3,"шины")
 						elseif SubSize(str, size -3)=="Стол" then
 							str=repsubstr(str,size -3,"Стол")
+						elseif SubSize(str, size -3)=="Улей" then
+							str=repsubstr(str,size -3,"Улья")
+						elseif SubSize(str, size -3)=="Пана" then
+							str=repsubstr(str,size -3,"Пана")
+						elseif SubSize(str, size -3)=="чина" then
+							str=repsubstr(str,size -3,"чины")
+						elseif SubSize(str, size -3)=="пуса" then
+							str=repsubstr(str,size -3,"пуса")
+						elseif SubSize(str, size -3)=="Вилы" then
+							str=str:utf8sub(1, -2)
+						elseif SubSize(str, size -3)=="стей" then
+							str=repsubstr(str,size -3,"стей")
+						elseif SubSize(str, size -3)=="ория" then
+							str=repsubstr(str,size -3,"ории")
+						elseif SubSize(str, size -3)=="мина" then
+							str=repsubstr(str,size -3,"мины")
+						elseif SubSize(str, size -3)=="фало" then
+							str=repsubstr(str,size -3,"фало")
 						elseif SubSize(str, size -2)=="зой" then
 							str=repsubstr(str,size -2,"зой")
+						elseif SubSize(str, size -2)=="для" then
+							str=repsubstr(str,size -2,"для")
 						elseif SubSize(str, size -2)=="арь" then
 							str=repsubstr(str,size -2,"аря")
 						elseif SubSize(str, size -2)=="Тэм" then
@@ -353,10 +375,20 @@ local function rebuildname(str1, action, objectname)
 							str=repsubstr(str,size ,"а")
 						elseif SubSize(str, size -2)=="лун" then
 							str=repsubstr(str,size -2,"лун")
+						elseif SubSize(str, size -2)=="асы" then
+							str=repsubstr(str,size -2,"асов")
+						elseif SubSize(str, size -2)=="лей" then
+							str=repsubstr(str,size -2,"лей")
 						elseif SubSize(str, size -2)=="ода" then
 							str=repsubstr(str,size -2,"ода")
+						elseif SubSize(str, size -2)=="ера" then
+							str=repsubstr(str,size -2,"ера")
+						elseif SubSize(str, size -2)=="ыга" then
+							str=repsubstr(str,size -2,"ыги")
 						elseif SubSize(str, size -2)=="шок" then
-							str=repsubstr(str,size -2,"шка")
+							str=repsubstr(str,size -2,"шка")							
+						elseif SubSize(str, size -2)=="ина" then
+							str=repsubstr(str,size -2,"ины")
 						elseif SubSize(str, size -2)=="ики" then
 							str=repsubstr(str,size ,"ов")
 						elseif SubSize(str, size -2)=="уса" then
@@ -367,8 +399,8 @@ local function rebuildname(str1, action, objectname)
 							str=str:utf8sub(1, -2)
 						elseif SubSize(str, size -2)=="ота" then
 							str=str:utf8sub(1, -2)
-						elseif SubSize(str, size -2)=="ий" then
-							str=repsubstr(str,size -2,"ого")
+						elseif SubSize(str, size -1)=="ий" then
+							str=repsubstr(str,size -1,"ого")
 						elseif SubSize(str, size -1)=="зд" then
 							str=str:utf8sub(1, -2)
 						elseif SubSize(str, size -1)=="ьё" then
@@ -385,6 +417,8 @@ local function rebuildname(str1, action, objectname)
 							str=repsubstr(str,size -1,"ки")
 						elseif SubSize(str, size -1)=="та" then
 							str=repsubstr(str,size -1,"ты")
+						elseif SubSize(str, size -1)=="ян" then
+							str=repsubstr(str,size -1,"ян")
 						elseif SubSize(str, size -1)=="ой" then
 							str=repsubstr(str,size -1,"ого")
 						elseif SubSize(str, size -1)=="ая" then
@@ -401,12 +435,14 @@ local function rebuildname(str1, action, objectname)
 							str=repsubstr(str,size -1,"ьей")
 						elseif SubSize(str, size -1)=="ия" then
 							str=repsubstr(str,size -1,"ий")
+						elseif SubSize(str, size -1)=="из" then
+							str=repsubstr(str,size -1,"из")
 						elseif SubSize(str, size -1)=="па" then
 							str=repsubstr(str,size -1,"пы")
 						elseif SubSize(str, size -1)=="ще" then
 							str=repsubstr(str,size -1,"ща")
 						elseif SubSize(str, size -1)=="нь" then
-							str=repsubstr(str,size -2,"ня")
+							str=repsubstr(str,size -1,"ня")
 						elseif SubSize(str, size -1)=="яя" then
 							str=repsubstr(str,size -1,"ей")
 						elseif SubSize(str, size -1)=="це" then
