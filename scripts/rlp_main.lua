@@ -336,7 +336,7 @@ local function rebuildname(str1, action, objectname)
 			-- (Кого? Чего?) Изменяет внешний вид у (кого? чего?) Родительный
 			elseif action=="reskin" then
 						if SubSize(str, size -5)=="камень" then
-							str=repsubstr(str,size -5,"камня ")
+							str=repsubstr(str,size -5,"камня"):utf8sub(1, -2)
 						elseif SubSize(str, size -3)=="шина" then
 							str=repsubstr(str,size -3,"шины")
 						elseif SubSize(str, size -3)=="Стол" then
