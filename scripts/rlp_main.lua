@@ -1341,6 +1341,51 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 	end end
 end) -- для AddClassPostConstruct "widgets/eventannouncer"
 
+-- Правильно склоняем названия Эскизов в плейсхолдере
+local SKETCHES = 
+{
+    {item="chesspiece_toadstool",       recipe="chesspiece_toadstool_builder"},
+    {item="chesspiece_stalker",         recipe="chesspiece_stalker_builder"},
+    {item="chesspiece_pipe",        	recipe="chesspiece_pipe_builder"},
+    {item="chesspiece_minotaur",        recipe="chesspiece_minotaur_builder"},
+    {item="chesspiece_klaus",        	recipe="chesspiece_klaus_builder"},
+    {item="chesspiece_hornucopia",      recipe="chesspiece_hornucopia_builder"},
+    {item="chesspiece_beequeen",        recipe="chesspiece_beequeen_builder"},
+    {item="chesspiece_antlion",         recipe="chesspiece_antlion_builder"},
+    {item="chesspiece_pawn",        	recipe="chesspiece_pawn_builder"},
+    {item="chesspiece_rook",        	recipe="chesspiece_rook_builder"},
+    {item="chesspiece_knight",      	recipe="chesspiece_knight_builder"},
+    {item="chesspiece_bishop",     	 	recipe="chesspiece_bishop_builder"},
+    {item="chesspiece_muse",        	recipe="chesspiece_muse_builder"},
+    {item="chesspiece_formal",      	recipe="chesspiece_formal_builder"},
+    {item="chesspiece_deerclops",   	recipe="chesspiece_deerclops_builder"},
+    {item="chesspiece_bearger",     	recipe="chesspiece_bearger_builder"},
+    {item="chesspiece_moosegoose",  	recipe="chesspiece_moosegoose_builder"},
+    {item="chesspiece_dragonfly",  		recipe="chesspiece_dragonfly_builder"},
+    {item="chesspiece_clayhound",       recipe="chesspiece_clayhound_builder",      	image="chesspiece_clayhound_sketch"},
+    {item="chesspiece_claywarg",        recipe="chesspiece_claywarg_builder",       	image="chesspiece_claywarg_sketch"},
+    {item="chesspiece_malbatross",      recipe="chesspiece_malbatross_builder",         image="chesspiece_malbatross_sketch"},
+    {item="chesspiece_butterfly",       recipe="chesspiece_butterfly_builder",       	image="chesspiece_butterfly_sketch"},
+    {item="chesspiece_carrat",          recipe="chesspiece_carrat_builder",       		image="chesspiece_carrat_sketch"},
+    {item="chesspiece_crabking",        recipe="chesspiece_crabking_builder",       	image="chesspiece_crabking_sketch"},
+    {item="chesspiece_guardianphase3",  recipe="chesspiece_guardianphase3_builder",     image="chesspiece_guardianphase3_sketch"},
+    {item="chesspiece_moon",            recipe="chesspiece_moon_builder",       		image="chesspiece_moon_sketch"},
+    {item="chesspiece_beefalo",         recipe="chesspiece_beefalo_builder",       		image="chesspiece_beefalo_sketch"},
+    {item="chesspiece_anchor",          recipe="chesspiece_anchor_builder",       		image="chesspiece_anchor_sketch"},
+}
+AddPrefabPostInit("sketch",function(inst)
+	if inst.sketchid and SKETCHES[inst.sketchid] and SKETCHES[inst.sketchid].recipe  and STRINGS.NAMES[string.upper(SKETCHES[inst.sketchid].recipe)] then 
+		local newname ="Эскиз "..STRINGS.NAMES[string.upper(SKETCHES[inst.sketchid].recipe)]
+		newname=newname:gsub("Фигура", "фигуры")
+		inst.components.named:SetName(newname)
+		local _OnLoad=inst.OnLoad
+		inst.OnLoad=function(inst, data)
+			_OnLoad(inst, data)
+			inst.components.named:SetName(inst.name:gsub("Фигура","фигуры"))
+		end
+	end
+end)
+
 --Тут мы должны переделать описание скелета, чтобы в него не попал русский
 -- Жуть какая. Столько кода просто для перевода скелета
 AddPrefabPostInit("skeleton_player", function(inst)
