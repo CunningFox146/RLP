@@ -8,7 +8,7 @@ local UpdateScreen = Class(GenericWaitingPopup, function(self)
 		self.inst:DoTaskInTime(0, function()
 			TheFrontEnd:PopScreen(self)
 			TheFrontEnd:PushScreen(PopupDialogScreen("Обновление невозможно",
-			"Вы находитесь на GitHub версии. Пожалуйста, обновите мод вручную, или истользуйте версию из воркшопа.",
+			"Вы находитесь на GitHub версии. Пожалуйста, обновите мод вручную, или используйте версию из воркшопа.",
 				{
 					{text="Понятно", cb = function()
 						TheFrontEnd:PopScreen()
