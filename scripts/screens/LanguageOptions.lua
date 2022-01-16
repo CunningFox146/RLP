@@ -100,7 +100,7 @@ local LanguageOptions = Class(Screen, function(self)
 
 	self.URLButton = self.root:AddChild(ImageButton("images/ui.xml", "button_large.tex", "button_large_over.tex", "button_large_over.tex"))
 	self.URLButton:SetText("Страница\nпроекта")
-	self.URLButton:SetOnClick( function() VisitURL(t.Repositoyry) end )
+	self.URLButton:SetOnClick( function() VisitURL(t.Repository) end )
 	self.URLButton:SetTextSize(30)
 
 
