@@ -1,1 +1,7 @@
-<Atlas><Texture filename="rlp_icon_beta.tex" /><Elements><Element name="rlp_icon_beta.tex" u1="0.0009765625" u2="0.9111328125" v1="0.0888671875" v2="0.9990234375" /></Elements></Atlas>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Atlas>
+	<Texture filename="rlp_icon_beta.tex" />
+	<Elements>
+		<Element name="rlp_icon_beta.tex" u1="0.001" u2="0.5224375" v2="0.999" v1="0.4775625" variant="" />
+	</Elements>
+</Atlas>
