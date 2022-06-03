@@ -2271,7 +2271,7 @@ AddClassPostConstruct("widgets/truescrolllist", function(self)
 			if data and data.option and data.option.image then
 				if list[data.option.image] then
 					widget.opt_spinner.image:SetTexture("images/rus_mapgen.xml", "rus_"..data.option.image)
-					widget.opt_spinner.image:SetSize(70,70)
+					widget.opt_spinner.image:SetSize(50,50)
 				end
 			end
 		end
