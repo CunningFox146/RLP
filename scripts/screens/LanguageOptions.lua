@@ -17,7 +17,11 @@ local VKButton = require "widgets/vk_button"
 local RLPModButton = require "widgets/mod_settings_button"
 --local Puppet = require "widgets/skinspuppet"
 
-local TranslationTypeSave = nil
+local TranslationTypeSave
+
+local function escapeR(str)
+	if string.sub(str, #str)=="\r" then return string.sub(str, 1, #str-1) else return str end
+end
 
 local LanguageOptions = Class(Screen, function(self)
     Screen._ctor(self, "LanguageOptions")
@@ -96,7 +100,7 @@ local LanguageOptions = Class(Screen, function(self)
 
 	self.URLButton = self.root:AddChild(ImageButton("images/ui.xml", "button_large.tex", "button_large_over.tex", "button_large_over.tex"))
 	self.URLButton:SetText("Страница\nпроекта")
-	self.URLButton:SetOnClick( function() VisitURL("https://github.com/CunningFox146/RLP") end )
+	self.URLButton:SetOnClick( function() VisitURL(t.Repository) end )
 	self.URLButton:SetTextSize(30)
 
 
@@ -123,7 +127,7 @@ local LanguageOptions = Class(Screen, function(self)
 	self.updateoptionstitle_fx:SetScale(.4)
 	self.updateoptionstitle_fx:Hide()
 	
-	self.updateoptionstitle.modicon = self.updateoptionstitle:AddChild(Image("images/rusif_icon.xml", "rusif_icon.tex"))
+	self.updateoptionstitle.modicon = self.updateoptionstitle:AddChild(Image("images/rlp_icon"..(t.IsBeta and "_beta.xml" or ".xml"), t.IsBeta and "rlp_icon_beta.tex" or "rlp_icon.tex"))
 	self.updateoptionstitle.modicon:SetScale(.5)
 	self.updateoptionstitle.modicon:Hide()
 	
@@ -170,17 +174,12 @@ local LanguageOptions = Class(Screen, function(self)
 	self.TranslationTypeText.text:SetString("Варианты русификации")
 	self.TranslationTypeText.text:SetHAlign(ANCHOR_MIDDLE)
 
-	local transtype = Profile:GetLocalizaitonValue("translation_type")
-	if not transtype then --Если нет записи о типе, то делаем по умолчанию полный перевод
-		transtype = t.TranslationTypes.Full
-		Profile:SetLocalizaitonValue("translation_type", transtype)
-	end
+	local transtype = Profile:GetTranslationType()
 	TranslationTypeSave = transtype --сохраняем то значение, которое у нас при входе в это окно
 
 	self.TranslationTypeOptions={
 		{text = "Полная", data = t.TranslationTypes.Full, description = "Переведено всё, включая интерфейс, чат, названия предметов и реплики персонажей."},
-		{text = "Интерфейс и чат", data = t.TranslationTypes.InterfaceChat, description = "Переведён только интерфейс и чат. Пригодится тем, кто привык к оригинальной английской терминологии."},
-		{text = "Только чат", data = t.TranslationTypes.ChatOnly, description = "Подойдёт тем, кто не хочет перевода игры. Подгружаются только русские шрифты."}
+		{text = "Только шрифты", data = t.TranslationTypes.FontsOnly, description = "Подойдёт тем, кто не хочет перевода игры. Подгружаются только русские шрифты."}
 	}
 	
 	--Нам нужен bg. Выше спинера
@@ -191,7 +190,7 @@ local LanguageOptions = Class(Screen, function(self)
 	self.TranslationTypeSpinner = self.updateoptionspanel:AddChild(Spinner(self.TranslationTypeOptions, 350, nil, nil, nil, nil, nil, true, nil, nil, .7, .7))	
 	
 	for i,v in ipairs(self.TranslationTypeOptions) do --Скроллер должен показывать текущий режим русификатора
-		if v.data==transtype then
+		if v.data == transtype then
 			self.TranslationTypeSpinner:SetSelectedIndex(i)
 			break
 		end
@@ -201,7 +200,7 @@ local LanguageOptions = Class(Screen, function(self)
 	self.TranslationTypeSpinner.OnChanged =
 		function( _, data )
 			self.TranslationTypeDescriptionText:SetString(self.TranslationTypeOptions[self.TranslationTypeSpinner:GetSelectedIndex()].description)
-			Profile:SetLocalizaitonValue("translation_type",t.TranslationTypes[self.TranslationTypeSpinner:GetSelectedData()])
+			Profile:SetLocalizaitonValue("translation_type", self.TranslationTypeSpinner:GetSelectedData())
 		end
 	self.TranslationTypeSpinner:SetWrapEnabled(true)
 	--БГ следут за спинером.
@@ -323,10 +322,6 @@ local LanguageOptions = Class(Screen, function(self)
 	self.tf2:SetScale(.9)
 	self.tf1 = self.tf2:AddChild(Widget("tf1"))
 	self.tf1:SetPosition(right_col,0,0)
-	self.textfade = self.tf1:AddChild(Image("images/gradient.xml", "gradient.tex")) --затемнение справа для сильно длинных строк
-	self.textfade:ScaleToSize(90,480,1)
-	self.textfade:SetPosition(245,-25)
-
 
 	self.logtextpagenumber={}
 	for i=1,4 do
@@ -380,10 +375,6 @@ local LanguageOptions = Class(Screen, function(self)
 --	self.default_focus = self.updateoptionsspinner
 	self.default_focus = self.TranslationTypeSpinner
 	self.TranslationTypeSpinner:SetFocus()
-	self.urlbutton=ImageButton("images/eyebutton.xml", "eyebutton1.tex", "eyebutton2.tex", "eyebutton3.tex")
-	self.urlbutton:SetPosition(-265,-12)
-	self.urlbutton:SetScale(0.4)
-	self.urlbutton:Hide()
 	HistoryButtonClick()
 	
 	--Его делаем выше всех
@@ -465,7 +456,6 @@ function LanguageOptions:UpdateLogText()
 		self.logtextbg[i].OnLoseFocus=nil
 	end
 	local function DoDownload(...)
-		self.urlbutton:Enable()
 		if ... then --пустые они будут если сервер не вернёт ответа или в самый первый раз
 			local tbl={...}
 			if tbl and #tbl==3 and tbl[3]==200 then --получили ответ от сервера и он положителен
@@ -802,7 +792,7 @@ function LanguageOptions:LoadHistory()
 	local lines=0
 	local f=io.open(t.StorePath.."scripts/history.txt","r")
 	if f then for line in f:lines() do 
-		line=t.escapeR(line) --избавляемся от \r для юникс систем
+		line=escapeR(line) --избавляемся от \r для юникс систем
 		if line:utf8sub(1,6)=="Версия" then --Найдено описание новой версии
 			if lines~=0 then --до этого шло описание другой версии
 				if self.logtextlines<lines then self.logtextlines=lines end
@@ -1024,13 +1014,10 @@ function LanguageOptions:Cancel()
 	self.tf3:Kill()
 	
 	--Если выбран другой тип русификации, то перегружаем систему.
-	if TranslationTypeSave and TranslationTypeSave~=self.TranslationTypeSpinner:GetSelectedData() then
-		if not( (TranslationTypeSave==t.TranslationTypes.Full and self.TranslationTypeSpinner:GetSelectedData()==t.TranslationTypes.InterfaceChat) or
-		(TranslationTypeSave==t.TranslationTypes.InterfaceChat and self.TranslationTypeSpinner:GetSelectedData()==t.TranslationTypes.Full) ) then
-			--TheFrontEnd:Fade(FADE_IN, SCREEN_FADE_TIME, function()
-				SimReset()
-			--end)
-		end
+	if TranslationTypeSave and TranslationTypeSave ~= self.TranslationTypeSpinner:GetSelectedData() then
+		-- TheFrontEnd:Fade(FADE_IN, SCREEN_FADE_TIME, function()
+			SimReset()
+		-- end)
 	end
 
 	--Музло

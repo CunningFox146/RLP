@@ -1,5 +1,6 @@
+local t = mods.RussianLanguagePack
 local VerChecker = {
-	URL = "https://raw.githubusercontent.com/CunningFox146/RLP/master/modinfo.lua",
+	URL = "https://raw.githubusercontent.com/CunningFox146/RLP/"..(t.IsBeta and "wip" or "master").."/modinfo.lua",
 }
 
 -- local VerChecker = require("ver_checker") VerChecker:GetVersion(function(data) print(data) end)
@@ -12,7 +13,7 @@ function VerChecker:LoadVersion(fn)
 		end
 		
 		local anim = (result:match("version = [%S]+"))
-		self.data = anim and (anim:gsub("version = ", ""))
+		self.data = anim and (anim:gsub("version = ", "")):sub(2, -2)
 		
 		if fn then
 			fn(self.data)

@@ -1,12 +1,12 @@
 local t = mods.RussianLanguagePack
-
+local LINK = "https://raw.githubusercontent.com/CunningFox146/RLP/".. (t.IsBeta and "wip" or "master") .. "/"
 local POUpdater = {
-	VER_URL = "https://raw.githubusercontent.com/CunningFox146/RLP/master/po_ver.txt",
-	URL = "https://raw.githubusercontent.com/CunningFox146/RLP/master/DST.po",
+	VER_URL = LINK.."po_ver.txt",
+	URL = LINK.."DST.po",
 	
 	git_ver = "0.0",
 	
-	disabled = not t.StorePath:find("workshop-"),
+	disabled = not t.IsLive,
 }
 
 function POUpdater:StartUpdating(auto)

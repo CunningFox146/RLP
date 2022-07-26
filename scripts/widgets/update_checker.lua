@@ -5,40 +5,47 @@ local ModsScreen = require "screens/redux/modsscreen"
 
 local t = mods.RussianLanguagePack
 
-local COLOUR_RED = {255/255,25/255,0,1}
+local COLOUR_RED = {255/255, 25/255, 0, 1}
 
 local UpdateChecker = Class(Widget, function(self)
-    Widget._ctor(self, "UPDATE_CHECKER")
-	--sizeX, sizeY, title_text, bottom_buttons, button_spacing, body_text
-	self.bg = self:AddChild(TEMPLATES.CurlyWindow(150, 175, "Внимание!",
+    Widget._ctor(self, "UpdateChecker")
+	
+	self.bg = self:AddChild(TEMPLATES.RectangleWindow(175, 250, "Внимание!",
 	{
 		{ text = "Обновить!", cb = function() 
-			TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return ModsScreen() end)
+			if not t.IsLive then
+				VisitURL(t.Repository)
+			else
+				TheFrontEnd:FadeToScreen(TheFrontEnd:GetActiveScreen(), function() return ModsScreen() end)
+			end
 		end},
 	},
 	nil, "Вам нужно обновить русификатор! Последняя версия:"))
 	
+	local r, g, b = unpack(UICOLOURS.BROWN_DARK)
+    self.bg:SetBackgroundTint(r, g, b, 1)
+	
 	if self.bg.actions then
-		self.bg.actions:SetPosition(0, 30)
+		self.bg.actions:SetPosition(0, 35)
 	end
 	
 	if self.bg.body then
-		self.bg.body:SetPosition(0, 55)
+		self.bg.body:SetPosition(0, 25)
 	end
 	
 	self.last_ver_text = self.bg:AddChild(Text(HEADERFONT, 50))
 	self.last_ver_text:SetRegionSize(185, 200)
-	self.last_ver_text:SetPosition(0, -30)
+	self.last_ver_text:SetPosition(0, -60)
 	
 	self:Hide()
 	
-	self.inst:DoTaskInTime(1, function() self:SyncVersion() end)
+	self:SyncVersion()
 end)
 
 function UpdateChecker:SyncVersion()
-	t.VerChecker:GetData(function(data)
-		if data.last_ver ~= nil and t.modinfo.version ~= data.last_ver then
-			self.last_ver_text:SetString(data.last_ver)
+	t.VerChecker:GetVersion(function(ver)
+		if ver and t.modinfo.version ~= ver then
+			self.last_ver_text:SetString(t.IsBeta and ver:gsub("_beta", "") or ver)
 			self.last_ver_text:SetColour(COLOUR_RED)
 			
 			self:Show()

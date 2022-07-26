@@ -112,7 +112,7 @@ end
 local after_init = {} --Функции пост инициализации.
 --При создании мира все префабы уже загружены, поэтому это самое удачное время для исправления строк.
 local after_init_trans = {} --А это функции, которые не подозревают, что в теле мода. Хитрая подстановка переменных.
-env.AddPrefabPostInit("world",function(inst)
+env.AddPrefabPostInit("world", function(inst)
 	for i,fn in ipairs(after_init) do
 		fn()
 	end
@@ -165,7 +165,7 @@ env.RegisterReplacedTranslation = function(fn)
 	table.insert(after_init_trans, fn)
 end
 
-if t.IsModTranslEnabled ~= t.ModTranslationTypes.disabled and t.CurrentTranslationType == t.TranslationTypes.Full then
+if t.IsModTranslEnabled ~= t.ModTranslationTypes.Disabled and t.CurrentTranslationType == t.TranslationTypes.Full then
 	--Простые переменные.
 	env.mk = t.RegisterRussianName
 	env.ch_nm = t.RegisterRussianName

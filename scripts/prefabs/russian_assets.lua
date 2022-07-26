@@ -9,10 +9,6 @@ local assets =
 	
     Asset("ATLAS", "images/rus_button_icon.xml" ),
 	
-    Asset("ATLAS", "images/rusif_icon.xml"),
-	
-	Asset("ATLAS","images/eyebutton.xml"),
-	
 	Asset("ATLAS","images/rus_group.xml"),
 	
 	Asset("ATLAS","images/rus_wiki.xml"),
@@ -26,9 +22,10 @@ local assets =
 	Asset("ATLAS","images/inf_btn.xml"),
 }
 
-if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё остальное
+	table.insert(assets, Asset("ATLAS", "images/rlp_icon"..(t.IsBeta and "_beta.xml" or ".xml")))
+
+if t.CurrentTranslationType == t.TranslationTypes.Full then --Всё остальное
 	local ass = {
-		Asset("ATLAS","images/gradient.xml"), --Градиент на слишком длинных строках лога в настройках перевода
 		Asset("ATLAS","images/rus_mapgen.xml"), --Русифицированные пиктограммы в окне генерирования нового мира
 		--Персонажи
 		Asset("ATLAS","images/rus_locked.xml"), 
@@ -58,7 +55,9 @@ if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё ост�
 		Asset("ATLAS","images/rus_names_wortox.xml"),
 		Asset("ATLAS","images/rus_names_wormwood.xml"),
 		Asset("ATLAS","images/rus_names_warly.xml"),
+		Asset("ATLAS","images/rus_names_wanda.xml"),
 		Asset("ATLAS","images/rus_names_wurt.xml"),
+		Asset("ATLAS","images/rus_names_walter.xml"),
 		Asset("ATLAS","images/rus_names_random.xml"),
 		--Золото
 		Asset("ATLAS","images/rus_names_gold_wickerbottom.xml"), 
@@ -77,7 +76,9 @@ if t.CurrentTranslationType ~= t.TranslationTypes.ChatOnly then --Всё ост�
 		Asset("ATLAS","images/rus_names_gold_wortox.xml"),
 		Asset("ATLAS","images/rus_names_gold_wormwood.xml"),
 		Asset("ATLAS","images/rus_names_gold_warly.xml"),
+		Asset("ATLAS","images/rus_names_gold_wanda.xml"),
 		Asset("ATLAS","images/rus_names_gold_wurt.xml"),
+		Asset("ATLAS","images/rus_names_gold_walter.xml"),
 		
 		
 		Asset("ATLAS", "images/frontscreen_ru.xml" ),

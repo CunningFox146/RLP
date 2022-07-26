@@ -11,7 +11,9 @@ PrefabFiles = {
 	"russian_assets"
 }
 
-local SteamID = "1240565842"
+local IsBeta = modinfo.is_beta
+local IsLive = MODROOT:find("workshop-") ~= nil
+local SteamID = IsBeta and "2286791724" or "1240565842"
 
 mods.RussianLanguagePack = {
 	modinfo = modinfo,
@@ -21,19 +23,20 @@ mods.RussianLanguagePack = {
 	mod_phrases = {},
 	mod_announce = {},
 	
-	-- Для дебага
-	debug = true,
-	print = function(...) if mods.RussianLanguagePack.debug then print("[RLP_DEBUG] " .. (...))  end end,
+	debug = nil,
+	print = function(...) if mods.RussianLanguagePack.debug then print("[RLP_DEBUG]", ...)  end end,
 	
 	UpdateLogFileName = "updatelog.txt",
 	MainPOfilename = "DST.po",
 	ModsPOfilename = "MODS.po",
-	TranslationTypes = {Full = "Full", InterfaceChat = "InterfaceChat", ChatOnly = "ChatOnly"},
-	ModTranslationTypes = {enabled = "enabled", disabled = "disabled"},
+	TranslationTypes = {Full = "1", FontsOnly = "0"},
+	ModTranslationTypes = {Enabled = "1", Disabled = "0"},
 	CurrentTranslationType = nil,
 	IsModTranslEnabled = nil,
 	SteamID = SteamID,
+	Repository = "https://github.com/CunningFox146/RLP/tree/"..(IsBeta and "wip" or "master"),
 	SteamURL = "http://steamcommunity.com/sharedfiles/filedetails/?id="..SteamID,
+	DiscordURL = "https://discord.gg/eHEgH3xSF8",
 	SelectedLanguage = "ru",
 
 	--Склонения
@@ -48,6 +51,9 @@ mods.RussianLanguagePack = {
 		instrumental = "ins"--unused
 	},
 	DefaultActionCase = "accusative",
+
+	IsBeta = IsBeta,
+	IsLive = IsLive,
 }
 
 print("About to load RLP ver. ", modinfo.version)

@@ -1,0 +1,6 @@
+<Atlas>
+	<Texture filename="rlp_icon.tex" />
+	<Elements>
+		<Element name="rlp_icon.tex" u1="0.001" u2="0.5224375" v2="0.999" v1="0.4775625" variant="" />
+	</Elements>
+</Atlas>
