@@ -337,8 +337,14 @@ local function rebuildname(str1, action, objectname)
 			elseif action=="reskin" then
 						if SubSize(str, size -5)=="камень" then
 							str=repsubstr(str,size -5,"камня"):utf8sub(1, -2)
+						elseif SubSize(str, size -3)=="алун" then
+							str=repsubstr(str,size -3,"алуна")
 						elseif SubSize(str, size -3)=="шина" then
 							str=repsubstr(str,size -3,"шины")
+						elseif SubSize(str, size -3)=="эрма" then
+							str=repsubstr(str,size -3,"эрма")
+						elseif SubSize(str, size -3)=="обие" then
+							str=repsubstr(str,size -3,"обия")
 						elseif SubSize(str, size -3)=="Стол" then
 							str=repsubstr(str,size -3,"Стол")
 						elseif SubSize(str, size -3)=="Улей" then
@@ -347,9 +353,13 @@ local function rebuildname(str1, action, objectname)
 							str=repsubstr(str,size -3,"Пана")
 						elseif SubSize(str, size -3)=="чина" then
 							str=repsubstr(str,size -3,"чины")
+						elseif SubSize(str, size -3)=="жина" then
+							str=repsubstr(str,size -3,"жины")
 						elseif SubSize(str, size -3)=="пуса" then
 							str=repsubstr(str,size -3,"пуса")
 						elseif SubSize(str, size -3)=="Вилы" then
+							str=str:utf8sub(1, -2)
+						elseif SubSize(str, size -3)=="вилы" then
 							str=str:utf8sub(1, -2)
 						elseif SubSize(str, size -3)=="стей" then
 							str=repsubstr(str,size -3,"стей")
@@ -383,28 +393,42 @@ local function rebuildname(str1, action, objectname)
 							str=repsubstr(str,size -2,"ода")
 						elseif SubSize(str, size -2)=="ера" then
 							str=repsubstr(str,size -2,"ера")
+						elseif SubSize(str, size -2)=="ний" then
+							str=repsubstr(str,size -2,"его")
+						elseif SubSize(str, size -2)=="щий" then
+							str=repsubstr(str,size -2,"его")
+						elseif SubSize(str, size -2)=="ьей" then
+							str=repsubstr(str,size -2,"ьей")
+						elseif SubSize(str, size -2)=="еля" then
+							str=repsubstr(str,size -2,"еля")
 						elseif SubSize(str, size -2)=="ыга" then
 							str=repsubstr(str,size -2,"ыги")
 						elseif SubSize(str, size -2)=="шок" then
 							str=repsubstr(str,size -2,"шка")							
 						elseif SubSize(str, size -2)=="ина" then
-							str=repsubstr(str,size -2,"ины")
+							str=repsubstr(str,size -2,"ины")						
+						elseif SubSize(str, size -2)=="ово" then
+							str=repsubstr(str,size -2,"ова")
 						elseif SubSize(str, size -2)=="ики" then
 							str=repsubstr(str,size ,"ов")
 						elseif SubSize(str, size -2)=="уса" then
 							str=str:utf8sub(1, -2)
 						elseif SubSize(str, size -2)=="нец" then
 							str=repsubstr(str,size -2,"нец")
+						elseif SubSize(str, size -2)=="ное" then
+							str=repsubstr(str,size -2,"ного")
+						elseif SubSize(str, size -2)=="щий" then
+							str=repsubstr(str,size -2,"щего")
 						elseif SubSize(str, size -2)=="ало" then
 							str=str:utf8sub(1, -2)
 						elseif SubSize(str, size -2)=="ота" then
 							str=str:utf8sub(1, -2)
 						elseif SubSize(str, size -1)=="ий" then
 							str=repsubstr(str,size -1,"ого")
-						elseif SubSize(str, size -1)=="зд" then
-							str=str:utf8sub(1, -2)
 						elseif SubSize(str, size -1)=="ьё" then
 							str=repsubstr(str,size -1,"ья")
+						elseif SubSize(str, size -1)=="зд" then
+							str=repsubstr(str,size -1,"зд")
 						elseif SubSize(str, size -1)=="на" then
 							str=repsubstr(str,size ,"ы")
 						elseif SubSize(str, size -1)=="ль" then
