@@ -371,6 +371,8 @@ local function rebuildname(str1, action, objectname)
 							str=repsubstr(str,size -3,"фало")
 						elseif SubSize(str, size -2)=="зой" then
 							str=repsubstr(str,size -2,"зой")
+						elseif SubSize(str, size -2)=="йца" then
+							str=repsubstr(str,size -2,"йца")
 						elseif SubSize(str, size -2)=="для" then
 							str=repsubstr(str,size -2,"для")
 						elseif SubSize(str, size -2)=="арь" then
@@ -394,9 +396,9 @@ local function rebuildname(str1, action, objectname)
 						elseif SubSize(str, size -2)=="ера" then
 							str=repsubstr(str,size -2,"ера")
 						elseif SubSize(str, size -2)=="ний" then
-							str=repsubstr(str,size -2,"его")
+							str=repsubstr(str,size -2,"него")
 						elseif SubSize(str, size -2)=="щий" then
-							str=repsubstr(str,size -2,"его")
+							str=repsubstr(str,size -2,"щего")
 						elseif SubSize(str, size -2)=="ьей" then
 							str=repsubstr(str,size -2,"ьей")
 						elseif SubSize(str, size -2)=="еля" then
@@ -417,8 +419,6 @@ local function rebuildname(str1, action, objectname)
 							str=repsubstr(str,size -2,"нец")
 						elseif SubSize(str, size -2)=="ное" then
 							str=repsubstr(str,size -2,"ного")
-						elseif SubSize(str, size -2)=="щий" then
-							str=repsubstr(str,size -2,"щего")
 						elseif SubSize(str, size -2)=="ало" then
 							str=str:utf8sub(1, -2)
 						elseif SubSize(str, size -2)=="ота" then
