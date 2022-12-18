@@ -50,6 +50,7 @@ Sim.ShouldWarnModsLoaded = function() return false end
 
 modimport("scripts/rlp_fonts.lua")
 modimport("scripts/rlp_settings.lua")
+modimport("scripts/rlp_fix.lua")
 
 --Исправление бага с шрифтом в спиннерах
 --Выполняем подмену шрифта в спиннере из-за глупой ошибки разрабов в этом виджете
