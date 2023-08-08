@@ -1624,66 +1624,66 @@ do
 		end
 	end)
 
-	AddClassPostConstruct("widgets/text", function(self)
-		local function IsWhiteSpace(charcode)
+	-- AddClassPostConstruct("widgets/text", function(self)
+		-- local function IsWhiteSpace(charcode)
 		    -- 32: space
-		    --  9: \t
-		    return charcode == 32 or charcode == 9
-		end
+		     -- 9: \t
+		    -- return charcode == 32 or charcode == 9
+		-- end
 
-		local function IsNewLine(charcode)
+		-- local function IsNewLine(charcode)
 		    -- 10: \n
 		    -- 11: \v
 		    -- 12: \f
 		    -- 13: \r
-		    return charcode >= 10 and charcode <= 13
-		end
-		function self:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
-		    if str == nil or #str <= 0 then
-		        self.inst.TextWidget:SetString("")
-		        return
-		    end
-		    local tempmaxwidth = type(maxwidth) == "table" and maxwidth[1] or maxwidth
-		    if maxlines <= 1 then
-		        self:SetTruncatedString(str, tempmaxwidth, maxcharsperline, ellipses)
-		    else
-		        self:SetTruncatedString(str, tempmaxwidth, maxcharsperline, false)
-		        local line = self:GetString()
-		        if #line < #str then
-		            if IsNewLine(str:byte(#line + 1)) then
-		                str = str:sub(#line + 2)
-		            elseif not IsWhiteSpace(str:byte(#line + 1)) then
-		                for i = #line, 1, -1 do
-		                    if IsWhiteSpace(line:byte(i)) then
-		                        line = line:sub(1, i)
-		                        break
-		                    end
-		                end
-		                str = str:sub(#line + 1)
-		            else
-		                str = str:sub(#line + 2)
-		                while #str > 0 and IsWhiteSpace(str:byte(1)) do
-		                    str = str:sub(2)
-		                end
-		            end
-		            if #str > 0 then
-		                if type(maxwidth) == "table" then
-		                    if #maxwidth > 2 then
-		                        tempmaxwidth = {}
-		                        for i = 2, #maxwidth do
-		                            table.insert(tempmaxwidth, maxwidth[i])
-		                        end
-		                    elseif #maxwidth == 2 then
-		                        tempmaxwidth = maxwidth[2]
-		                    end
-		                end
-		                self:SetMultilineTruncatedString(str, maxlines - 1, tempmaxwidth, maxcharsperline, ellipses)
-		                self.inst.TextWidget:SetString(line.."\n"..(self.inst.TextWidget:GetString() or ""))
-		            end
-		        end
-		    end
-		end
-	end)
+		    -- return charcode >= 10 and charcode <= 13
+		-- end
+		-- function self:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
+		    -- if str == nil or #str <= 0 then
+		        -- self.inst.TextWidget:SetString("")
+		        -- return
+		    -- end
+		    -- local tempmaxwidth = type(maxwidth) == "table" and maxwidth[1] or maxwidth
+		    -- if maxlines <= 1 then
+		        -- self:SetTruncatedString(str, tempmaxwidth, maxcharsperline, ellipses)
+		    -- else
+		        -- self:SetTruncatedString(str, tempmaxwidth, maxcharsperline, false)
+		        -- local line = self:GetString()
+		        -- if #line < #str then
+		            -- if IsNewLine(str:byte(#line + 1)) then
+		                -- str = str:sub(#line + 2)
+		            -- elseif not IsWhiteSpace(str:byte(#line + 1)) then
+		                -- for i = #line, 1, -1 do
+		                    -- if IsWhiteSpace(line:byte(i)) then
+		                        -- line = line:sub(1, i)
+		                        -- break
+		                    -- end
+		                -- end
+		                -- str = str:sub(#line + 1)
+		            -- else
+		                -- str = str:sub(#line + 2)
+		                -- while #str > 0 and IsWhiteSpace(str:byte(1)) do
+		                    -- str = str:sub(2)
+		                -- end
+		            -- end
+		            -- if #str > 0 then
+		                -- if type(maxwidth) == "table" then
+		                    -- if #maxwidth > 2 then
+		                        -- tempmaxwidth = {}
+		                        -- for i = 2, #maxwidth do
+		                            -- table.insert(tempmaxwidth, maxwidth[i])
+		                        -- end
+		                    -- elseif #maxwidth == 2 then
+		                        -- tempmaxwidth = maxwidth[2]
+		                    -- end
+		                -- end
+		                -- self:SetMultilineTruncatedString(str, maxlines - 1, tempmaxwidth, maxcharsperline, ellipses)
+		                -- self.inst.TextWidget:SetString(line.."\n"..(self.inst.TextWidget:GetString() or ""))
+		            -- end
+		        -- end
+		    -- end
+		-- end
+	-- end)
 
 	AddClassPostConstruct("widgets/playeravatarpopup", function(self)
 		local _UpdateData = self.UpdateData
