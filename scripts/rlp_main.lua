@@ -1220,6 +1220,8 @@ function t.TranslateToRussian(message, entity)
 		end
 		--Подстраиваем сообщение под пол персонажа
 		message=(t.ParseTranslationTags(message, ent.prefab, nil, killerkey)) or message
+		--Добавляем записям вида "число%" дополнительный знак % для работы функции string.format
+		message=string.gsub(message, "%d%%", "%1%%")
 		--Подставляем имена, если они есть
 		message=string.format(message, unpack(mentions or {"","","",""}))
 		if entity=="WX78" then
