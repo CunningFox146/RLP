@@ -624,7 +624,7 @@ local function firsttolower(tmp)
 	if not tmp then return end
 	local firstletter=tmp:utf8sub(1,1)
 	firstletter = LetterCasesHash.u2l[firstletter] or firstletter
-	return firstletter:lower()..tmp:utf8sub(2)
+	return firstletter..tmp:utf8sub(2)
 end
 
 --первый символ в верхний регистр
@@ -632,7 +632,7 @@ local function firsttoupper(tmp)
 	if not tmp then return end
 	local firstletter=tmp:utf8sub(1,1)
 	firstletter = LetterCasesHash.l2u[firstletter] or firstletter
-	return firstletter:upper()..tmp:utf8sub(2)
+	return firstletter..tmp:utf8sub(2)
 end
 
 local function isupper(letter)
@@ -652,7 +652,7 @@ local function russianupper(tmp)
 	for i=1,tmp:utf8len() do
 		letter = tmp:utf8sub(i,i)
 		letter = LetterCasesHash.l2u[letter] or letter
-		res = res..letter:upper()
+		res = res..letter
 	end
 	return res
 end
@@ -664,7 +664,7 @@ local function russianlower(tmp)
 	for i=1,tmp:utf8len() do
 		letter = tmp:utf8sub(i,i)
 		letter = LetterCasesHash.u2l[letter] or letter
-		res = res..letter:lower()
+		res = res..letter
 	end
 	return res
 end
