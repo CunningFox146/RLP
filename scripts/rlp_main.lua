@@ -338,12 +338,42 @@ local function rebuildname(str1, action, objectname)
 			elseif action=="reskin" then
 						if SubSize(str, size -5)=="камень" then
 							str=repsubstr(str,size -5,"камня"):utf8sub(1, -2)
+						elseif SubSize(str, size -5)=="Сказки" then
+							str=repsubstr(str,size -5,"Сказок")
+						elseif SubSize(str, size -4)=="льная" then
+							str=repsubstr(str,size -4,"льной")
+						elseif SubSize(str, size -4)=="дство" then
+							str=repsubstr(str,size -4,"дства")
 						elseif SubSize(str, size -3)=="алун" then
 							str=repsubstr(str,size -3,"алуна")
+						elseif SubSize(str, size -3)=="свая" then
+							str=repsubstr(str,size -3,"сваи")
+						elseif SubSize(str, size -3)=="весы" then
+							str=repsubstr(str,size -3,"весов")
+						elseif SubSize(str, size -3)=="Весы" then
+							str=repsubstr(str,size -3,"Весов")
 						elseif SubSize(str, size -3)=="шина" then
 							str=repsubstr(str,size -3,"шины")
+						elseif SubSize(str, size -3)=="ация" then
+							str=repsubstr(str,size -3,"ации")
+						elseif SubSize(str, size -3)=="всём" then
+							str=repsubstr(str,size -3,"всём")
+						elseif SubSize(str, size -3)=="ляры" then
+							str=repsubstr(str,size -3,"ляров")
+						elseif SubSize(str, size -3)=="ское" then
+							str=repsubstr(str,size -3,"ского")
+						elseif SubSize(str, size -3)=="атур" then
+							str=repsubstr(str,size -3,"атуры")
+						elseif SubSize(str, size -3)=="ение" then
+							str=repsubstr(str,size -3,"ения")
+						elseif SubSize(str, size -3)=="ание" then
+							str=repsubstr(str,size -3,"ания")
+						elseif SubSize(str, size -3)=="едия" then
+							str=repsubstr(str,size -3,"едии")
 						elseif SubSize(str, size -3)=="эрма" then
 							str=repsubstr(str,size -3,"эрма")
+						elseif SubSize(str, size -3)=="ночь" then
+							str=repsubstr(str,size -3,"ночь")
 						elseif SubSize(str, size -3)=="обие" then
 							str=repsubstr(str,size -3,"обия")
 						elseif SubSize(str, size -3)=="Стол" then
@@ -420,6 +450,8 @@ local function rebuildname(str1, action, objectname)
 							str=repsubstr(str,size -2,"нец")
 						elseif SubSize(str, size -2)=="ное" then
 							str=repsubstr(str,size -2,"ного")
+						elseif SubSize(str, size -2)=="чий" then
+							str=repsubstr(str,size -2,"чего")
 						elseif SubSize(str, size -2)=="ало" then
 							str=str:utf8sub(1, -2)
 						elseif SubSize(str, size -2)=="ота" then
