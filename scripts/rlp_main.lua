@@ -2718,7 +2718,7 @@ function EntityScript:GetDisplayName(act, ...) --Подмена функции, 
 
 					seed_name = string.upper(self.plant_def.seed) -- определяем семя
 					
-					if player_is_farmplantidentifier or (knowsseed and knowsplantname) then  -- если исследовано
+					if (player_is_farmplantidentifier or (knowsseed and knowsplantname)) and not self.plant_def.is_randomseed then  -- если исследовано
 						seed_name = "KNOWN_"..seed_name
 					end
 
