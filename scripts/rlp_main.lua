@@ -594,6 +594,7 @@ local function rebuildname(str1, action, objectname)
 	end
 	resstr=resstr:utf8sub(1,resstr:utf8len()-1)
 	subbed = nil
+	--print("action: "..action.."resstr: "..resstr)
 	return resstr
 end
 t.rebuildname = rebuildname
@@ -765,6 +766,9 @@ do
 	endings["DEFAULTACTION"] = endings["acc"]
 	endings["WALKTO"] = endings["dat"]
 	endings["SLEEPIN"] = endings["loc"]
+	endings["ASSESSPLANTHAPPINESS"] = endings["gen"]
+	endings["PLANTREGISTRY_RESEARCH"] = endings["acc"]	
+	endings["INTERACT_WITH"] = endings["abl"]
 
 	FixPrefix = function(prefix, act, item)
 		if not t.NamesGender then return prefix end
@@ -777,13 +781,35 @@ do
 			elseif t.NamesGender["she"][item] then gender="she"
 			elseif t.NamesGender["it"][item] then gender="it"
 			elseif t.NamesGender["plural"][item] then gender="plural"
-			elseif t.NamesGender["plural2"][item] then gender="plural2" end
-		end
+			elseif t.NamesGender["plural2"][item] then gender="plural2" 
+			end
+		end		
 
 		--Особый случай. Для действия "Собрать" у меня есть три записи с заменённым текстом. Там получается множественное число.
 		if act=="PICK" and item and t.RussianNames[STRINGS.NAMES[string.upper(item)]] and t.RussianNames[STRINGS.NAMES[string.upper(item)]][act] then gender="plural" end
-		--Ищем переданное действие в таблице выше
 
+		--Смена пола префикса для ВЫРОСШЕГО урожая на грядках, пол берём из плода
+		--пример: для выросшей моркови "NAMES.FARM_PLANT_CARROT" пол берётся из "NAMES.CARROT"
+		if act=="PICK" and item then
+			local plant = ""
+
+		 	if item:utf8sub(1,11)=="farm_plant_" then
+				plant = item:utf8sub(12)
+			elseif item:utf8sub(1,5)=="weed_" then 
+				plant = item:utf8sub(6)
+			else 
+				plant = string.lower(item)	-- гниль, ...
+			end
+
+			if plant then
+				if t.NamesGender["he"][plant] then gender="he"
+				elseif t.NamesGender["she"][plant] then gender="she"
+				elseif t.NamesGender["it"][plant] then gender="it"
+				end
+			end
+		end			
+
+		--Ищем переданное действие в таблице выше
 		act = endings[act] and act or (item and "DEFAULTACTION" or "nom")
 
 		local words=string.split(prefix," ") --разбиваем на слова
@@ -2650,6 +2676,88 @@ function EntityScript:GetDisplayName(act, ...) --Подмена функции, 
 			end
 		end
 	end
+	-- перевод растений на грядке
+	local isSeed = false 
+	if self:HasTag("farm_plant") and self.components and self.components.growable then
+		-- определяем степень роста
+		local stage_data = self.components.growable:GetCurrentStageData()
+
+		if stage_data.inspect_str and stage_data.inspect_str then
+			local seed_name = ""
+			local farm_plant_seed_ru = ""
+			local knowsseed = false
+			local knowsplantname = false
+			local knowsweedname = false
+			local player_is_farmplantidentifier = (ThePlayer ~= nil and ThePlayer:HasTag("farmplantidentifier"))
+			local plant_stage = stage_data.inspect_str -- узнаём состояние роста
+
+			-- проверяем иследованность сорняка
+			if self.weed_def and self.weed_def.plantregistryinfo then
+					local plantregistryinfo = self.weed_def.plantregistryinfo
+					local registry_key = self:GetPlantRegistryKey()	
+					
+					knowsweedname = ThePlantRegistry:KnowsPlantName(registry_key, plantregistryinfo)
+					--print("knowsweedname="..tostring(knowsweedname))			
+			end
+			
+			if self.plant_def then
+				-- проверяем иследованность растения
+				if self.plant_def.plantregistryinfo then						
+					local plantregistryinfo = self.plant_def.plantregistryinfo
+					local registry_key = self:GetPlantRegistryKey()
+					
+					knowsseed = ThePlantRegistry:KnowsSeed(registry_key, plantregistryinfo)
+					knowsplantname = ThePlantRegistry:KnowsPlantName(registry_key, plantregistryinfo)
+
+					--print("knowsseed="..tostring(knowsseed).." knowsplantname="..tostring(knowsplantname).." player_is_farmplantidentifier="..tostring(player_is_farmplantidentifier))					
+				end
+
+				-- формируем имя семени
+				if plant_stage == "SEED" and self.plant_def.seed then
+					isSeed = true
+
+					seed_name = string.upper(self.plant_def.seed) -- определяем семя
+					
+					if player_is_farmplantidentifier or (knowsseed and knowsplantname) then  -- если исследовано
+						seed_name = "KNOWN_"..seed_name
+					end
+
+					if STRINGS.NAMES[seed_name] ~= nil then 
+						seed_name=STRINGS.NAMES[seed_name] -- определяем название на русском
+					end	
+
+					if act then --если есть действие
+						-- выбираем вариант склонения по действию для имени семени 
+						if t.RussianNames[seed_name] ~= nil and (t.RussianNames[seed_name][act.action and act.action.id] or t.RussianNames[seed_name]["DEFAULTACTION"]) ~= nil then
+							seed_name = t.RussianNames[seed_name][act.action and act.action.id] or t.RussianNames[seed_name]["DEFAULTACTION"]
+							seed_name = firsttolower(seed_name)
+						end
+						-- выбираем вариант склонения по действию для farm_plant_seed (слово "посаженные")
+						if t.RussianNames["Посаженные {seed}"] ~= nil and (t.RussianNames["Посаженные {seed}"][act.action and act.action.id] or t.RussianNames["Посаженные {seed}"]["DEFAULTACTION"]) ~= nil  then
+							farm_plant_seed_ru = t.RussianNames["Посаженные {seed}"][act.action and act.action.id] or t.RussianNames["Посаженные {seed}"]["DEFAULTACTION"]
+						end					
+					end
+					name = (farm_plant_seed_ru or "Посаженные").." "..seed_name
+				end					
+			end
+			-- склоняем префикс при намокании
+			if Prefix and act then
+				Prefix = "влажный" -- сбрасываем префикс и склоняем заново с учетом полученных данных	
+				-- ещё растущие сорняки и растения
+				if (self.prefab:utf8sub(1,4) == "weed" and plant_stage ~= "FULL_WEED" and not (player_is_farmplantidentifier or knowsweedname)) or (self.prefab:utf8sub(1,4) == "farm" and plant_stage == "GROWING" and not (player_is_farmplantidentifier or knowsplantname)) then
+					Prefix = FixPrefix(Prefix,act.action and act.action.id or "NOACTION","farm_plant_unknown")
+				-- только посаженные семена
+				elseif (self.prefab:utf8sub(1,4) == "farm" and plant_stage == "SEED") then
+					Prefix = FixPrefix(Prefix,act.action and act.action.id or "NOACTION","farm_plant_seed")
+				-- гниль
+				elseif (self.prefab:utf8sub(1,4) == "farm" and plant_stage == "ROTTEN") then
+					Prefix = FixPrefix(Prefix,act.action and act.action.id or "NOACTION","spoiled_food")
+				else
+					Prefix = FixPrefix(Prefix,act.action and act.action.id or "NOACTION",self.prefab)
+				end	
+			end			
+		end
+	end
 	if name and self.prefab then --Для ДСТ нужно перевести имя свина или кролика на русский
 		if self.prefab=="pigman" then
 			name=t.SpeechHashTbl.PIGNAMES.Eng2Rus[name] or name
@@ -2668,7 +2776,9 @@ function EntityScript:GetDisplayName(act, ...) --Подмена функции, 
 			if t.RussianNames[name] then
 				name=t.RussianNames[name][act] or t.RussianNames[name]["DEFAULTACTION"] or t.RussianNames[name]["DEFAULT"] or rebuildname(name,act,self.prefab) or "NAME"
 			else
-				name=rebuildname(name,act,self.prefab)
+				if not isSeed then 
+					name=rebuildname(name,act,self.prefab)
+				end
 			end
 			if (not self.prefab or self.prefab~="pigman" and self.prefab~="pigguard" and self.prefab~="bunnyman" and self.prefab~="quagmire_trader_merm" and self.prefab~="quagmire_trader_merm2"  and self.prefab~="quagmire_swampigelder"  and self.prefab~="quagmire_goatmum" and self.prefab~="quagmire_goatkid" and self.prefab~="quagmire_swampig")
 			 and not t.ShouldBeCapped[self.prefab] and name and type(name)=="string" and #name>0 then
@@ -2686,7 +2796,9 @@ function EntityScript:GetDisplayName(act, ...) --Подмена функции, 
 	if Prefix then
 		name=Prefix.." "..name
 	end
+
 	if act and act=="SLEEPIN" and name then name="в "..name end --Особый случай для "спать в палатке" и "спать в навесе для сиесты"
+	if act and act=="INTERACT_WITH" and name then name="с "..name end --Чтобы не было фразы "Поговорить с" с надетой шляпой садовника 
 	return name
 end
 
