@@ -2169,6 +2169,11 @@ AddClassPostConstruct("widgets/skincollector", function(self)
 	end
 end)
 
+-- применяем шрифт при выборе скина в меню крафта предмета
+AddClassPostConstruct("widgets/redux/craftingmenu_skinselector", function(self)
+	self.spinner.text:SetFont(UIFONT)
+end)
+
 --Увеличиваем область заголовка, чтобы не съедало буквы
 local function postintentionpicker(self)
 	if self.headertext then
