@@ -2169,6 +2169,11 @@ AddClassPostConstruct("widgets/skincollector", function(self)
 	end
 end)
 
+-- применяем шрифт при выборе скина в меню крафта предмета
+AddClassPostConstruct("widgets/redux/craftingmenu_skinselector", function(self)
+	self.spinner.text:SetFont(UIFONT)
+end)
+
 --Увеличиваем область заголовка, чтобы не съедало буквы
 local function postintentionpicker(self)
 	if self.headertext then
@@ -2797,7 +2802,9 @@ function EntityScript:GetDisplayName(act, ...) --Подмена функции, 
 		name=Prefix.." "..name
 	end
 
-	if act and act=="SLEEPIN" and name then name="в "..name end --Особый случай для "спать в палатке" и "спать в навесе для сиесты"
+	if act and act=="SLEEPIN" and name then
+		name=Prefix and "во "..name or "в "..name --Особый случай для "спать в палатке" и "спать в навесе для сиесты" \ при наличии влажности меняем предлог на "во" - во влажной палатке
+	end 
 	if act and act=="INTERACT_WITH" and name then name="с "..name end --Чтобы не было фразы "Поговорить с" с надетой шляпой садовника 
 	return name
 end
