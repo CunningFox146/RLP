@@ -1426,51 +1426,6 @@ AddClassPostConstruct("widgets/eventannouncer", function(self)
 	end end
 end) -- для AddClassPostConstruct "widgets/eventannouncer"
 
--- Правильно склоняем названия Эскизов в плейсхолдере
-local SKETCHES = 
-{
-    {item="chesspiece_toadstool",       recipe="chesspiece_toadstool_builder"},
-    {item="chesspiece_stalker",         recipe="chesspiece_stalker_builder"},
-    {item="chesspiece_pipe",        	recipe="chesspiece_pipe_builder"},
-    {item="chesspiece_minotaur",        recipe="chesspiece_minotaur_builder"},
-    {item="chesspiece_klaus",        	recipe="chesspiece_klaus_builder"},
-    {item="chesspiece_hornucopia",      recipe="chesspiece_hornucopia_builder"},
-    {item="chesspiece_beequeen",        recipe="chesspiece_beequeen_builder"},
-    {item="chesspiece_antlion",         recipe="chesspiece_antlion_builder"},
-    {item="chesspiece_pawn",        	recipe="chesspiece_pawn_builder"},
-    {item="chesspiece_rook",        	recipe="chesspiece_rook_builder"},
-    {item="chesspiece_knight",      	recipe="chesspiece_knight_builder"},
-    {item="chesspiece_bishop",     	 	recipe="chesspiece_bishop_builder"},
-    {item="chesspiece_muse",        	recipe="chesspiece_muse_builder"},
-    {item="chesspiece_formal",      	recipe="chesspiece_formal_builder"},
-    {item="chesspiece_deerclops",   	recipe="chesspiece_deerclops_builder"},
-    {item="chesspiece_bearger",     	recipe="chesspiece_bearger_builder"},
-    {item="chesspiece_moosegoose",  	recipe="chesspiece_moosegoose_builder"},
-    {item="chesspiece_dragonfly",  		recipe="chesspiece_dragonfly_builder"},
-    {item="chesspiece_clayhound",       recipe="chesspiece_clayhound_builder",      	image="chesspiece_clayhound_sketch"},
-    {item="chesspiece_claywarg",        recipe="chesspiece_claywarg_builder",       	image="chesspiece_claywarg_sketch"},
-    {item="chesspiece_malbatross",      recipe="chesspiece_malbatross_builder",         image="chesspiece_malbatross_sketch"},
-    {item="chesspiece_butterfly",       recipe="chesspiece_butterfly_builder",       	image="chesspiece_butterfly_sketch"},
-    {item="chesspiece_carrat",          recipe="chesspiece_carrat_builder",       		image="chesspiece_carrat_sketch"},
-    {item="chesspiece_crabking",        recipe="chesspiece_crabking_builder",       	image="chesspiece_crabking_sketch"},
-    {item="chesspiece_guardianphase3",  recipe="chesspiece_guardianphase3_builder",     image="chesspiece_guardianphase3_sketch"},
-    {item="chesspiece_moon",            recipe="chesspiece_moon_builder",       		image="chesspiece_moon_sketch"},
-    {item="chesspiece_beefalo",         recipe="chesspiece_beefalo_builder",       		image="chesspiece_beefalo_sketch"},
-    {item="chesspiece_anchor",          recipe="chesspiece_anchor_builder",       		image="chesspiece_anchor_sketch"},
-}
-AddPrefabPostInit("sketch",function(inst)
-	if inst.sketchid and SKETCHES[inst.sketchid] and SKETCHES[inst.sketchid].recipe  and STRINGS.NAMES[string.upper(SKETCHES[inst.sketchid].recipe)] then 
-		local newname ="Эскиз "..STRINGS.NAMES[string.upper(SKETCHES[inst.sketchid].recipe)]
-		newname=newname:gsub("Фигура", "фигуры")
-		inst.components.named:SetName(newname)
-		local _OnLoad=inst.OnLoad
-		inst.OnLoad=function(inst, data)
-			_OnLoad(inst, data)
-			inst.components.named:SetName(inst.name:gsub("Фигура","фигуры"))
-		end
-	end
-end)
-
 --Тут мы должны переделать описание скелета, чтобы в него не попал русский
 -- Жуть какая. Столько кода просто для перевода скелета
 AddPrefabPostInit("skeleton_player", function(inst)
@@ -1548,6 +1503,7 @@ AddPrefabPostInit("skeleton_player", function(inst)
 end)
 
 --Тут мы должны перехватывать название предмета у blueprint и переводить на английский
+-- TODO: проверить работу AddPrefabPostInit
 AddPrefabPostInit("blueprint", function(inst)
 	local function reassignfn(inst)
 		if inst.recipetouse then
@@ -1684,67 +1640,6 @@ do
 		end
 	end)
 
-	-- AddClassPostConstruct("widgets/text", function(self)
-		-- local function IsWhiteSpace(charcode)
-		    -- 32: space
-		     -- 9: \t
-		    -- return charcode == 32 or charcode == 9
-		-- end
-
-		-- local function IsNewLine(charcode)
-		    -- 10: \n
-		    -- 11: \v
-		    -- 12: \f
-		    -- 13: \r
-		    -- return charcode >= 10 and charcode <= 13
-		-- end
-		-- function self:SetMultilineTruncatedString(str, maxlines, maxwidth, maxcharsperline, ellipses)
-		    -- if str == nil or #str <= 0 then
-		        -- self.inst.TextWidget:SetString("")
-		        -- return
-		    -- end
-		    -- local tempmaxwidth = type(maxwidth) == "table" and maxwidth[1] or maxwidth
-		    -- if maxlines <= 1 then
-		        -- self:SetTruncatedString(str, tempmaxwidth, maxcharsperline, ellipses)
-		    -- else
-		        -- self:SetTruncatedString(str, tempmaxwidth, maxcharsperline, false)
-		        -- local line = self:GetString()
-		        -- if #line < #str then
-		            -- if IsNewLine(str:byte(#line + 1)) then
-		                -- str = str:sub(#line + 2)
-		            -- elseif not IsWhiteSpace(str:byte(#line + 1)) then
-		                -- for i = #line, 1, -1 do
-		                    -- if IsWhiteSpace(line:byte(i)) then
-		                        -- line = line:sub(1, i)
-		                        -- break
-		                    -- end
-		                -- end
-		                -- str = str:sub(#line + 1)
-		            -- else
-		                -- str = str:sub(#line + 2)
-		                -- while #str > 0 and IsWhiteSpace(str:byte(1)) do
-		                    -- str = str:sub(2)
-		                -- end
-		            -- end
-		            -- if #str > 0 then
-		                -- if type(maxwidth) == "table" then
-		                    -- if #maxwidth > 2 then
-		                        -- tempmaxwidth = {}
-		                        -- for i = 2, #maxwidth do
-		                            -- table.insert(tempmaxwidth, maxwidth[i])
-		                        -- end
-		                    -- elseif #maxwidth == 2 then
-		                        -- tempmaxwidth = maxwidth[2]
-		                    -- end
-		                -- end
-		                -- self:SetMultilineTruncatedString(str, maxlines - 1, tempmaxwidth, maxcharsperline, ellipses)
-		                -- self.inst.TextWidget:SetString(line.."\n"..(self.inst.TextWidget:GetString() or ""))
-		            -- end
-		        -- end
-		    -- end
-		-- end
-	-- end)
-
 	AddClassPostConstruct("widgets/playeravatarpopup", function(self)
 		local _UpdateData = self.UpdateData
 		function self:UpdateData(data)
@@ -1758,7 +1653,8 @@ do
 	end)
 
 	--Переводим названия дней недели
-	local _ListSnapshots = NetworkProxy.ListSnapshots
+	-- неактуально? 10/2023
+	--[[local _ListSnapshots = NetworkProxy.ListSnapshots
 	NetworkProxy.ListSnapshots = function(self, ...)
 		local lis t =_ListSnapshots(self, ...) or {}
 		if list and #list>0 and list[1].timestamp then
@@ -1782,7 +1678,7 @@ do
 			end
 		end
 		return list
-	end
+	end]]
 
 	--Окно просмотра серверов, двигаем контролсы, исправляем надписи
 	local function ServerListingScreenPost1(self)
@@ -1856,12 +1752,24 @@ do
 
 		AddClassPostConstruct("components/named_replica", function(self)
 			local possible_names = NAMES_OVERRIDE[self.inst]
-			if not possible_names then
-				return
-			end
 
 			local function OnNameDirty(inst)
-				inst.name = possible_names[math.random(#inst.possible_names)]
+				if inst.prefab == "sketch" then
+					local sketch_name = ""
+
+					if not TheWorld.ismastersim then
+						sketch_name = inst.name:gsub("(%a+)%sFigure%sSketch", "%1")
+						sketch_name = "CHESSPIECE_"..sketch_name:gsub(" ", ""):upper()
+						sketch_name = STRINGS.NAMES[sketch_name] or inst.name
+						sketch_name = sketch_name:gsub("Фигура", "Эскиз фигуры")
+					else
+						sketch_name = inst.name:gsub("Фигура", "фигуры")
+					end
+
+					inst.name = sketch_name
+				elseif possible_names ~= nil then
+					inst.name = possible_names[math.random(#inst.possible_names)]
+				end
 			end
 
 			self.inst:ListenForEvent("namedirty", OnNameDirty)
@@ -1904,7 +1812,7 @@ do
 	end)
 
 	--Сохраняем непереведённый текст настроек в свойствах мира (см. ниже)
-	local SandboxMenuData = {}
+	--[[local SandboxMenuData = {}
 	for i,v in pairs(STRINGS.UI.SANDBOXMENU) do
 		SandboxMenuData[v] = i
 	end
@@ -1922,8 +1830,8 @@ do
 				end
 				if v.option and v.option.options then
 					for ii,vv in pairs(v.option.options) do
-						local txt=STRINGS.UI.SANDBOXMENU[t.SpeechHashTbl.SANDBOXMENU.Eng2Key[vv.text]]
-						if txt then
+						local txt=STRINGS.UI.SANDBOXMENU[t.SpeechHashTbl.SANDBOXMENU.Eng2Key[vv.text]]--
+						--[[if txt then
 							vv.text=txt
 						else
 							vv.text=vv.text:gsub("No Day","Без дня")
@@ -2034,11 +1942,11 @@ do
 				end
 			end
 		end
-	end)
+	end)]]
 
 
 	--Сохраняем непереведённый текст пресетов настроек в свойствах мира (см. ниже)
-	local PresetLevels = {}
+	--[[local PresetLevels = {}
 	for i,v in pairs(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS) do
 		PresetLevels[v] = i
 	end
@@ -2101,7 +2009,7 @@ do
 		        self.revertbutton:Select()
 		    end
 		end
-	end)
+	end)]]
 
 
 	--согласовываем слово "дней" с количеством дней
@@ -2396,38 +2304,56 @@ AddClassPostConstruct("widgets/truescrolllist", function(self)
 	end
 end)
 
---Меняем меню создания сервера, чтоб текст не вылазил за кнопку
-local function ServerCreationScreenPost(self)
-	local oldSetString=self.day_title and self.day_title.SetString
-	if oldSetString then
-		function self.day_title:SetString(str)
-			if str:find("Лето")~=nil then
-				if str:find("Ранняя")~=nil then
-					str=str:gsub("Ранняя","Раннее")
-				elseif str:find("Поздняя")~=nil then
-					str=str:gsub("Поздняя","Позднее")
-				end
+-- перевод ServerDetailIcon HoverText
+-- согласование окончания сезона, разделение дня
+AddClassPostConstruct("widgets/redux/serversaveslot", function(self)		
+	self.cloud:SetHoverText(STRINGS.UI.SERVERLISTINGSCREEN.CLOUD_SAVE_HOVER)
+	self.mods:SetHoverText(STRINGS.UI.SERVERLISTINGSCREEN.MODS_ICON_HOVER)
+	self.pvp:SetHoverText(STRINGS.UI.SERVERLISTINGSCREEN.PVP_ICON_HOVER)
+
+	local oldSetSaveSlot = self.SetSaveSlot
+	function self:SetSaveSlot(slot, server_data)
+		oldSetSaveSlot(self, slot, server_data)
+		self.slot = slot
+
+		local Levels = require "map/levels"	
+		local server_data = ShardSaveGameIndex:GetSlotServerData(self.slot)
+		local privacy_options = { 
+			STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.PUBLIC,
+			STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.FRIENDS,
+			STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.LOCAL,
+			STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.CLAN,
+		}			
+
+		if server_data and server_data.privacy_type then
+			self.privacy:SetHoverText(privacy_options[server_data.privacy_type+1])
+		end
+
+		if server_data and server_data.playstyle then
+			local playstyle_def = server_data.playstyle ~= nil and Levels.GetPlaystyleDef(server_data.playstyle) or nil
+
+			if playstyle_def ~= nil then
+				self.playstyle:SetHoverText(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[playstyle_def.default_preset])
 			end
-			oldSetString(self,str)
 		end
-	end
 
-	if self.day_title then
-		self.day_title:SetString(self.day_title:GetString())
-	end
-
-	local _OnUpdate_Old = self.OnUpdate or (function() return end)
-	function self:OnUpdate(...)
-		_OnUpdate_Old(self, ...)
-
-		if self.create_button.text then
-			self.create_button.text:SetSize(35)
+		local DayAndSeasonText = self.serverslotscreen:GetDayAndSeasonText(self.slot)
+		if DayAndSeasonText:find("Лето") ~= nil then
+			if DayAndSeasonText:find("Ранняя") ~= nil then
+				DayAndSeasonText = DayAndSeasonText:gsub("Ранняя","Раннее")
+			elseif DayAndSeasonText:find("Поздняя") ~= nil then
+				DayAndSeasonText = DayAndSeasonText:gsub("Поздняя","Позднее")
+			end
 		end
-	end
-end
+		if DayAndSeasonText:find(" День") ~= nil then
+			DayAndSeasonText = DayAndSeasonText:gsub(" День",", День")
+		end
 
---AddClassPostConstruct("screens/servercreationscreen", ServerCreationScreenPost)
-AddClassPostConstruct("screens/redux/servercreationscreen", ServerCreationScreenPost)
+		DayAndSeasonText = firsttoupper(russianlower(DayAndSeasonText))
+
+		self.day_and_season:SetString(DayAndSeasonText)
+	end
+end)
 
 --Слетали шрифты у кнопок выбора в первом слоте
 local function serversettingstabpost(self)
