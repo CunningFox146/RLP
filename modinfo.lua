@@ -34,7 +34,7 @@ local icon_name = is_beta and "rlp_icon_beta" or "rlp_icon"
 icon_atlas = "images/"..icon_name..".xml"
 icon = icon_name..".tex"
 
-priority = 10.1251526619
+priority = 2023
 
 dont_starve_compatible = false
 dst_compatible = true
