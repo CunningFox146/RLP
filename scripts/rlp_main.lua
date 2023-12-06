@@ -50,13 +50,10 @@ Sim.ShouldWarnModsLoaded = function() return false end
 
 modimport("scripts/rlp_fonts.lua")
 modimport("scripts/rlp_settings.lua")
-modimport("scripts/rlp_fix.lua")
 
---Исправление бага с шрифтом в спиннерах
---Выполняем подмену шрифта в спиннере из-за глупой ошибки разрабов в этом виджете
-AddClassPostConstruct("widgets/spinner", function(self, options, width, height, textinfo, ...)
-	if textinfo then return end
-	self.text:SetFont(BUTTONFONT)
+-- используемый CHATFONT_OUTLINE не поддерживает иконки кнопок мыши и отображает их знаками ?
+AddClassPostConstruct("widgets/redux/loadingwidget", function(self)
+	self.loading_tip_text:SetFont(CHATFONT) 
 end)
 
 if t.CurrentTranslationType == t.TranslationTypes.FontsOnly then
@@ -64,6 +61,15 @@ if t.CurrentTranslationType == t.TranslationTypes.FontsOnly then
 	if DEBUG_ENABLED then
 		t.ModLoaded()
 	end
+
+	--Исправление бага с шрифтом в спиннерах
+	--Выполняем подмену шрифта в спиннере из-за глупой ошибки разрабов в этом виджете
+	--ниже есть версия для фикса перевода настроек--
+	AddClassPostConstruct("widgets/spinner", function(self, options, width, height, textinfo, ...)
+		if textinfo then return end
+		self.text:SetFont(BUTTONFONT)
+	end)
+
 	return
 end
 
@@ -1783,6 +1789,57 @@ do
 		privacy_options[v] = i
 	end
 
+	-- перевод ServerDetailIcon HoverText
+	-- согласование окончания сезона, разделение дня
+	AddClassPostConstruct("widgets/redux/serversaveslot", function(self)		
+		self.cloud:SetHoverText(STRINGS.UI.SERVERLISTINGSCREEN.CLOUD_SAVE_HOVER)
+		self.mods:SetHoverText(STRINGS.UI.SERVERLISTINGSCREEN.MODS_ICON_HOVER)
+		self.pvp:SetHoverText(STRINGS.UI.SERVERLISTINGSCREEN.PVP_ICON_HOVER)
+
+		local oldSetSaveSlot = self.SetSaveSlot
+		function self:SetSaveSlot(slot, server_data)
+			oldSetSaveSlot(self, slot, server_data)
+			self.slot = slot
+
+			local Levels = require "map/levels"	
+			local server_data = server_data or ShardSaveGameIndex:GetSlotServerData(self.slot)
+			local privacy_options = { 
+				STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.PUBLIC,
+				STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.FRIENDS,
+				STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.LOCAL,
+				STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.CLAN,
+			}			
+
+			if server_data and server_data.privacy_type then
+				self.privacy:SetHoverText(privacy_options[server_data.privacy_type+1])
+			end
+
+			if server_data and server_data.playstyle then
+				local playstyle_def = server_data.playstyle ~= nil and Levels.GetPlaystyleDef(server_data.playstyle) or nil
+
+				if playstyle_def ~= nil then
+					self.playstyle:SetHoverText(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[playstyle_def.default_preset])
+				end
+			end
+
+			local DayAndSeasonText = self.serverslotscreen:GetDayAndSeasonText(self.slot)
+			if DayAndSeasonText:find("Лето") ~= nil then
+				if DayAndSeasonText:find("Ранняя") ~= nil then
+					DayAndSeasonText = DayAndSeasonText:gsub("Ранняя","Раннее")
+				elseif DayAndSeasonText:find("Поздняя") ~= nil then
+					DayAndSeasonText = DayAndSeasonText:gsub("Поздняя","Позднее")
+				end
+			end
+			if DayAndSeasonText:find(" День") ~= nil then
+				DayAndSeasonText = DayAndSeasonText:gsub(" День",", День")
+			end
+
+			DayAndSeasonText = firsttoupper(russianlower(DayAndSeasonText))
+
+			self.day_and_season:SetString(DayAndSeasonText)
+		end
+	end)
+
 	--Баг разработчиков, не переводятся радиобаттоны в настройках при создании сервера
 	AddClassPostConstruct("widgets/redux/serversettingstab", function(self)
 		local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
@@ -1811,206 +1868,155 @@ do
 		end
 	end)
 
-	--Сохраняем непереведённый текст настроек в свойствах мира (см. ниже)
-	--[[local SandboxMenuData = {}
-	for i,v in pairs(STRINGS.UI.SANDBOXMENU) do
-		SandboxMenuData[v] = i
-	end
+	-- перевод виджета выбора свойств мира
+	AddClassPostConstruct("widgets/redux/worldsettings/settingslist", function(self)
+		local num_columns = 3
 
-	--Виджет выбора свойств мира. Исправляем надписи, согласовываем слова
-	AddClassPostConstruct("widgets/redux/worldcustomizationlist", function(self)
-		if self.optionitems then
-			for i,v in pairs(self.optionitems) do
-				if v.heading_text then
-					v.heading_text=v.heading_text:gsub(" World",": настройки мира")
-					v.heading_text=v.heading_text:gsub(" Resources",": настройки ресурсов")
-					v.heading_text=v.heading_text:gsub(" Food",": настройки еды")
-					v.heading_text=v.heading_text:gsub(" Animals",": настройки животных")
-					v.heading_text=v.heading_text:gsub(" Monsters",": настройки монстров")
-				end
-				if v.option and v.option.options then
-					for ii,vv in pairs(v.option.options) do
-						local txt=STRINGS.UI.SANDBOXMENU[t.SpeechHashTbl.SANDBOXMENU.Eng2Key[vv.text]]--
-						--[[if txt then
-							vv.text=txt
-						else
-							vv.text=vv.text:gsub("No Day","Без дня")
-							vv.text=vv.text:gsub("No Dusk","Без вечера")
-							vv.text=vv.text:gsub("No Night","Без ночи")
-							vv.text=vv.text:gsub("Long Day","Длинный день")
-							vv.text=vv.text:gsub("Long Dusk","Длинный вечер")
-							vv.text=vv.text:gsub("Long Night","Длинная ночь")
-							vv.text=vv.text:gsub("Only Day","Только день")
-							vv.text=vv.text:gsub("Only Dusk","Только вечер")
-							vv.text=vv.text:gsub("Only Night","Только ночь")
-						end
+		function self:RefreshOptionItems()			
+			local opts_text = { ["No Day"]="Без дня", ["No Dusk"]="Без вечера", ["No Night"]="Без ночи", ["Long Day"]="Длинный день", 
+							  ["Long Dusk"]="Длинный вечер", ["Long Night"]="Длинная ночь", ["Only Day"]="Только день", 
+							  ["Only Dusk"]="Только вечер", ["Only Night"]="Только ночь", ["Auto"]="Авто", ["Underground"]="Под землёй" }
+
+		    if not self.scroll_list then return end
+		    self.options = self.parent_widget:GetOptions()
+		    self.optionitems = {}
+		    local lastgroup = nil
+
+		    for i,v in ipairs(self.options) do
+		        if v.group ~= lastgroup then
+		            local wrapped_index = #self.optionitems % num_columns
+		            if wrapped_index > 0 then
+		                for col = wrapped_index + 1, num_columns do
+		                    table.insert(self.optionitems, {is_empty = true})
+		                end
+		            end
+					-- добавление и перевод заголовков
+		            table.insert(self.optionitems, {heading_text = STRINGS.UI.SANDBOXMENU[t.SpeechHashTbl.SANDBOXMENU.Eng2Key[v.grouplabel]] or v.grouplabel})
+		            for col = 2, num_columns do
+		                table.insert(self.optionitems, {is_empty = true})
+		            end
+		            lastgroup = v.group
+		        end
+				if v.options then
+					for ii,vv in pairs(v.options) do
+						-- добавление и перевод значений спинеров
+						v.options[ii].text = opts_text[vv.text] or STRINGS.UI.SANDBOXMENU[t.SpeechHashTbl.SANDBOXMENU.Eng2Key[vv.text]] or vv.text
 					end
 				end
-				if v.GetChildren then
-					for ii,vv in pairs(v:GetChildren()) do
-						if vv.name and vv.name:upper()=="TEXT" then --Заголовки групп настроек
-							local words = vv:GetString():split(" ")
-							local res
-							if #words==2 then
-								local second = SandboxMenuData[ words[2] ]
-								words[2] = STRINGS.UI.SANDBOXMENU[second] or words[2]
-								if second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.FOREST then
-									if second=="CHOICEAMTDAY" then
-										res = words[2].." в лесу"
-									elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
-										res = words[2].." леса"
-									elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
-										res = words[2]..", доступная в лесу"
-									elseif second=="CHOICEMISC" then
-										res = "Лесной "..firsttolower(words[2])
-									end
-								elseif second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.CAVE then
-									if second=="CHOICEAMTDAY" then
-										res = words[2].." в пещерах"
-									elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
-										res = words[2].." пещер"
-									elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
-										res = words[2]..", доступная в пещерах"
-									elseif second=="CHOICEMISC" then
-										res = "Пещерный "..firsttolower(words[2])
-									end
-								elseif second and words[1]==STRINGS.UI.SANDBOXMENU.LOCATION.UNKNOWN then
-									if second=="CHOICEAMTDAY" then
-										res = words[2].." в каком-то мире"
-									elseif second=="CHOICEMONSTERS" or second=="CHOICEANIMALS" or second=="CHOICERESOURCES" then
-										res = words[2].." какого-то мира"
-									elseif second=="CHOICEFOOD" or second=="CHOICECOOKED"then
-										res = words[2]..", доступная в каком-то мире"
-									elseif second=="CHOICEMISC" then
-										res = words[1].." "..firsttolower(words[2])
-									end
-								end
-							end
-							if res then vv:SetString(res) end
-						elseif vv.name and vv.name:upper()=="OPTION" then --Спиннеры, нужно перевести в них текст
-							for iii,vvv in pairs(vv:GetChildren()) do
-								if vvv.name and vvv.name:upper()=="SPINNER" then
-									for _,opt in ipairs(vvv.options) do
-										if SandboxMenuData[opt.text] then
-											opt.text = STRINGS.UI.SANDBOXMENU[ SandboxMenuData[opt.text] ]
-										elseif opt.text then
-											local words = opt.text:split(" ")
-											for idx, txt in ipairs(words) do
-												local p = SandboxMenuData[txt]
-												words[idx] = p and STRINGS.UI.SANDBOXMENU[p] or words[idx]
-											end
-											if words[2]==STRINGS.UI.SANDBOXMENU.DAY then
-												if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","дня"}
-												elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгий" end
-											elseif words[2]==STRINGS.UI.SANDBOXMENU.DUSK then
-												if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","вечера"}
-												elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгий" end
-											elseif words[2]==STRINGS.UI.SANDBOXMENU.NIGHT then
-												if words[1]==STRINGS.UI.SANDBOXMENU.EXCLUDE then words= {"Без","ночи"}
-												elseif words[1]==STRINGS.UI.SANDBOXMENU.SLIDELONG then words[1]="Долгая" end
-											end
-											opt.text = words[1] or opt.text
-											for idx=2,#words do opt.text = opt.text.." "..firsttolower(words[idx]) end
-										end
-									end
-									vvv:UpdateState()
-								elseif vvv.name and vvv.name:upper()=="IMAGEPARENT" then
-									local list={["day.tex"]=1,
-												["season.tex"]=1,
-												["season_start.tex"]=1,
-												["world_size.tex"]=1,
-												["world_branching.tex"]=1,
-												["world_loop.tex"]=1,
-												["world_map.tex"]=1,
-												["world_start.tex"]=1,
-												["starting_variety.tex"]=1,
-												["winter.tex"]=1,
-												["summer.tex"]=1,
-												["autumn.tex"]=1,
-												["spring.tex"]=1}
-									for iiii,vvvv in pairs(vvv:GetChildren()) do
-										if vvvv.name and vvvv.name:upper()=="IMAGE" then
-											if list[vvvv.texture] then
-												vvvv:SetTexture("images/rus_mapgen.xml", "rus_"..vvvv.texture)
-											end
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-			end
+		        table.insert(self.optionitems, {option = v})
+		    end
+		    local wrapped_index = #self.optionitems % num_columns
+		    if wrapped_index > 0 then
+		        for col = wrapped_index + 1, num_columns do
+		            table.insert(self.optionitems, {is_empty = true})
+		        end
+		    end
+
+		    self.forceupdate = true
+		    self.scroll_list:SetItemsData(self.optionitems)
+		    self.forceupdate = false
+		    self.scroll_list:SetPosition(self.scroll_list:CanScroll() and -15 or 0, 0)
 		end
-	end)]]
+	end)
 
 
-	--Сохраняем непереведённый текст пресетов настроек в свойствах мира (см. ниже)
-	--[[local PresetLevels = {}
-	for i,v in pairs(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS) do
-		PresetLevels[v] = i
+--Перегоняем перевод в STRINGS
+TranslateStringTable(STRINGS)
+
+	do
+		local Levels = require("map/levels")
+
+		-- шаблоны настроек (пресеты) при создании мира [для presetpopupscreen]
+		-- перевод имени
+		local oldGetList = Levels.GetList
+		Levels.GetList = function(category, ...)		
+			local ret = oldGetList(category, ...)		
+			for i, data in ipairs(ret) do
+				if data.text ~= nil then
+					ret[i].text = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[data.data] or data.text
+				end
+			end		
+
+			return ret
+		end
+		-- перевод описания [для presetpopupscreen]
+		local oldGetDataForSettingsID = Levels.GetDataForSettingsID
+		Levels.GetDataForSettingsID = function(data, ...)
+			local ret = oldGetDataForSettingsID(data, ...)		
+			ret.settings_desc = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[data] or ret.settings_desc
+
+			return ret
+		end
+
+		-- имя и описание стиля игры
+		local oldGetPlaystyleDef = Levels.GetPlaystyleDef
+		Levels.GetPlaystyleDef = function(playstyle_id)
+			local ret = oldGetPlaystyleDef(playstyle_id)		
+			ret.name = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[ret.default_preset] or ret.name
+			ret.desc = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[ret.default_preset] or ret.desc
+
+			return ret
+		end
 	end
-	for i,v in pairs(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC) do
-		PresetLevels[v] = i
-	end
 
-	--Баг разработчиков: Не переведённые пресеты
-	AddClassPostConstruct("widgets/redux/worldcustomizationtab", function(self)
+	--Исправление перевода спиннеров в настройках
+	--Исправление бага с шрифтом в спиннерах
+	--выше есть версия для фикса только шрифта--
+	AddClassPostConstruct("widgets/spinner", function(self, options, width, height, textinfo, ...)
+		local spinners_text = { ["All"]="Все", ["Tips Only"]="Только советы", ["Lore Only"]="Лор игры", ["None"]="Никакие", 
+									["Separated"]="Отдельное", ["Integrated"]="Совмещённое" }
+
+		local oldUpdateText = self.UpdateText
+		function self:UpdateText(msg)
+			local text = STRINGS.UI.OPTIONS[string.upper(msg)] or spinners_text[msg] or msg
+			oldUpdateText(self, text)
+		end
+
+		if textinfo then return end
+		self.text:SetFont(BUTTONFONT)
+	end)
+
+	-- перевод выбранного пресета
+	AddClassPostConstruct("widgets/redux/worldsettings/worldsettingsmenu", function(self)
 		local Levels = require "map/levels"
-		local oldGetDataForLevelID=Levels.GetDataForLevelID
-		Levels.GetDataForLevelID=function(id, nolocation)
-			local ret = oldGetDataForLevelID(id, nolocation)
-			if ret and STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[id] then
-				ret.desc=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[id]
-				ret.name=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[id]
+
+		local oldGetNameForID = Levels.GetNameForID
+		Levels.GetNameForID = function(levelcategory, preset)
+			local ret = oldGetNameForID(levelcategory, preset)
+			if ret and STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[preset] then
+				ret = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[preset]
 			end
 			return ret
 		end
-		function self:UpdatePresetInfo(level)
-			if level ~= self.currentmultilevel -- this might be called for the "unselected" level, so we don't want to do anything.
-			    or not self:IsLevelEnabled(level) -- invalid so we can't show anything.
-			    then
-			    return
+
+		local oldGetDescForID = Levels.GetDescForID
+		Levels.GetDescForID = function(levelcategory, preset)
+			local ret = oldGetDescForID(levelcategory, preset)
+			if ret and STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[preset] then
+				ret = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[preset]
 			end
-
-		    local clean = self:GetNumberOfTweaks(self.currentmultilevel) == 0
-
-		    if not self.allowEdit then
-
-		    	local levelid=self.slotoptions[self.slot][self.currentmultilevel].id
-		    	self.slotoptions[self.slot][self.currentmultilevel].desc=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[levelid]
-		    	self.slotoptions[self.slot][self.currentmultilevel].name=STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[levelid]
-		        self.presetdesc:SetString(self.slotoptions[self.slot][self.currentmultilevel].desc)
-		        --print(self.slotoptions[self.slot][self.currentmultilevel].name)
-		        self.presetspinner.spinner:UpdateText(self.slotoptions[self.slot][self.currentmultilevel].name)
-		    elseif clean then
-		        self.presetdesc:SetString(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).desc)
-		        --print(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name)
-		        self.presetspinner.spinner:UpdateText(Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name)
-		    elseif self.current_option_settings[self.currentmultilevel].preset == "MOD_MISSING" then
-		        self.presetdesc:SetString(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC.MOD_MISSING)
-		        self.presetspinner.spinner:UpdateText(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS.MOD_MISSING)
-		    else
-		        self.presetdesc:SetString(STRINGS.UI.CUSTOMIZATIONSCREEN.CUSTOMDESC)
-		        self.presetspinner.spinner:UpdateText(string.format(STRINGS.UI.CUSTOMIZATIONSCREEN.CUSTOM, Levels.GetDataForLevelID(self.current_option_settings[self.currentmultilevel].preset).name))
-		    end
-
-		    if self.allowEdit then
-		        self.revertbutton:Show()
-		        self.savepresetbutton:Show()
-		    else
-		        self.revertbutton:Hide()
-		        self.savepresetbutton:Hide()
-		    end
-
-		    if not clean and self.allowEdit then
-		        self.revertbutton:Unselect()
-		    else
-		        self.revertbutton:Select()
-		    end
+			return ret
 		end
-	end)]]
+	end)
 
+	-- перевод playstyle HoverText
+	AddClassPostConstruct("widgets/redux/worldsettings/presetbox", function(self)
+		local Levels = require "map/levels"
+		local oldSetPlaystyleIcon = self.SetPlaystyleIcon
+
+		function self:SetPlaystyleIcon(playstyle_id)
+			oldSetPlaystyleIcon(self, playstyle_id)
+			local playstyle_def = playstyle_id ~= nil and Levels.GetPlaystyleDef(playstyle_id) or nil
+
+			if playstyle_def ~= nil then
+				self.playstyle.icon:SetHoverText(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[playstyle_def.default_preset])
+			end
+		end
+
+		-- и чтоб влезало
+		self.presetdesc:SetSize(18)
+		self.presetdesc:SetRegionSize(230, 160)
+	end)
 
 	--согласовываем слово "дней" с количеством дней
 	AddClassPostConstruct("widgets/worldresettimer", function(self)
@@ -2037,9 +2043,6 @@ do
 	end)
 
 end
-
---Перегоняем перевод в STRINGS
-TranslateStringTable(STRINGS)
 
 --Дядька, продающий скины должен склонять слова под названия вещей
 AddClassPostConstruct("widgets/skincollector", function(self)
@@ -2304,56 +2307,6 @@ AddClassPostConstruct("widgets/truescrolllist", function(self)
 	end
 end)
 
--- перевод ServerDetailIcon HoverText
--- согласование окончания сезона, разделение дня
-AddClassPostConstruct("widgets/redux/serversaveslot", function(self)		
-	self.cloud:SetHoverText(STRINGS.UI.SERVERLISTINGSCREEN.CLOUD_SAVE_HOVER)
-	self.mods:SetHoverText(STRINGS.UI.SERVERLISTINGSCREEN.MODS_ICON_HOVER)
-	self.pvp:SetHoverText(STRINGS.UI.SERVERLISTINGSCREEN.PVP_ICON_HOVER)
-
-	local oldSetSaveSlot = self.SetSaveSlot
-	function self:SetSaveSlot(slot, server_data)
-		oldSetSaveSlot(self, slot, server_data)
-		self.slot = slot
-
-		local Levels = require "map/levels"	
-		local server_data = ShardSaveGameIndex:GetSlotServerData(self.slot)
-		local privacy_options = { 
-			STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.PUBLIC,
-			STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.FRIENDS,
-			STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.LOCAL,
-			STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.CLAN,
-		}			
-
-		if server_data and server_data.privacy_type then
-			self.privacy:SetHoverText(privacy_options[server_data.privacy_type+1])
-		end
-
-		if server_data and server_data.playstyle then
-			local playstyle_def = server_data.playstyle ~= nil and Levels.GetPlaystyleDef(server_data.playstyle) or nil
-
-			if playstyle_def ~= nil then
-				self.playstyle:SetHoverText(STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[playstyle_def.default_preset])
-			end
-		end
-
-		local DayAndSeasonText = self.serverslotscreen:GetDayAndSeasonText(self.slot)
-		if DayAndSeasonText:find("Лето") ~= nil then
-			if DayAndSeasonText:find("Ранняя") ~= nil then
-				DayAndSeasonText = DayAndSeasonText:gsub("Ранняя","Раннее")
-			elseif DayAndSeasonText:find("Поздняя") ~= nil then
-				DayAndSeasonText = DayAndSeasonText:gsub("Поздняя","Позднее")
-			end
-		end
-		if DayAndSeasonText:find(" День") ~= nil then
-			DayAndSeasonText = DayAndSeasonText:gsub(" День",", День")
-		end
-
-		DayAndSeasonText = firsttoupper(russianlower(DayAndSeasonText))
-
-		self.day_and_season:SetString(DayAndSeasonText)
-	end
-end)
 
 --Слетали шрифты у кнопок выбора в первом слоте
 local function serversettingstabpost(self)
