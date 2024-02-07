@@ -1242,8 +1242,9 @@ function t.TranslateToRussian(message, entity)
 		return message
 	end
 
-	if t.SpeechHashTbl.EPITAPHS[message] then --если это описание эпитафии
-		return t.SpeechHashTbl.EPITAPHS[message]
+	-- осмотр надгробий	
+	if t.SpeechHashTbl.EPITAPHS.Eng2Rus[message] then
+		message = t.SpeechHashTbl.EPITAPHS.Eng2Rus[message] or message
 	end
 
 	local ent=entity
@@ -1339,6 +1340,15 @@ function Networking_Talk(guid, message, ...)
 	t.print("Networking_Talk", entity, message)
 	message = t.TranslateToRussian(message, entity) or message --Переводим на русский
 	return _Networking_Talk(guid, message, ...)
+end
+
+-- исправление умлаутов Вигфрид в чате
+local _Networking_Say = Networking_Say
+function Networking_Say(guid, userid, name, prefab, message, ...)
+	if prefab=="wathgrithr" and Profile:IsWathgrithrFontEnabled() then
+		message = message:gsub("о","ö"):gsub("О","Ö") or message
+	end
+	return _Networking_Say(guid, userid, name, prefab, message, ...)
 end
 
 --Перевод на русский произносимого на сервере

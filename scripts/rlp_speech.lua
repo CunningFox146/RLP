@@ -130,6 +130,13 @@ for key, val in pairs(STRINGS.SKIN_NAMES) do
 	end
 end
 
+--хеш-таблицы эпитафий
+t.SpeechHashTbl.EPITAPHS={Eng2Rus={}}
+for i,v in pairs(STRINGS.EPITAPHS) do
+	t.SpeechHashTbl.EPITAPHS.Eng2Rus[v]=t.PO["STRINGS.EPITAPHS."..i] or v
+	t.PO["STRINGS.EPITAPHS."..i]=nil
+end
+
 --Генерируем хеш-таблицы для имён свиней и кроликов
 t.SpeechHashTbl.PIGNAMES={Eng2Rus={}}
 for i,v in pairs(STRINGS.PIGNAMES) do
@@ -210,8 +217,6 @@ if TheNet:GetServerGameMode() == "quagmire" then
         end
     end
 end
-
-t.SpeechHashTbl.EPITAPHS={}
 
 --[[ Юзалось в режиме только UI
 	for charname,v in pairs(STRINGS.CHARACTERS) do
