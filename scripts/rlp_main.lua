@@ -53,7 +53,9 @@ modimport("scripts/rlp_settings.lua")
 
 -- используемый CHATFONT_OUTLINE не поддерживает иконки кнопок мыши и отображает их знаками ?
 AddClassPostConstruct("widgets/redux/loadingwidget", function(self)
-	self.loading_tip_text:SetFont(CHATFONT) 
+	if self and self.loading_tip_text then -- если советы отключены
+		self.loading_tip_text:SetFont(CHATFONT) 
+	end
 end)
 
 if t.CurrentTranslationType == t.TranslationTypes.FontsOnly then
