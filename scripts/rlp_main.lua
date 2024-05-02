@@ -99,7 +99,14 @@ end
 --Пытается сформировать правильные окончания в словах названия предмета str1 в соответствии действию action
 --objectname - название префаба предмета
 local function rebuildname(str1, action, objectname)
-	local function repsubstr(str, pos, substr)--вставить подстроку substr в строку str в позиции pos
+	local function repsubstr(str, pos, substr)--вставить подстроку substr в строку str в позиции pos	
+		local dontrebuild = {"для", "за"}; -- слова которые не нужно склонять
+			for _,v in ipairs(dontrebuild) do 
+				if str == v then
+					return v
+				end
+			end
+
 		pos = pos - 1
 		return str:utf8sub(1, pos)..substr..str:utf8sub(pos+substr:utf8len()+1, str:utf8len())
 	end
@@ -122,7 +129,7 @@ local function rebuildname(str1, action, objectname)
 	local str=""
 	str1=str1.." "
 	local str1len=str1:utf8len()
-
+	
 	if objectname then
 		objectname = string.lower(objectname)
 	end
@@ -777,6 +784,11 @@ do
 	endings["ASSESSPLANTHAPPINESS"] = endings["gen"]
 	endings["PLANTREGISTRY_RESEARCH"] = endings["acc"]	
 	endings["INTERACT_WITH"] = endings["abl"]
+	endings["STEER_BOAT"] = endings["abl"]	
+	endings["CHARGE_FROM"] = endings["gen"]	
+
+	-- для рода реликвий, т.к. имеем одно выводимое имя, но разные префабы
+	local relics = {ruins_chair=1, ruins_table=1, ruins_vase=1, ruins_plate=1, ruins_bowl=1, ruins_chipbowl=1}
 
 	FixPrefix = function(prefix, act, item)
 		if not t.NamesGender then return prefix end
@@ -789,13 +801,14 @@ do
 			elseif t.NamesGender["she"][item] then gender="she"
 			elseif t.NamesGender["it"][item] then gender="it"
 			elseif t.NamesGender["plural"][item] then gender="plural"
-			elseif t.NamesGender["plural2"][item] then gender="plural2" 
+			elseif t.NamesGender["plural2"][item] then gender="plural2"
+			elseif relics[item] then gender="she" 
 			end
 		end		
 
 		--Особый случай. Для действия "Собрать" у меня есть три записи с заменённым текстом. Там получается множественное число.
 		if act=="PICK" and item and t.RussianNames[STRINGS.NAMES[string.upper(item)]] and t.RussianNames[STRINGS.NAMES[string.upper(item)]][act] then gender="plural" end
-
+ 
 		--Смена пола префикса для ВЫРОСШЕГО урожая на грядках, пол берём из плода
 		--пример: для выросшей моркови "NAMES.FARM_PLANT_CARROT" пол берётся из "NAMES.CARROT"
 		if act=="PICK" and item then
@@ -1878,6 +1891,13 @@ do
 			self.server_intention.button.text:SetSize(23)
 			self.server_intention.button.text:Nudge({x=-3,y=0,z=0})
 		end
+
+		-- делаем выполнение RefreshPrivacyButtons при нажатии на радиобаттоны настроек приватности
+		local oldUpdateSlot = self.UpdateSlot
+		function self:UpdateSlot()
+			oldUpdateSlot(self)
+			self:RefreshPrivacyButtons()
+		end
 	end)
 
 	-- перевод виджета выбора свойств мира
@@ -1931,6 +1951,15 @@ do
 		end
 	end)
 
+	-- расширение блока описания стиля игры сервера
+	AddClassPostConstruct("screens/redux/playstyleselectscreen", function(self)
+		local oldUpdateStyleInfo = self.UpdateStyleInfo
+		function self:UpdateStyleInfo(w)
+			if self and self.description and w and w.settings_desc then
+				self.description:SetMultilineTruncatedString(w.settings_desc, 3, 750, nil, true, true)
+			end
+		end
+	end)
 
 --Перегоняем перевод в STRINGS
 TranslateStringTable(STRINGS)
@@ -1975,8 +2004,8 @@ TranslateStringTable(STRINGS)
 	--Исправление бага с шрифтом в спиннерах
 	--выше есть версия для фикса только шрифта--
 	AddClassPostConstruct("widgets/spinner", function(self, options, width, height, textinfo, ...)
-		local spinners_text = { ["All"]="Все", ["Tips Only"]="Только советы", ["Lore Only"]="Лор игры", ["None"]="Никакие", 
-									["Separated"]="Отдельное", ["Integrated"]="Совмещённое" }
+		local spinners_text = { ["All"]="Все", ["Tips Only"]="Только советы", ["Lore Only"]="Лор игры", ["None"]="Нет", 
+									["Separated"]="Отдельное", ["Integrated"]="Совмещённое", ["Most"]="Большинство", ["Important"]="Важные" }
 
 		local oldUpdateText = self.UpdateText
 		function self:UpdateText(msg)
@@ -2328,33 +2357,74 @@ local function serversettingstabpost(self)
 end
 AddClassPostConstruct("widgets/serversettingstab", serversettingstabpost)
 
---Клей отрубили подгрузку шрифтов, поэтому подменяем шрифты в попапах
-local function PopUpdialogPost(self)
-	if self.title then
-		self.title:SetFont(HEADERFONT)
-	end
-
-	if self.text then
-		self.text:SetFont(CHATFONT)
-	end
-
-	if self.title and self.title.string==STRINGS.UI.MODSSCREEN.UPDATEALL_TITLE then
-		self:SetTitleTextSize(27)
-	end
-
-	if self.title and self.title.string==STRINGS.UI.MODSSCREEN.CLEANALL_TITLE then
-		self:SetTitleTextSize(27)
-	end
-end
-
-AddClassPostConstruct("screens/popupdialog", PopUpdialogPost)
-AddClassPostConstruct("screens/redux/popupdialog", PopUpdialogPost)
-
 -- Не показываем настройки языка. Ультрамегахак
 do
 	local optionsscreen = require("screens/redux/optionsscreen")
 	local __ctor = optionsscreen._ctor
 	optionsscreen._ctor = function(self, prev_screen, ...) print("_ctor") return __ctor(self, nil, ...) end
+	
+
+	-- исправления интерфейса
+	local TEMPLATES = require "widgets/redux/templates"
+	local oldLabelSpinner = TEMPLATES.LabelSpinner	
+	function TEMPLATES.LabelSpinner(labeltext, spinnerdata, width_label, width_spinner, height, spacing, font, font_size, horiz_offset, ...)
+		local ActiveScreen = TheFrontEnd:GetActiveScreen().name
+		if ActiveScreen == "MultiplayerMainScreen" then
+			local width_label = width_label and width_label+14 or 220
+			local font_size = font_size or 22
+			local horiz_offset = horiz_offset and horiz_offset+10 or 0
+			local width_spinner = width_spinner and width_spinner-10 or 150
+
+			return oldLabelSpinner(labeltext, spinnerdata, width_label, width_spinner, height, spacing, font, font_size, horiz_offset, ...)
+		else
+			return oldLabelSpinner(labeltext, spinnerdata, width_label, width_spinner, height, spacing, font, font_size, horiz_offset, ...)
+		end
+	end
+
+	local oldLabelNumericSpinner = TEMPLATES.LabelNumericSpinner	
+	function TEMPLATES.LabelNumericSpinner(labeltext, min, max, width_label, width_spinner, height, spacing, font, font_size, horiz_offset, ...)
+		local ActiveScreen = TheFrontEnd:GetActiveScreen().name
+		if ActiveScreen == "MultiplayerMainScreen" then
+			local width_label = width_label+14 or 220
+			local font_size = font_size or 22
+			local horiz_offset = horiz_offset and horiz_offset+10 or 0
+			local width_spinner = width_spinner and width_spinner-10 or 150
+
+			return oldLabelNumericSpinner(labeltext, min, max, width_label, width_spinner, height, spacing, font, font_size, horiz_offset, ...)
+		else
+			return oldLabelNumericSpinner(labeltext, min, max, width_label, width_spinner, height, spacing, font, font_size, horiz_offset, ...)
+		end
+	end
+
+	local oldOptionsLabelCheckbox = TEMPLATES.OptionsLabelCheckbox	
+	function TEMPLATES.OptionsLabelCheckbox(onclick, labeltext, checked, width_label, width_button, height, checkbox_size, spacing, font, font_size, horiz_offset, ...)
+		local ActiveScreen = TheFrontEnd:GetActiveScreen().name
+		if ActiveScreen == "MultiplayerMainScreen" then
+			local font_size = font_size or 22
+			local horiz_offset = horiz_offset and horiz_offset+10 or 0
+
+			return oldOptionsLabelCheckbox(onclick, labeltext, checked, width_label, width_button, height, checkbox_size, spacing, font, font_size, horiz_offset, ...)
+		else
+			return oldOptionsLabelCheckbox(onclick, labeltext, checked, width_label, width_button, height, checkbox_size, spacing, font, font_size, horiz_offset, ...)
+		end
+	end
+
+
+	local oldCurlyWindow = TEMPLATES.CurlyWindow	
+	function TEMPLATES.CurlyWindow(sizeX, sizeY, title_text, bottom_buttons, button_spacing, body_text)
+		local w = oldCurlyWindow(sizeX, sizeY, title_text, bottom_buttons, button_spacing, body_text)
+
+		if title_text then
+			w.title:SetRegionSize(680, 50)
+            w.title:SetSize(35)
+        end  
+
+	    if body_text then
+	    	w.body:SetSize(24)
+	    end
+
+		return w
+	end
 end
 
 AddClassPostConstruct("screens/redux/optionsscreen", function(self)
@@ -2396,6 +2466,26 @@ AddClassPostConstruct("screens/redux/optionsscreen", function(self)
 
 	if self.title then
 		self.title.big:SetString("Настройки игры")
+	end
+end) 
+
+AddClassPostConstruct("screens/redux/scrapbookscreen", function(self)
+	local Text = require "widgets/text"
+
+	function Text:SetString(str)
+		if t.PO["STRINGS.SCRAPBOOK.DATA_USES"] and string.match(str,"^(%d*)"..t.PO["STRINGS.SCRAPBOOK.DATA_USES"].."$") then 
+			local splitstr = split(str, " ")
+			str = splitstr[1] .. StringTime(splitstr[1],{" ПРИМЕНЕНИЕ"," ПРИМЕНЕНИЯ"," ПРИМЕНЕНИЙ"}) or str
+		elseif t.PO["STRINGS.SCRAPBOOK.DATA_DAYS"] and string.match(str,"^(%d*)%s"..t.PO["STRINGS.SCRAPBOOK.DATA_DAYS"].."$") then
+			local splitstr = split(str, " ")
+			str = splitstr[1] .. StringTime(splitstr[1],{" ДЕНЬ"," ДНЯ"," ДНЕЙ"}) or str
+		elseif t.PO["STRINGS.SCRAPBOOK.DATA_STACK"] and string.match(str,"^(%d*)%s"..t.PO["STRINGS.SCRAPBOOK.DATA_STACK"].."$") then
+			local splitstr = split(str, " ")
+			str = splitstr[1] .. StringTime(splitstr[1],{" ШТУКА"," ШТУКИ"," ШТУК"}) or str
+		end
+
+	    self.string = str
+	    self.inst.TextWidget:SetString(str or "")
 	end
 end)
 
@@ -2693,8 +2783,13 @@ function EntityScript:GetDisplayName(act, ...) --Подмена функции, 
 		name=Prefix.." "..name
 	end
 
-	if act and act=="SLEEPIN" and name then
-		name=Prefix and "во "..name or "в "..name --Особый случай для "спать в палатке" и "спать в навесе для сиесты" \ при наличии влажности меняем предлог на "во" - во влажной палатке
+	if act and name then
+		if act=="SLEEPIN" or act=="JUMPIN" then		
+			name=Prefix and "во "..name or "в "..name
+		end 
+		if act=="OPEN_CRAFTING" and self.prefab and (self.prefab == "madscience_lab" or self.prefab == "wintersfeastoven") then		
+			name=Prefix and "во "..name or "в "..name
+		end
 	end 
 	if act and act=="INTERACT_WITH" and name then name="с "..name end --Чтобы не было фразы "Поговорить с" с надетой шляпой садовника 
 	return name
