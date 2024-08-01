@@ -1585,13 +1585,7 @@ do
 
 	--Подменяем портреты
 	local TRANSLATED_LIST = {
-		wortox = true,
-		warly = true,
-		wanda = true,
-		wurt = true,
-		winona = true,
 		wickerbottom = true,
-		waxwell = true,
 		willow = true,
 		wilson = true,
 		woodie = true,
@@ -1600,10 +1594,17 @@ do
 		wendy = true,
 		wathgrithr = true,
 		webber = true,
-		wormwood = true,
-		walter = true,
-
+		waxwell = true,
 		random = true,
+		wx78 = true,
+		winona = true,
+		wortox = true,
+		wormwood = true,
+		warly = true,
+		wonkey = true,
+		wanda = true,
+		wurt = true,
+		walter = true,
 	}
 
 	require("characterutil")
