@@ -2320,7 +2320,7 @@ AddClassPostConstruct("widgets/truescrolllist", function(self)
 		end
 		if data and data.item_type and widget.text then
 			local x, y = widget.text:GetRegionSize()
-			widget.text:SetRegionSize(x+30, y+20)
+			widget.text:SetRegionSize(x+30, y+20)   -- По неизвестной причине затрагивает и вкладку "Магазин", тем самым смещая описание "Сундуков" левее @Никита
 		end
 		if data and data.days_survived and widget.DAYS_LIVED then
 			local Text = require "widgets/text"
