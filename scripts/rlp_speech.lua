@@ -86,11 +86,11 @@ local function BuildCharacterHash(charname, russource)
 			end
 		end
 	end
-	charname=charname:upper()
-	if charname=="WILSON" then charname="GENERIC" end
-	if charname=="MAXWELL" then charname="WAXWELL" end
-	if charname=="WIGFRID" then charname="WATHGRITHR" end
-	t.SpeechHashTbl[charname]={}
+	charname = charname:upper()
+	if charname == "WILSON" or charname == "WONKEY" then charname = "GENERIC" end
+	if charname == "MAXWELL" then charname = "WAXWELL" end
+	if charname == "WIGFRID" then charname = "WATHGRITHR" end
+	t.SpeechHashTbl[charname] = {}
 	CreateRussianHashTable(t.SpeechHashTbl[charname],STRINGS.CHARACTERS[charname],"STRINGS.CHARACTERS."..charname)
 end
 t.BuildCharacterHash = BuildCharacterHash
@@ -154,6 +154,47 @@ for i,v in pairs(STRINGS.SWAMPIGNAMES) do
 	t.SpeechHashTbl.SWAMPIGNAMES.Eng2Rus[v]=t.PO["STRINGS.SWAMPIGNAMES."..i] or v
 	t.PO["STRINGS.SWAMPIGNAMES."..i]=nil
 end
+
+
+-- постройка хеш-таблиц для реплик с "гениальными" ключами
+local MONKEY_QUEEN_KEYS = {}
+local MERM_KING_KEYS = {} 
+
+local function BuildSpeechHash(name,tbl,str)
+	if type(tbl)=="table" then
+		for i,v in pairs(tbl) do
+			if type(v)=="table" then
+				BuildSpeechHash(name,tbl[i],str.."."..i)
+			else
+				t.SpeechHashTbl[name].Eng2Rus[v] = t.PO[str.."."..i] or v
+			end	
+		end
+	else		
+		if t.PO[str] then
+			t.SpeechHashTbl[name].Eng2Rus[tbl] = t.PO[str]
+		end
+	end
+end
+
+for i,v in pairs(STRINGS) do
+	if string.match(i,"^MONKEY_QUEEN*") then
+		table.insert(MONKEY_QUEEN_KEYS, i)
+	elseif string.match(i,"^MERM_KING_TALK*") then
+		table.insert(MERM_KING_KEYS, i)
+	end
+end
+
+t.SpeechHashTbl.MONKEY_QUEEN={Eng2Rus={}}
+for _,v in pairs(MONKEY_QUEEN_KEYS) do
+	BuildSpeechHash("MONKEY_QUEEN",STRINGS[v], "STRINGS."..v)
+end
+
+t.SpeechHashTbl.MERM_KING={Eng2Rus={}}
+for _,v in pairs(MERM_KING_KEYS) do
+	print("SpeechHashTbl.MERM_KING = "..v)
+	BuildSpeechHash("MERM_KING",STRINGS[v], "STRINGS."..v)
+end
+----
 
 --Подгружаем в "хэш" фразы Мамси
 if TheNet:GetServerGameMode() == "quagmire" then

@@ -100,7 +100,7 @@ end
 --objectname - название префаба предмета
 local function rebuildname(str1, action, objectname)
 	local function repsubstr(str, pos, substr)--вставить подстроку substr в строку str в позиции pos	
-		local dontrebuild = {"для", "за"}; -- слова которые не нужно склонять
+		local dontrebuild = {"для", "за", "на", "в"}; -- слова которые не нужно склонять
 			for _,v in ipairs(dontrebuild) do 
 				if str == v then
 					return v
@@ -1037,39 +1037,45 @@ if rawget(_G, "GAME_MODES") and STRINGS.UI.GAMEMODES then
 	end
 end
 
---Склоняем названия вещей в пожитках
+-- cклоняем названия вещей в пожитках
 function GetSkinUsableOnString(item_type, popup_txt)
 	local skin_data = GetSkinData(item_type)
+
 	local skin_str = GetSkinName(item_type)
 
-	local usable_on_str = ""
+	local usable_on_str
 	if skin_data ~= nil and skin_data.base_prefab ~= nil then
-		if skin_data.granted_items == nil then
-			local item_str = rebuildname(STRINGS.NAMES[string.upper(skin_data.base_prefab)],"reskin",string.upper(skin_data.base_prefab))
-			usable_on_str = subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON, { skin = skin_str, item = item_str })
-		else
-			local item1_str = rebuildname(STRINGS.NAMES[string.upper(skin_data.base_prefab)],"reskin",string.upper(skin_data.base_prefab))
-			local item2_str = nil
-			local item3_str = nil
-
-			local granted_skin_data = GetSkinData(skin_data.granted_items[1])
-			if granted_skin_data ~= nil and granted_skin_data.base_prefab ~= nil then
-				item2_str = rebuildname(STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)],"reskin",string.upper(granted_skin_data.base_prefab))
-			end
-			local granted_skin_data = GetSkinData(skin_data.granted_items[2])
-			if granted_skin_data ~= nil and granted_skin_data.base_prefab ~= nil then
-				item3_str = rebuildname(STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)],"reskin",string.upper(granted_skin_data.base_prefab))
-			end
-
-			if item3_str == nil then
-				usable_on_str = subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE, { skin = skin_str, item1 = item1_str, item2 = item2_str })
-			else
-				usable_on_str = subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE_3_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE_3, { skin = skin_str, item1 = item1_str, item2 = item2_str, item3 = item3_str })
-			end
-		end
+        local item1_str, item2_str, item3_str
+        item1_str = t.RussianNames[STRINGS.NAMES[string.upper(skin_data.base_prefab)]] and t.RussianNames[STRINGS.NAMES[string.upper(skin_data.base_prefab)]]["RESKIN"] or rebuildname(STRINGS.NAMES[string.upper(skin_data.base_prefab)], "reskin", string.upper(skin_data.base_prefab))
+        if skin_data.granted_items ~= nil then
+            local granted_skin_data = GetSkinData(skin_data.granted_items[1])
+            if granted_skin_data ~= nil and granted_skin_data.base_prefab ~= nil then
+                item2_str = t.RussianNames[STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)]] and t.RussianNames[STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)]]["RESKIN"] or rebuildname(STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)], "reskin", string.upper(granted_skin_data.base_prefab))
+                if item2_str == item1_str then
+                    item2_str = nil
+                end
+            end
+            granted_skin_data = GetSkinData(skin_data.granted_items[2])
+            if granted_skin_data ~= nil and granted_skin_data.base_prefab ~= nil then
+                item3_str = t.RussianNames[STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)]] and t.RussianNames[STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)]]["RESKIN"] or rebuildname(STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)],"reskin",string.upper(granted_skin_data.base_prefab))
+                if item2_str == nil and item3_str ~= item1_str then
+                    item2_str = item3_str
+                    item3_str = nil
+                elseif item1_str == item3_str or item2_str == item3_str then
+                    item3_str = nil
+                end
+            end
+        end
+        if item2_str == nil then
+            usable_on_str = subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON, { skin = skin_str, item = item1_str })
+        elseif item3_str == nil then
+            usable_on_str = subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE, { skin = skin_str, item1 = item1_str, item2 = item2_str })
+        else
+            usable_on_str = subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE_3_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE_3, { skin = skin_str, item1 = item1_str, item2 = item2_str, item3 = item3_str })
+        end
 	end
 
-	return usable_on_str
+	return usable_on_str or ""
 end
 
 require("widgets/eventannouncer")
@@ -1213,6 +1219,7 @@ end
 --entity - ссылка на говорящего это сообщение персонажа
 function t.TranslateToRussian(message, entity)
 	t.print("t.TranslateToRussian", message, entity.prefab)
+
 	if not (entity and entity.prefab and entity.components.talker and type(message)=="string") then return message end
 
 	local new_line = string.find(message,"\n",1,true)
@@ -1255,6 +1262,14 @@ function t.TranslateToRussian(message, entity)
 			end
 		end
 		return message
+	elseif entity.prefab == "monkeyqueen" then -- реплики Королевы лунной пристани
+		if t.SpeechHashTbl.MONKEY_QUEEN.Eng2Rus[message] then
+			message = t.SpeechHashTbl.MONKEY_QUEEN.Eng2Rus[message] or message
+		end
+	elseif entity.prefab == "mermking" then -- реплики Короля мэрмов
+		if t.SpeechHashTbl.MERM_KING.Eng2Rus[message] then
+			message = t.SpeechHashTbl.MERM_KING.Eng2Rus[message] or message
+		end
 	end
 
 	-- осмотр надгробий	
@@ -1262,11 +1277,11 @@ function t.TranslateToRussian(message, entity)
 		message = t.SpeechHashTbl.EPITAPHS.Eng2Rus[message] or message
 	end
 
-	local ent=entity
-	entity=entity.prefab:upper()
-	if entity=="WILSON" then entity="GENERIC" end
-	if entity=="MAXWELL" then entity="WAXWELL" end
-	if entity=="WIGFRID" then entity="WATHGRITHR" end
+	local ent = entity
+	entity = entity.prefab:upper()
+	if entity == "WILSON" or entity == "WONKEY" then entity = "GENERIC" end
+	if entity == "MAXWELL" then entity = "WAXWELL" end
+	if entity == "WIGFRID" then entity = "WATHGRITHR" end
 
 	--Обработка сообщения
 	local function TranslateMessage(message)
@@ -1585,7 +1600,13 @@ do
 
 	--Подменяем портреты
 	local TRANSLATED_LIST = {
+		wortox = true,
+		warly = true,
+		wanda = true,
+		wurt = true,
+		winona = true,
 		wickerbottom = true,
+		waxwell = true,
 		willow = true,
 		wilson = true,
 		woodie = true,
@@ -1594,17 +1615,10 @@ do
 		wendy = true,
 		wathgrithr = true,
 		webber = true,
-		waxwell = true,
-		random = true,
-		wx78 = true,
-		winona = true,
-		wortox = true,
 		wormwood = true,
-		warly = true,
-		wonkey = true,
-		wanda = true,
-		wurt = true,
 		walter = true,
+
+		random = true,
 	}
 
 	require("characterutil")
@@ -2318,10 +2332,10 @@ AddClassPostConstruct("widgets/truescrolllist", function(self)
 				end
 			end
 		end
-		if data and data.item_type and widget.text then
+		--[[if data and data.item_type and widget.text then
 			local x, y = widget.text:GetRegionSize()
 			widget.text:SetRegionSize(x+30, y+20)   -- По неизвестной причине затрагивает и вкладку "Магазин", тем самым смещая описание "Сундуков" левее @Никита
-		end
+		end]]
 		if data and data.days_survived and widget.DAYS_LIVED then
 			local Text = require "widgets/text"
 			widget.DAYS_LIVED:SetTruncatedString((data.days_survived or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS).." "..StringTime(data.days_survived), widget.DAYS_LIVED._align.maxwidth, widget.DAYS_LIVED._align.maxchars, true)
@@ -2472,22 +2486,44 @@ end)
 
 AddClassPostConstruct("screens/redux/scrapbookscreen", function(self)
 	local Text = require "widgets/text"
-
 	function Text:SetString(str)
-		if t.PO["STRINGS.SCRAPBOOK.DATA_USES"] and string.match(str,"^(%d*)"..t.PO["STRINGS.SCRAPBOOK.DATA_USES"].."$") then 
-			local splitstr = split(str, " ")
-			str = splitstr[1] .. StringTime(splitstr[1],{" ПРИМЕНЕНИЕ"," ПРИМЕНЕНИЯ"," ПРИМЕНЕНИЙ"}) or str
-		elseif t.PO["STRINGS.SCRAPBOOK.DATA_DAYS"] and string.match(str,"^(%d*)%s"..t.PO["STRINGS.SCRAPBOOK.DATA_DAYS"].."$") then
-			local splitstr = split(str, " ")
-			str = splitstr[1] .. StringTime(splitstr[1],{" ДЕНЬ"," ДНЯ"," ДНЕЙ"}) or str
-		elseif t.PO["STRINGS.SCRAPBOOK.DATA_STACK"] and string.match(str,"^(%d*)%s"..t.PO["STRINGS.SCRAPBOOK.DATA_STACK"].."$") then
-			local splitstr = split(str, " ")
-			str = splitstr[1] .. StringTime(splitstr[1],{" ШТУКА"," ШТУКИ"," ШТУК"}) or str
-		end
+		if str ~= nil then
+			if t.PO["STRINGS.SCRAPBOOK.DATA_USES"] and string.match(str,"^(%d*)"..t.PO["STRINGS.SCRAPBOOK.DATA_USES"].."$") then 
+				local splitstr = split(str, " ")
+				str = splitstr[1] .. StringTime(splitstr[1],{" ПРИМЕНЕНИЕ"," ПРИМЕНЕНИЯ"," ПРИМЕНЕНИЙ"}) or str
+			elseif t.PO["STRINGS.SCRAPBOOK.DATA_DAYS"] and string.match(str,"^(%d*)%s"..t.PO["STRINGS.SCRAPBOOK.DATA_DAYS"].."$") then
+				local splitstr = split(str, " ")
+				str = splitstr[1] .. StringTime(splitstr[1],{" ДЕНЬ"," ДНЯ"," ДНЕЙ"}) or str
+			elseif t.PO["STRINGS.SCRAPBOOK.DATA_STACK"] and string.match(str,"^(%d*)%s"..t.PO["STRINGS.SCRAPBOOK.DATA_STACK"].."$") then
+				local splitstr = split(str, " ")
+				str = splitstr[1] .. StringTime(splitstr[1],{" ШТУКА"," ШТУКИ"," ШТУК"}) or str
+			end
 
-	    self.string = str
-	    self.inst.TextWidget:SetString(str or "")
+		    self.string = str
+		    self.inst.TextWidget:SetString(str or "")
+		end
 	end
+end)
+
+AddClassPostConstruct("screens/redux/caveselectscreen", function(self)
+	if self.headertext then
+		self.headertext:SetString("С пещерами или без пещер?")
+	end
+
+	local srv_desc = {
+		["Play with Caves, requires more PC Power as it runs multiple servers"] = {"С пещерами", "Игра с пещерами требует больше мощности ПК, так как работает на нескольких серверах"}, 
+		["Play with no Caves, sad, but not as demanding on a computer"] = {"Без пещер", "Играть без пещер, грустно, но не так требовательно к компьютеру"}
+	}
+
+	local oldUpdateStyleInfo = self.UpdateStyleInfo
+	function self:UpdateStyleInfo(w)
+		self.description:SetMultilineTruncatedString(srv_desc[w.settings_desc][2], 3, 700, nil, true, true)
+
+		if w.button and w.button.text then
+			w.button.text:SetString(srv_desc[w.settings_desc][1])
+		end
+	end
+	
 end)
 
 --Не переводится т.к. таблица создаётся до загрузки модов.
