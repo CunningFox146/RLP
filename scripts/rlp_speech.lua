@@ -191,7 +191,6 @@ end
 
 t.SpeechHashTbl.MERM_KING={Eng2Rus={}}
 for _,v in pairs(MERM_KING_KEYS) do
-	print("SpeechHashTbl.MERM_KING = "..v)
 	BuildSpeechHash("MERM_KING",STRINGS[v], "STRINGS."..v)
 end
 ----
