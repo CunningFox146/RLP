@@ -2383,7 +2383,8 @@ do
 	local TEMPLATES = require "widgets/redux/templates"
 	local oldLabelSpinner = TEMPLATES.LabelSpinner	
 	function TEMPLATES.LabelSpinner(labeltext, spinnerdata, width_label, width_spinner, height, spacing, font, font_size, horiz_offset, ...)
-		local ActiveScreen = TheFrontEnd:GetActiveScreen().name
+		local ActiveScreen = "none"
+		if TheFrontEnd:GetActiveScreen() and TheFrontEnd:GetActiveScreen().name then ActiveScreen = TheFrontEnd:GetActiveScreen().name end
 		if ActiveScreen == "MultiplayerMainScreen" then
 			local width_label = width_label and width_label+14 or 220
 			local font_size = font_size or 22
@@ -2398,7 +2399,8 @@ do
 
 	local oldLabelNumericSpinner = TEMPLATES.LabelNumericSpinner	
 	function TEMPLATES.LabelNumericSpinner(labeltext, min, max, width_label, width_spinner, height, spacing, font, font_size, horiz_offset, ...)
-		local ActiveScreen = TheFrontEnd:GetActiveScreen().name
+		local ActiveScreen = "none"
+		if TheFrontEnd:GetActiveScreen() and TheFrontEnd:GetActiveScreen().name then ActiveScreen = TheFrontEnd:GetActiveScreen().name end
 		if ActiveScreen == "MultiplayerMainScreen" then
 			local width_label = width_label+14 or 220
 			local font_size = font_size or 22
@@ -2413,7 +2415,8 @@ do
 
 	local oldOptionsLabelCheckbox = TEMPLATES.OptionsLabelCheckbox	
 	function TEMPLATES.OptionsLabelCheckbox(onclick, labeltext, checked, width_label, width_button, height, checkbox_size, spacing, font, font_size, horiz_offset, ...)
-		local ActiveScreen = TheFrontEnd:GetActiveScreen().name
+		local ActiveScreen = "none"
+		if TheFrontEnd:GetActiveScreen() and TheFrontEnd:GetActiveScreen().name then ActiveScreen = TheFrontEnd:GetActiveScreen().name end
 		if ActiveScreen == "MultiplayerMainScreen" then
 			local font_size = font_size or 22
 			local horiz_offset = horiz_offset and horiz_offset+10 or 0
