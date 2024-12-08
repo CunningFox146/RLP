@@ -1880,16 +1880,17 @@ do
 		end
 	end)
 
-	--Баг разработчиков, не переводятся радиобаттоны в настройках при создании сервера
+	-- перевод настроек приватности сервера
 	AddClassPostConstruct("widgets/redux/serversettingstab", function(self)
-		local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
-		function self:RefreshPrivacyButtons()
-			oldRefreshPrivacyButtons(self)
+		local oldUpdateSlot = self.UpdateSlot
+		function self:UpdateSlot()
+			oldUpdateSlot(self)
 			for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
 				v.button.text:SetFont(NEWFONT)
 				v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
 			end
 		end
+
 		if self.privacy_type and self.privacy_type.buttons and self.privacy_type.buttons.buttonwidgets then
 			for _,option in pairs(self.privacy_type.buttons.options) do
 				if privacy_options[option.text] then
@@ -1897,21 +1898,6 @@ do
 				end
 
 			end
-			for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
-				v.button.text:SetFont(NEWFONT)
-				v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
-			end
-		end
-		if self.server_intention then
-			self.server_intention.button.text:SetSize(23)
-			self.server_intention.button.text:Nudge({x=-3,y=0,z=0})
-		end
-
-		-- делаем выполнение RefreshPrivacyButtons при нажатии на радиобаттоны настроек приватности
-		local oldUpdateSlot = self.UpdateSlot
-		function self:UpdateSlot()
-			oldUpdateSlot(self)
-			self:RefreshPrivacyButtons()
 		end
 	end)
 
@@ -2259,8 +2245,8 @@ AddClassPostConstruct("widgets/quagmire_recipepopup", function(self) --Для г
 	end
 end)
 
---Перевод настроек приватности при создании сервера
-AddClassPostConstruct("screens/redux/cloudserversettingspopup", function(self)
+--Перевод настроек приватности при создании сервера (неактуально? 23.11.24)
+--[[AddClassPostConstruct("screens/redux/cloudserversettingspopup", function(self)
 	local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
 	function self:RefreshPrivacyButtons()
 		oldRefreshPrivacyButtons(self)
@@ -2284,7 +2270,7 @@ AddClassPostConstruct("screens/redux/cloudserversettingspopup", function(self)
 		end
 	end
 	self.privacy_type.buttons:UpdateButtons()
-end)
+end)]]
 
 do
 	local translations = {
