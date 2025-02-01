@@ -250,9 +250,9 @@ local LanguageOptions = Class(Screen, function(self)
 	
 	--обавляем менюшку с кнопками справа
 	--Кнопки вылазит из-под понели
-	self.updt_btn = self.logspanel:AddChild(UpdateBtn())
-	self.updt_btn:SetScale(.85, .85, 1)
-	self.updt_btn:Hide()
+	--self.updt_btn = self.logspanel:AddChild(UpdateBtn())
+	--self.updt_btn:SetScale(.85, .85, 1)
+	--self.updt_btn:Hide()
 	
 	self.groupbutton = self.logspanel:AddChild(GroupButton())
 	self.groupbutton:SetScale(.85, .85, 1)
@@ -267,8 +267,8 @@ local LanguageOptions = Class(Screen, function(self)
 	self.vkbutton:Hide()
 	
 	self.inst:DoTaskInTime(.75, function()
-		self.updt_btn:Show()
-		self.updt_btn:MoveTo(Vector3(250,0,1), Vector3(425,240,1), .75)
+		--self.updt_btn:Show()
+		--self.updt_btn:MoveTo(Vector3(250,0,1), Vector3(425,240,1), .75)
 		
 		self.inst:DoTaskInTime(.25, function()
 			self.groupbutton:Show()
