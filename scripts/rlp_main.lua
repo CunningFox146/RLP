@@ -1185,6 +1185,29 @@ local function GetMentioned1(message)
 	return nil
 end
 
+function GetMortalityStringFor(target)
+	local mortalitystring = STRINGS.UI.MORTALITYSTRINGS.DEFAULT
+
+	if target ~= nil then 
+		local hands_equip = nil
+		if target.replica.inventory and target.replica.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) ~= nil then
+			hands_equip = target.replica.inventory:GetEquippedItem(EQUIPSLOTS.HANDS).prefab
+		end
+		
+		if hands_equip ~= nil and hands_equip == "voidcloth_scythe" then
+			if STRINGS.UI.MORTALITYSTRINGS[string.upper(target.prefab)] then
+				mortalitystring = STRINGS.UI.MORTALITYSTRINGS[string.upper(target.prefab)] .. "-c-c"
+			else
+				mortalitystring = "c-c-" .. STRINGS.UI.MORTALITYSTRINGS.DEFAULT
+			end
+		else
+			mortalitystring = STRINGS.UI.MORTALITYSTRINGS[string.upper(target.prefab)] or STRINGS.UI.MORTALITYSTRINGS.DEFAULT
+		end
+	end	
+
+    return mortalitystring
+end
+
 --[[
 --Формирует тестовую функцию для проверки перевода
 if not rawget(_G,"test") then
