@@ -2007,18 +2007,21 @@ TranslateStringTable(STRINGS)
 		-- перевод описания [для presetpopupscreen]
 		local oldGetDataForSettingsID = Levels.GetDataForSettingsID
 		Levels.GetDataForSettingsID = function(data, ...)
-			local ret = oldGetDataForSettingsID(data, ...)		
-			ret.settings_desc = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[data] or ret.settings_desc
-
+			local ret = oldGetDataForSettingsID(data, ...)	
+			if ret ~= nil then
+				ret.settings_desc = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[data] or ret.settings_desc
+			end
 			return ret
 		end
 
 		-- имя и описание стиля игры
 		local oldGetPlaystyleDef = Levels.GetPlaystyleDef
 		Levels.GetPlaystyleDef = function(playstyle_id)
-			local ret = oldGetPlaystyleDef(playstyle_id)		
-			ret.name = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[ret.default_preset] or ret.name
-			ret.desc = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[ret.default_preset] or ret.desc
+			local ret = oldGetPlaystyleDef(playstyle_id)
+			if ret ~= nil then
+				ret.name = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELS[ret.default_preset] or ret.name
+				ret.desc = STRINGS.UI.CUSTOMIZATIONSCREEN.PRESETLEVELDESC[ret.default_preset] or ret.desc
+			end
 
 			return ret
 		end
