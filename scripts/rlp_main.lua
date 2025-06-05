@@ -2532,10 +2532,14 @@ AddClassPostConstruct("screens/redux/caveselectscreen", function(self)
 
 	local oldUpdateStyleInfo = self.UpdateStyleInfo
 	function self:UpdateStyleInfo(w)
-		self.description:SetMultilineTruncatedString(srv_desc[w.settings_desc][2], 3, 700, nil, true, true)
-
-		if w.button and w.button.text then
-			w.button.text:SetString(srv_desc[w.settings_desc][1])
+		if w ~= nil then
+			if w.settings_desc ~= nil then
+				self.description:SetMultilineTruncatedString(srv_desc[w.settings_desc][2], 3, 700, nil, true, true)
+			end
+							
+			if w.button and w.button.text then
+				w.button.text:SetString(srv_desc[w.settings_desc][1])
+			end
 		end
 	end
 	
