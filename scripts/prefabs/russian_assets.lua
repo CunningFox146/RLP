@@ -15,7 +15,7 @@ local assets =
 	
 	Asset("ATLAS","images/vk_group.xml"),
 	
-	Asset("ATLAS","images/web_button.xml"),
+	Asset("ATLAS","images/discord_button.xml"),
 	
 	Asset("ATLAS","images/text_bg.xml"),
 	

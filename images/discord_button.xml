@@ -1,0 +1,6 @@
+<Atlas>
+	<Texture filename="discord_button.tex" />
+	<Elements>
+		<Element name="discord_button.tex" u1="0.001" u2="0.999" v2="0.999" v1="0.001" variant="" />
+	</Elements>
+</Atlas>

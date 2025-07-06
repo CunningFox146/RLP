@@ -7,7 +7,7 @@ local UpdateScreen = require "screens/update_screen"
 local EyeButton = Class(Widget, function(self)
     Widget._ctor(self, "RLPEyeButton")
 	
-	self.btn = self:AddChild(ImageButton("images/web_button.xml", "web_button.tex", nil, nil, nil, nil, {1,1}, {0,0}))
+	self.btn = self:AddChild(ImageButton("images/discord_button.xml", "discord_button.tex", nil, nil, nil, nil, {1,1}, {0,0}))
 	self.btn.image:SetPosition(-12, 0)
 
 	self.btn.highlight = self.btn:AddChild(Image("images/frontend.xml", "button_square_highlight.tex"))
@@ -15,7 +15,7 @@ local EyeButton = Class(Widget, function(self)
 	self.btn.highlight:SetClickable(false)
 	self.btn.highlight:Hide()
 
-	self.btn:SetText("Обновить\nПеревод")
+	self.btn:SetText("Наш\nDiscord сервер")
 	self.btn:SetTextSize(25)
 	self.btn.text:SetPosition(-12, -80)
 	self.btn:SetFont(CHATFONT)
@@ -24,7 +24,7 @@ local EyeButton = Class(Widget, function(self)
 	self.btn.scale_on_focus = false
 	
 	self.btn:SetOnClick(function()
-		TheFrontEnd:PushScreen(UpdateScreen())
+		VisitURL("https://discord.gg/eHEgH3xSF8")
 	end)
 
 	self.btn:SetOnGainFocus(function()
