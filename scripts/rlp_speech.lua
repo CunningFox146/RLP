@@ -155,7 +155,6 @@ for i,v in pairs(STRINGS.SWAMPIGNAMES) do
 	t.PO["STRINGS.SWAMPIGNAMES."..i]=nil
 end
 
-
 -- постройка хеш-таблиц для реплик с "гениальными" ключами
 local MONKEY_QUEEN_KEYS = {}
 local MERM_KING_KEYS = {} 
@@ -258,17 +257,19 @@ if TheNet:GetServerGameMode() == "quagmire" then
     end
 end
 
---[[ Юзалось в режиме только UI
-	for charname,v in pairs(STRINGS.CHARACTERS) do
-		t.SpeechHashTbl[charname]={}
-	end
-
-	t.SpeechHashTbl.EPITAPHS={}
-	t.SpeechHashTbl.NAMES={Eng2Key={},Rus2Eng={}}
-	t.SpeechHashTbl.PIGNAMES={Eng2Rus={}}
-	t.SpeechHashTbl.BUNNYMANNAMES={Eng2Rus={}}
-
-	for i,v in pairs(t.PO) do
-		if string.sub(i,8+1,8+3)~="UI." then t.PO[i]=nil end
-	end
-end]]
+t.SpeechHashTbl.STORYTELLER_WALTERCAMPFIRE = {Eng2Rus = {}}
+for category, categoryData in pairs(STRINGS.STORYTELLER.WALTER) do
+    if type(categoryData) == "table" then
+        for storyName, storyData in pairs(categoryData) do
+            if storyData.lines then
+                for idx, lineData in ipairs(storyData.lines) do
+                    local engLine = lineData.line
+                    local fullPath = string.format("STRINGS.STORYTELLER.WALTER.%s.%s.lines.%d.line", 
+                                                   category, storyName, idx)
+                    t.SpeechHashTbl.STORYTELLER_WALTERCAMPFIRE.Eng2Rus[engLine] = t.PO[fullPath] or engLine
+                    t.PO[fullPath] = nil
+                end
+            end
+        end
+    end
+end
