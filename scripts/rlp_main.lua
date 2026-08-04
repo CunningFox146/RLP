@@ -1293,6 +1293,10 @@ function t.TranslateToRussian(message, entity)
 		if t.SpeechHashTbl.MERM_KING.Eng2Rus[message] then
 			message = t.SpeechHashTbl.MERM_KING.Eng2Rus[message] or message
 		end
+	elseif entity.prefab == "walter" then -- истории у костра
+		if t.SpeechHashTbl.STORYTELLER_WALTERCAMPFIRE.Eng2Rus[message] then
+			message = t.SpeechHashTbl.STORYTELLER_WALTERCAMPFIRE.Eng2Rus[message] or message
+		end
 	end
 
 	-- осмотр надгробий	
