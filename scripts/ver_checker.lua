@@ -1,10 +1,15 @@
 local t = mods.RussianLanguagePack
 local VerChecker = {
 	URL = "https://raw.githubusercontent.com/CunningFox146/RLP/"..(t.IsBeta and "wip" or "master").."/modinfo.lua",
+	disabled = true,
 }
 
--- local VerChecker = require("ver_checker") VerChecker:GetVersion(function(data) print(data) end)
 function VerChecker:LoadVersion(fn)
+	if self.disabled then
+		print("[RLP VerChecker] VerChecker disabled.")
+		return
+	end
+
 	print("[RLP VerChecker] Downloading mod version")
 	TheSim:QueryServer(self.URL, function (result, isSuccessful, resultCode)
 		if resultCode ~= 200 or not isSuccessful or #result < 1 then
