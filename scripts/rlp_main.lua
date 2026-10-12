@@ -2268,39 +2268,30 @@ AddClassPostConstruct("widgets/quagmire_recipepopup", function(self) --Для г
 
 		if self.desc then
 			self.desc:SetSize(28)
-			--Перезаписмываем строку
+			--Перезаписываем строку
 			self.desc:SetString("")
 			self.desc:SetMultilineTruncatedString(STRINGS.RECIPE_DESC[string.upper(self.recipe.product) or "ERROR!"], 2, 320, nil, true)
 		end
 	end
 end)
 
---Перевод настроек приватности при создании сервера (неактуально? 23.11.24)
---[[AddClassPostConstruct("screens/redux/cloudserversettingspopup", function(self)
-	local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
-	function self:RefreshPrivacyButtons()
-		oldRefreshPrivacyButtons(self)
-		for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
-			v.button.text:SetFont(NEWFONT)
-			v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
-		end
+-- исправление поиска в пожитках.. и не только
+AddClassPostConstruct("widgets/redux/filterbar", function(self)
+	local upper = string.upper
+
+	string.upper = function(s)
+	    return russianupper(upper(s))
 	end
-	if self.privacy_type and self.privacy_type.buttons and self.privacy_type.buttons.buttonwidgets then
-		for _,option in pairs(self.privacy_type.buttons.options) do
-			if option.data==PRIVACY_TYPE.PUBLIC then
-				option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.PUBLIC
-			end
-			if option.data==PRIVACY_TYPE.CLAN then
-				option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.CLAN
-			end
-		end
-		for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
-			v.button.text:SetFont(NEWFONT)
-			v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
-		end
+end)
+
+-- исправление поиска рецептов в меню крафта  
+AddClassPostConstruct("widgets/redux/craftingmenu_widget", function(self)
+	local lower = string.lower
+
+	string.lower = function(s)
+	    return russianlower(lower(s))
 	end
-	self.privacy_type.buttons:UpdateButtons()
-end)]]
+end)
 
 do
 	local translations = {
@@ -2501,7 +2492,20 @@ AddClassPostConstruct("screens/redux/optionsscreen", function(self)
 	if self.title then
 		self.title.big:SetString("Настройки игры")
 	end
-end) 
+end)
+
+-- меняем FILLER для правильной сортировки в справочнике
+local orig_sorter = _G.stringidsorter
+_G.stringidsorter = function(a, b)
+    if type(a) == "string" and a:find("zzzzzzz", 1, true) then
+        a = a:gsub("zzzzzzz", "яяяяяяя")
+    end
+    if type(b) == "string" and b:find("zzzzzzz", 1, true) then
+        b = b:gsub("zzzzzzz", "яяяяяяя")
+    end
+
+    return orig_sorter(a, b)
+end
 
 AddClassPostConstruct("screens/redux/scrapbookscreen", function(self)
 	local Text = require "widgets/text"
