@@ -1039,25 +1039,64 @@ end
 
 -- cклоняем названия вещей в пожитках
 function GetSkinUsableOnString(item_type, popup_txt)
+	local SKIN_NAME_REDIRECTS = {
+	    -- NOTES(JBK): This is a hack for a discrepency between itemdefs and what the game has for the prefab naming.
+	    -- Instead of adjusting the game the itemdef should be changed but it is too late for that now.
+	    wx78_drone_delivery_small = "wx78_drone_delivery",
+	}
+
 	local skin_data = GetSkinData(item_type)
 
 	local skin_str = GetSkinName(item_type)
 
 	local usable_on_str
 	if skin_data ~= nil and skin_data.base_prefab ~= nil then
+        local skin_only_item = CRAFTING_RECIPE_UNLOCKED_SKIN[item_type]
+        if not skin_only_item then
+            local recipe = AllRecipes[skin_data.base_prefab]
+            if not recipe then
+                if skin_data.granted_items then
+                    local granted_skin_data = GetSkinData(skin_data.granted_items[1])
+                    if granted_skin_data then
+                        recipe = AllRecipes[granted_skin_data.base_prefab]
+                    end
+                end
+            end
+            if recipe and recipe.unlocks_from_skin then
+                skin_only_item = true
+            end
+        end
         local item1_str, item2_str, item3_str
         item1_str = t.RussianNames[STRINGS.NAMES[string.upper(skin_data.base_prefab)]] and t.RussianNames[STRINGS.NAMES[string.upper(skin_data.base_prefab)]]["RESKIN"] or rebuildname(STRINGS.NAMES[string.upper(skin_data.base_prefab)], "reskin", string.upper(skin_data.base_prefab))
+        if item1_str and not t.ShouldBeCapped[skin_data.base_prefab] then
+        	item1_str = firsttolower(item1_str)
+        end        
+        if not item1_str then
+            local redirect = SKIN_NAME_REDIRECTS[skin_data.base_prefab]
+            if redirect then
+                item1_str = t.RussianNames[STRINGS.NAMES[string.upper(redirect)]] and t.RussianNames[STRINGS.NAMES[string.upper(redirect)]]["RESKIN"] or rebuildname(STRINGS.NAMES[string.upper(redirect)], "reskin", string.upper(redirect))
+		        if not t.ShouldBeCapped[skin_data.base_prefab] then
+		        	item1_str = firsttolower(item1_str)
+		        end
+            end
+        end
         if skin_data.granted_items ~= nil then
             local granted_skin_data = GetSkinData(skin_data.granted_items[1])
             if granted_skin_data ~= nil and granted_skin_data.base_prefab ~= nil then
                 item2_str = t.RussianNames[STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)]] and t.RussianNames[STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)]]["RESKIN"] or rebuildname(STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)], "reskin", string.upper(granted_skin_data.base_prefab))
+		        if not t.ShouldBeCapped[granted_skin_data.base_prefab] then
+		        	item2_str = firsttolower(item2_str)
+		        end
                 if item2_str == item1_str then
                     item2_str = nil
                 end
             end
             granted_skin_data = GetSkinData(skin_data.granted_items[2])
             if granted_skin_data ~= nil and granted_skin_data.base_prefab ~= nil then
-                item3_str = t.RussianNames[STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)]] and t.RussianNames[STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)]]["RESKIN"] or rebuildname(STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)],"reskin",string.upper(granted_skin_data.base_prefab))
+                item3_str = t.RussianNames[STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)]] and t.RussianNames[STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)]]["RESKIN"] or rebuildname(STRINGS.NAMES[string.upper(granted_skin_data.base_prefab)], "reskin", string.upper(granted_skin_data.base_prefab))
+		        if not t.ShouldBeCapped[granted_skin_data.base_prefab] then
+		        	item3_str = firsttolower(item3_str)
+		        end
                 if item2_str == nil and item3_str ~= item1_str then
                     item2_str = item3_str
                     item3_str = nil
@@ -1067,7 +1106,11 @@ function GetSkinUsableOnString(item_type, popup_txt)
             end
         end
         if item2_str == nil then
-            usable_on_str = subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON, { skin = skin_str, item = item1_str })
+            if skin_only_item then
+                usable_on_str = subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.ALLOWS_CRAFTING_POPUP or STRINGS.UI.SKINSSCREEN.ALLOWS_CRAFTING, { skin = skin_str, item = item1_str })
+            else
+                usable_on_str = subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON, { skin = skin_str, item = item1_str })
+            end
         elseif item3_str == nil then
             usable_on_str = subfmt(popup_txt and STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE_POPUP or STRINGS.UI.SKINSSCREEN.USABLE_ON_MULTIPLE, { skin = skin_str, item1 = item1_str, item2 = item2_str })
         else
@@ -2268,39 +2311,30 @@ AddClassPostConstruct("widgets/quagmire_recipepopup", function(self) --Для г
 
 		if self.desc then
 			self.desc:SetSize(28)
-			--Перезаписмываем строку
+			--Перезаписываем строку
 			self.desc:SetString("")
 			self.desc:SetMultilineTruncatedString(STRINGS.RECIPE_DESC[string.upper(self.recipe.product) or "ERROR!"], 2, 320, nil, true)
 		end
 	end
 end)
 
---Перевод настроек приватности при создании сервера (неактуально? 23.11.24)
---[[AddClassPostConstruct("screens/redux/cloudserversettingspopup", function(self)
-	local oldRefreshPrivacyButtons = self.RefreshPrivacyButtons
-	function self:RefreshPrivacyButtons()
-		oldRefreshPrivacyButtons(self)
-		for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
-			v.button.text:SetFont(NEWFONT)
-			v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
-		end
+-- исправление поиска в пожитках.. и не только
+AddClassPostConstruct("widgets/redux/filterbar", function(self)
+	local upper = string.upper
+
+	string.upper = function(s)
+	    return russianupper(upper(s))
 	end
-	if self.privacy_type and self.privacy_type.buttons and self.privacy_type.buttons.buttonwidgets then
-		for _,option in pairs(self.privacy_type.buttons.options) do
-			if option.data==PRIVACY_TYPE.PUBLIC then
-				option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.PUBLIC
-			end
-			if option.data==PRIVACY_TYPE.CLAN then
-				option.text = STRINGS.UI.SERVERCREATIONSCREEN.PRIVACY.CLAN
-			end
-		end
-		for i,v in ipairs(self.privacy_type.buttons.buttonwidgets) do
-			v.button.text:SetFont(NEWFONT)
-			v.button:SetTextSize(self.privacy_type.buttons.buttonsettings.font_size-2)
-		end
+end)
+
+-- исправление поиска рецептов в меню крафта  
+AddClassPostConstruct("widgets/redux/craftingmenu_widget", function(self)
+	local lower = string.lower
+
+	string.lower = function(s)
+	    return russianlower(lower(s))
 	end
-	self.privacy_type.buttons:UpdateButtons()
-end)]]
+end)
 
 do
 	local translations = {
@@ -2501,7 +2535,20 @@ AddClassPostConstruct("screens/redux/optionsscreen", function(self)
 	if self.title then
 		self.title.big:SetString("Настройки игры")
 	end
-end) 
+end)
+
+-- меняем FILLER для правильной сортировки в справочнике
+local orig_sorter = _G.stringidsorter
+_G.stringidsorter = function(a, b)
+    if type(a) == "string" and a:find("zzzzzzz", 1, true) then
+        a = a:gsub("zzzzzzz", "яяяяяяя")
+    end
+    if type(b) == "string" and b:find("zzzzzzz", 1, true) then
+        b = b:gsub("zzzzzzz", "яяяяяяя")
+    end
+
+    return orig_sorter(a, b)
+end
 
 AddClassPostConstruct("screens/redux/scrapbookscreen", function(self)
 	local Text = require "widgets/text"
