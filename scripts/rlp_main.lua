@@ -2569,6 +2569,32 @@ AddClassPostConstruct("screens/redux/scrapbookscreen", function(self)
 		    self.inst.TextWidget:SetString(str or "")
 		end
 	end
+
+	--------
+
+	local SCRAPBOOK_ACTIVATE_OVERRIDES = {
+	    PLAY_WITH = "МОЖНО СЫГРАТЬ",
+	}
+
+    local orig_populate = self.PopulateInfoPanel
+    self.PopulateInfoPanel = function(self, entry)
+        local old_activate = STRINGS.ACTIONS.ACTIVATE
+
+        STRINGS.ACTIONS.ACTIVATE = setmetatable({}, {
+            __index = function(_, k)
+                return SCRAPBOOK_ACTIVATE_OVERRIDES[k] or old_activate[k]
+            end,
+        })
+
+        local ok, result = pcall(orig_populate, self, entry)
+
+        STRINGS.ACTIONS.ACTIVATE = old_activate
+
+        if not ok then
+            error(result, 0)
+        end
+        return result
+    end	
 end)
 
 AddClassPostConstruct("screens/redux/caveselectscreen", function(self)
