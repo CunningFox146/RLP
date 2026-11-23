@@ -1,5 +1,5 @@
 name = "Russification Pack for DST"
-version = "3.7.4"
+version = "3.8.0"
 
 local desc = {
 	en = "\nThe best russian localization at the moment. Source code was taken from the Russian Language Pack. Special thanks to Some1 and Alevastor!\n\nVersion: "..version,
@@ -24,7 +24,7 @@ if git_build then
 	description = description.."\n\n" .. (language == "ru" and "Не забывайте обновлять мод вручную!" or "Don't forget to update RLP manually!")
 end
 
-author = "Cunning fox, 何も, FruitShake, stew, F0xAn, MrM" --Макс. 67 символов
+author = "Cunning fox, 何も, FruitShake, MrM, Jack Lodi" --Макс. 67 символов
 
 forumthread = ""
 
